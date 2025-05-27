@@ -36,15 +36,28 @@ export default function CarouselSlide({
       </div>
       <div className="relative z-10 flex flex-col justify-center h-full container mx-auto px-4">
         <div className="max-w-2xl">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{title}</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {title.split(' ').map((word, i) => 
+              i % 3 === 1 ? 
+                <span key={i} className="text-orange-500">{word} </span> : 
+                <span key={i}>{word} </span>
+            )}
+          </h2>
           {subtitle && <p className="text-xl text-white/90 mb-6">{subtitle}</p>}
-          {ctaText && ctaLink && (
-            <Link href={ctaLink}>
-              <Button variant="primary" size="lg">
-                {ctaText}
+          <div className="flex flex-wrap gap-4">
+            {ctaText && ctaLink && (
+              <Link href={ctaLink}>
+                <Button variant="primary" size="lg">
+                  {ctaText}
+                </Button>
+              </Link>
+            )}
+            <Link href="/about">
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900">
+                Learn More
               </Button>
             </Link>
-          )}
+          </div>
         </div>
       </div>
     </div>

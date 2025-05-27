@@ -26,7 +26,7 @@ export default function Button({
   onClick,
 }: ButtonProps) {
   // Base styles
-  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
+  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2';
   
   // Size styles
   const sizeStyles = {
@@ -37,7 +37,7 @@ export default function Button({
   
   // Variant styles
   const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    primary: 'bg-orange-500 text-white hover:bg-orange-600',
     secondary: 'bg-purple-600 text-white hover:bg-purple-700',
     success: 'bg-green-600 text-white hover:bg-green-700',
     warning: 'bg-amber-500 text-white hover:bg-amber-600',
