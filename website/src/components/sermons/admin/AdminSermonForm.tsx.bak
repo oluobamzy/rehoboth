@@ -1,0 +1,833 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm, Controller, FieldErrors } from 'react-hook-form';
+import Button from '@/components/common/Button';
+import {lient";
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm, Controller, FieldErrors } from 'react-hook-form';
+import {
+  fetchSermonById,
+  fetchSermonSeries,
+  fetchTags,
+  saveSermon,
+  uploadSermonMedia,
+  UploadResult,
+  UploadProgress,
+  Sermon,
+  SermonSeries
+} from '@/services/sermonService';
+import {
+  validateFile,
+  FileValidationResult,
+  AUDIO_FILE_CONFIG,
+  VIDEO_FILE_CONFIG,
+  IMAGE_FILE_CONFIG
+} from '@/utils/fileValidation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { posthog } from '@/services/posthog';
+import Button from '@/components/common/Button';
+
+interface AdminSermonFormProps {
+  sermonId?: string;
+  onSave?: (sermonData: Sermon) => Promise<void>;
+  isSaving?: boolean;
+}
+
+interface FileUploadState {
+  file: File | null;
+  isUploading: boolean;
+  progress: number;
+  error: string | null;
+}
+
+interface FormState {
+  audio: FileUploadState;
+  video: FileUploadState;
+  thumbnail: FileUploadState;
+}
+
+export default function AdminSermonForm({ sermonId, onSave, isSaving = false }: AdminSermonFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const isEditMode = !!sermonId;
+  
+  // Form setup with react-hook-form
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    setValue,
+    watch,
+    formState: { errors: formErrors, isSubmitting }
+  } = useForm<Sermon>({
+    defaultValues: {
+      title: '',
+      description: '',
+      scripture_reference: '',
+      speaker_name: '',
+      sermon_date: new Date().toISOString().split('T')[0],
+      tags: [],
+      series_id: undefined,
+      is_featured: false,
+      is_published: true,
+    }
+  });
+  
+  // UI state
+  const [tagInput, setTagInput] = useState('');
+  
+  // File state
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  
+  // Upload state
+  const [audioUploading, setAudioUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  
+  // File upload state management
+  const [formState, setFormState] = useState<FormState>({
+    audio: { file: null, isUploading: false, progress: 0, error: null },
+    video: { file: null, isUploading: false, progress: 0, error: null },
+    thumbnail: { file: null, isUploading: false, progress: 0, error: null }
+  });
+  
+  // Get existing sermon data if in edit mode
+  const { data: existingSermon } = useQuery({
+    queryKey: ['sermon', sermonId],
+    queryFn: () => fetchSermonById(sermonId!),
+    enabled: isEditMode,
+  });
+  
+  // Get series data for dropdown
+  const { data: seriesList = [] } = useQuery({
+    queryKey: ['sermonSeries'],
+    queryFn: fetchSermonSeries,
+  });
+  
+  // Get existing tags for suggestions
+  const { data: existingTags = [] } = useQuery({
+    queryKey: ['sermonTags'],
+    queryFn: fetchTags,
+  });
+  
+  // Save sermon mutation
+  const saveMutation = useMutation({
+    mutationFn: saveSermon,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-sermons'] });
+      if (!isEditMode) {
+        router.push(`/admin/sermons/edit/${data.id}`);
+      }
+    },
+  });
+  
+  // Set form values when existing sermon data is loaded
+  useEffect(() => {
+    if (existingSermon) {
+      // Map sermon data to form
+      reset({
+        ...existingSermon,
+        sermon_date: existingSermon.sermon_date.split('T')[0],
+      });
+    }
+  }, [existingSermon, reset]);
+  
+  // Watch form values
+  const watchedTags = watch('tags') || [];
+  
+  // Handle tag addition
+  const handleAddTag = () => {
+    if (tagInput.trim() !== '' && !watchedTags.includes(tagInput.trim())) {
+      setValue('tags', [...watchedTags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+  
+  // Handle tag deletion
+  const handleRemoveTag = (tagToRemove: string) => {
+    setValue('tags', watchedTags.filter(tag => tag !== tagToRemove));
+  };
+  
+  // Handle tag suggestion click
+  const handleTagSuggestionClick = (tag: string) => {
+    if (!watchedTags.includes(tag)) {
+      setValue('tags', [...watchedTags, tag]);
+    }
+  };
+  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Handle file changes
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'video' | 'thumbnail') => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file based on type
+      let validationResult;
+      switch (type) {
+        case 'audio':
+          validationResult = validateFile(file, AUDIO_FILE_CONFIG);
+          break;
+        case 'video':
+          validationResult = validateFile(file, VIDEO_FILE_CONFIG);
+          break;
+        case 'thumbnail':
+          validationResult = validateFile(file, IMAGE_FILE_CONFIG);
+          break;
+      }
+
+      if (!validationResult.isValid) {
+        setErrors(prev => ({ ...prev, [type]: validationResult.error || `Invalid ${type} file` }));
+        // Clear the input
+        e.target.value = '';
+        return;
+      }
+
+      // Clear any previous errors
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[type];
+        return newErrors;
+      });
+
+      // Set the file
+      if (type === 'audio') {
+        setAudioFile(file);
+      } else if (type === 'video') {
+        setVideoFile(file);
+      } else {
+        setThumbnailFile(file);
+      }
+    }
+  };
+  
+  // Track upload progress
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+
+  // Handle file uploads
+  const handleUploadFile = async (file: File, type: 'audio' | 'video' | 'thumbnail') => {
+    if (!file || !existingSermon?.id) return;
+    
+    try {
+      // Set the appropriate upload state flag
+      if (type === 'audio') setAudioUploading(true);
+      if (type === 'video') setVideoUploading(true);
+      if (type === 'thumbnail') setThumbnailUploading(true);
+      
+      // Reset upload progress
+      setUploadProgress(prev => ({ ...prev, [type]: 0 }));
+      
+      // Upload the file with progress tracking
+      const result = await uploadSermonMedia(
+        file, 
+        existingSermon.id, 
+        type, 
+        undefined, 
+        (progress) => {
+          setUploadProgress(prev => ({ ...prev, [type]: progress.progress }));
+        }
+      );
+      
+      if (result.error) {
+        // Set error state
+        setErrors(prev => ({ ...prev, [type]: result.error! }));
+        return null;
+      }
+      
+      // Clear any previous errors
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[type];
+        return newErrors;
+      });
+      
+      // Update form state with the new URL
+      if (type === 'audio') setValue('audio_url', result.url);
+      if (type === 'video') setValue('video_url', result.url);
+      if (type === 'thumbnail') setValue('thumbnail_url', result.url);
+      
+      // Invalidate query to refresh data
+      queryClient.invalidateQueries({ queryKey: ['sermon', sermonId] });
+      
+      return result.url;
+    } catch (error) {
+      console.error(`Error uploading ${type}:`, error);
+      setErrors(prev => ({ 
+        ...prev, 
+        [type]: error instanceof Error ? error.message : 'Upload failed' 
+      }));
+      return null;
+    } finally {
+      // Reset the appropriate upload state flag and progress
+      if (type === 'audio') {
+        setAudioUploading(false);
+        setUploadProgress(prev => ({ ...prev, audio: 0 }));
+      }
+      if (type === 'video') {
+        setVideoUploading(false);
+        setUploadProgress(prev => ({ ...prev, video: 0 }));
+      }
+      if (type === 'thumbnail') {
+        setThumbnailUploading(false);
+        setUploadProgress(prev => ({ ...prev, thumbnail: 0 }));
+      }
+  };
+  
+  // Handle form submission
+  const onSubmit = async (data: Sermon) => {
+    try {
+      // Upload files first if they exist
+      const uploadTasks: Promise<void>[] = [];
+      
+      if (formState.audio.file) {
+        uploadTasks.push(
+          handleFileUpload(formState.audio.file, 'audio').then(url => {
+            if (url) data.audio_url = url;
+          })
+        );
+      }
+      
+      if (formState.video.file) {
+        uploadTasks.push(
+          handleFileUpload(formState.video.file, 'video').then(url => {
+            if (url) data.video_url = url;
+          })
+        );
+      }
+      
+      if (formState.thumbnail.file) {
+        uploadTasks.push(
+          handleFileUpload(formState.thumbnail.file, 'thumbnail').then(url => {
+            if (url) data.thumbnail_url = url;
+          })
+        );
+      }
+
+      // Wait for all uploads to complete
+      await Promise.all(uploadTasks);
+
+      // Check if any uploads failed
+      const uploadErrors = Object.entries(formState).filter(([_, state]) => state.error);
+      if (uploadErrors.length > 0) {
+        throw new Error('Some files failed to upload. Please try again.');
+      }
+
+      // Save sermon data
+      await saveMutation.mutateAsync(data);
+
+      // Track successful submission
+      posthog?.capture('sermon_form_submitted', {
+        isEdit: isEditMode,
+        hasAudio: !!data.audio_url,
+        hasVideo: !!data.video_url,
+        hasThumbnail: !!data.thumbnail_url
+      });
+
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setErrors(prev => ({
+        ...prev,
+        submit: error instanceof Error ? error.message : 'Failed to save sermon'
+      }));
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="p-6 border-b border-gray-200">
+        <h2 className="text-2xl font-bold">
+          {isEditMode ? 'Edit Sermon' : 'Create New Sermon'}
+        </h2>
+      </div>
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+        {errors.submit && (
+          <Alert status="error" mb={4}>
+            {errors.submit}
+          </Alert>
+        )}
+
+        {/* File upload sections with progress and error states */}
+        <div className="space-y-4">
+          {['audio', 'video', 'thumbnail'].map((type) => (
+            <FormControl key={type} isInvalid={!!formState[type].error}>
+              <FormLabel>{type.charAt(0).toUpperCase() + type.slice(1)}</FormLabel>
+              <input
+                type="file"
+                onChange={(e) => handleFileChange(e, type)}
+                accept={type === 'audio' ? '.mp3,.wav' : type === 'video' ? '.mp4,.webm' : 'image/*'}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-primary file:text-white
+                  hover:file:bg-primary-dark"
+              />
+              {formState[type].isUploading && (
+                <Progress
+                  value={formState[type].progress}
+                  size="sm"
+                  colorScheme="blue"
+                  mt={2}
+                />
+              )}
+              {formState[type].error && (
+                <FormHelperText color="red.500">
+                  {formState[type].error}
+                </FormHelperText>
+              )}
+            </FormControl>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Title */}
+          <div className="col-span-1 md:col-span-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              Sermon Title*
+            </label>
+            <input
+              id="title"
+              type="text"
+              className={`w-full border rounded-md py-2 px-3 text-gray-700 ${
+                errors.title ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter sermon title"
+              {...register('title', { required: 'Title is required' })}
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+            )}
+          </div>
+          
+          {/* Speaker */}
+          <div>
+            <label htmlFor="speaker_name" className="block text-sm font-medium text-gray-700 mb-1">
+              Speaker*
+            </label>
+            <input
+              id="speaker_name"
+              type="text"
+              className={`w-full border rounded-md py-2 px-3 text-gray-700 ${
+                errors.speaker_name ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Speaker name"
+              {...register('speaker_name', { required: 'Speaker name is required' })}
+            />
+            {errors.speaker_name && (
+              <p className="mt-1 text-sm text-red-600">{errors.speaker_name.message}</p>
+            )}
+          </div>
+          
+          {/* Sermon Date */}
+          <div>
+            <label htmlFor="sermon_date" className="block text-sm font-medium text-gray-700 mb-1">
+              Sermon Date*
+            </label>
+            <input
+              id="sermon_date"
+              type="date"
+              className={`w-full border rounded-md py-2 px-3 text-gray-700 ${
+                errors.sermon_date ? 'border-red-500' : 'border-gray-300'
+              }`}
+              {...register('sermon_date', { required: 'Sermon date is required' })}
+            />
+            {errors.sermon_date && (
+              <p className="mt-1 text-sm text-red-600">{errors.sermon_date.message}</p>
+            )}
+          </div>
+          
+          {/* Series */}
+          <div>
+            <label htmlFor="series_id" className="block text-sm font-medium text-gray-700 mb-1">
+              Sermon Series
+            </label>
+            <Controller
+              name="series_id"
+              control={control}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  id="series_id"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+                >
+                  <option value="">-- No Series --</option>
+                  {seriesList.map((series: SermonSeries) => (
+                    <option key={series.id} value={series.id}>
+                      {series.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+          </div>
+          
+          {/* Scripture Reference */}
+          <div>
+            <label htmlFor="scripture_reference" className="block text-sm font-medium text-gray-700 mb-1">
+              Scripture Reference
+            </label>
+            <input
+              id="scripture_reference"
+              type="text"
+              className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+              placeholder="e.g. John 3:16-21"
+              {...register('scripture_reference')}
+            />
+          </div>
+          
+          {/* Duration */}
+          <div>
+            <label htmlFor="duration_seconds" className="block text-sm font-medium text-gray-700 mb-1">
+              Duration (seconds)
+            </label>
+            <input
+              id="duration_seconds"
+              type="number"
+              className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+              placeholder="e.g. 1800 for 30 minutes"
+              {...register('duration_seconds', {
+                valueAsNumber: true,
+                min: {
+                  value: 0,
+                  message: 'Duration must be positive'
+                }
+              })}
+            />
+            {errors.duration_seconds && (
+              <p className="mt-1 text-sm text-red-600">{errors.duration_seconds.message}</p>
+            )}
+          </div>
+          
+          {/* Description */}
+          <div className="col-span-1 md:col-span-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              id="description"
+              rows={4}
+              className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+              placeholder="Enter sermon description"
+              {...register('description')}
+            ></textarea>
+          </div>
+          
+          {/* Tags */}
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tags
+            </label>
+            <div className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                className="flex-grow border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+                placeholder="Add a tag and press Enter"
+              />
+              <button
+                type="button"
+                onClick={handleAddTag}
+                className="px-4 py-2 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300"
+              >
+                Add
+              </button>
+            </div>
+            
+            {/* Display existing tags */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {watchedTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-sm flex items-center"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-1 text-gray-500 hover:text-red-600 focus:outline-none"
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+            
+            {/* Tag suggestions */}
+            {existingTags.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Suggestions:</p>
+                <div className="flex flex-wrap gap-2">
+                  {existingTags
+                    .filter(tag => !watchedTags.includes(tag))
+                    .slice(0, 8)
+                    .map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => handleTagSuggestionClick(tag)}
+                        className="bg-gray-50 text-gray-600 px-2 py-1 rounded-md text-xs hover:bg-gray-100"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Transcript */}
+          <div className="col-span-1 md:col-span-2">
+            <label htmlFor="transcript" className="block text-sm font-medium text-gray-700 mb-1">
+              Transcript
+            </label>
+            <textarea
+              id="transcript"
+              rows={10}
+              className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
+              placeholder="Enter sermon transcript (optional)"
+              {...register('transcript')}
+            ></textarea>
+          </div>
+          
+          {/* Publication Settings */}
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="font-medium text-gray-900 mb-3">Publication Settings</h3>
+            <div className="flex items-center mb-4">
+              <input
+                id="is_published"
+                type="checkbox"
+                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                {...register('is_published')}
+              />
+              <label htmlFor="is_published" className="ml-2 block text-sm text-gray-700">
+                Published (visible to public)
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="is_featured"
+                type="checkbox"
+                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                {...register('is_featured')}
+              />
+              <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
+                Featured (displayed prominently on the site)
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        {/* Media upload section - only available in edit mode */}
+        {isEditMode && (
+          <div className="mt-8">
+            <h3 className="font-medium text-gray-900 mb-4">Media Files</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Audio upload */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-medium text-gray-800 mb-2">Audio</h4>
+                {existingSermon?.audio_url ? (
+                  <div className="mb-3">
+                    <div className="flex items-center mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-gray-700">Audio file uploaded</span>
+                    </div>
+                    <audio
+                      controls
+                      className="w-full"
+                      src={existingSermon.audio_url}
+                    ></audio>
+                    <p className="text-xs text-gray-500 mt-1">Replace the file:</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mb-3">No audio file uploaded</p>
+                )}
+                
+                <div>
+                  <label className="block">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => handleFileChange(e, 'audio')}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-700
+                        hover:file:bg-orange-100"
+                    />
+                  </label>
+                  {audioFile && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500">{audioFile.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleUploadFile(audioFile, 'audio')}
+                        disabled={audioUploading}
+                        className={`mt-2 px-3 py-1 text-xs font-medium rounded-md ${
+                          audioUploading
+                            ? 'bg-gray-300 text-gray-500'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {audioUploading ? 'Uploading...' : 'Upload Audio'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Video upload */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-medium text-gray-800 mb-2">Video</h4>
+                {existingSermon?.video_url ? (
+                  <div className="mb-3">
+                    <div className="flex items-center mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-gray-700">Video file uploaded</span>
+                    </div>
+                    <div className="relative aspect-video bg-black">
+                      <video 
+                        controls
+                        className="w-full h-full"
+                        src={existingSermon.video_url}
+                      ></video>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Replace the file:</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mb-3">No video file uploaded</p>
+                )}
+                
+                <div>
+                  <label className="block">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => handleFileChange(e, 'video')}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-700
+                        hover:file:bg-orange-100"
+                    />
+                  </label>
+                  {videoFile && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500">{videoFile.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleUploadFile(videoFile, 'video')}
+                        disabled={videoUploading}
+                        className={`mt-2 px-3 py-1 text-xs font-medium rounded-md ${
+                          videoUploading
+                            ? 'bg-gray-300 text-gray-500'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {videoUploading ? 'Uploading...' : 'Upload Video'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Thumbnail upload */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-medium text-gray-800 mb-2">Thumbnail</h4>
+                {existingSermon?.thumbnail_url ? (
+                  <div className="mb-3">
+                    <div className="flex items-center mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-gray-700">Thumbnail uploaded</span>
+                    </div>
+                    <div className="relative aspect-video bg-gray-100 mb-2">
+                      <img
+                        src={existingSermon.thumbnail_url}
+                        alt="Sermon thumbnail"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Replace the file:</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mb-3">No thumbnail uploaded</p>
+                )}
+                
+                <div>
+                  <label className="block">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, 'thumbnail')}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-700
+                        hover:file:bg-orange-100"
+                    />
+                  </label>
+                  {thumbnailFile && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500">{thumbnailFile.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleUploadFile(thumbnailFile, 'thumbnail')}
+                        disabled={thumbnailUploading}
+                        className={`mt-2 px-3 py-1 text-xs font-medium rounded-md ${
+                          thumbnailUploading
+                            ? 'bg-gray-300 text-gray-500'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {thumbnailUploading ? 'Uploading...' : 'Upload Thumbnail'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Form buttons */}
+        <div className="mt-8 flex justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/admin/sermons')}
+            isDisabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            colorScheme="blue"
+            isLoading={isSubmitting}
+            loadingText="Saving..."
+            isDisabled={Object.values(formState).some(state => state.isUploading)}
+          >
+            {isEditMode ? 'Update Sermon' : 'Create Sermon'}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

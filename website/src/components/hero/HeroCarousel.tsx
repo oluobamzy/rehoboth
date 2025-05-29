@@ -1,7 +1,7 @@
 "use client";
 
 // src/components/hero/HeroCarousel.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import CarouselSlide, { CarouselSlideProps } from './CarouselSlide';
 import CarouselControls from './CarouselControls';
@@ -10,7 +10,7 @@ import { fetchCarouselSlides } from '@/services/carouselService';
 import useCarousel from '@/hooks/useCarousel';
 
 export default function HeroCarousel() {
-  const { data: slides, isLoading, error } = useQuery({
+  const { data: slides, isLoading } = useQuery({
     queryKey: ['carouselSlides'],
     queryFn: fetchCarouselSlides,
     staleTime: 5 * 60 * 1000, // 5 minutes

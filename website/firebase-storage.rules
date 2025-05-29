@@ -1,0 +1,79 @@
+# Firebase Storage Rules for Rehoboth Church Website
+
+# These rules govern access to Firebase Storage for sermon media files
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default rule - deny all access unless explicitly granted
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+    
+    // Public sermon media - anyone can read, only authenticated admins can write
+    match /sermons/audio/{sermonId} {
+      // Allow public read access to all sermon audio
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
+    match /sermons/video/{sermonId} {
+      // Allow public read access to all sermon videos
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
+    match /sermons/video/{sermonId}/{filename} {
+      // Allow public read access to HLS streaming files
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
+    match /sermons/thumbnails/{sermonId} {
+      // Allow public read access to sermon thumbnails
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
+    // Public sermon series images - anyone can read, only authenticated admins can write
+    match /sermon_series/{seriesId}/{filename} {
+      // Allow public read access to series images
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
+    // Admin-specific media files
+    match /admin/{userId}/{filename} {
+      // Only the owner and admins can read and write their own files
+      allow read, write: if request.auth != null && 
+                          (request.auth.uid == userId || 
+                           request.auth.token.admin == true);
+    }
+    
+    // Temporary uploads (for processing before moving to final destination)
+    match /temp/{userId}/{filename} {
+      // Only the owner can read and write their own temp files
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == userId;
+                          
+      // Files in the temp folder should expire after 24 hours
+      // This requires a Cloud Function to clean up old files
+    }
+  }
+}

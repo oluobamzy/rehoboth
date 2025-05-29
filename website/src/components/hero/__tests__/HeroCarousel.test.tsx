@@ -2,9 +2,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import HeroCarousel from '../HeroCarousel';
-import * as carouselService from '@/services/carouselService';
-import '@testing-library/jest-dom';
+import HeroCarousel from '../HeroCarousel'; 
+import type { CarouselSlideProps as CarouselSlideData } from '../CarouselSlide'; // Import CarouselSlideProps as CarouselSlideData
+
+jest.mock('@/hooks/useCarousel');
 
 // Mock the carousel service
 jest.mock('@/services/carouselService', () => ({
@@ -27,6 +28,11 @@ const createWrapper = () => {
     </QueryClientProvider>
   );
 };
+
+const MockSlideComponent = ({ slide }: { slide: CarouselSlideData }) => (
+  <div data-testid={`slide-${slide.id}`}>{slide.title}</div>
+);
+MockSlideComponent.displayName = 'MockSlideComponent'; // Add display name
 
 describe('HeroCarousel component', () => {
   const mockSlides = [

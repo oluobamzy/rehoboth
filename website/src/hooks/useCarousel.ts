@@ -10,11 +10,25 @@ export default function useCarousel(slides: CarouselSlideProps[], autoPlayDelay 
   const [touchStart, setTouchStart] = useState(0);
   const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
   
+  // Reset the inactivity timer
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+    }
+    
+    // Resume auto-play after 3 seconds of inactivity
+    const timer = setTimeout(() => {
+      setIsPlaying(true);
+    }, 3000);
+    
+    setInactivityTimer(timer);
+  }, [inactivityTimer]);
+
   // Function to go to a specific slide
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
     resetInactivityTimer();
-  }, []);
+  }, [resetInactivityTimer]);
   
   // Function to go to the previous slide
   const goToPrevious = useCallback(() => {
@@ -22,20 +36,20 @@ export default function useCarousel(slides: CarouselSlideProps[], autoPlayDelay 
     setCurrentIndex(newIndex);
     setIsPlaying(false);
     resetInactivityTimer();
-  }, [currentIndex, slides.length]);
+  }, [currentIndex, resetInactivityTimer, slides.length]);
   
   // Function to go to the next slide
   const goToNext = useCallback(() => {
     const newIndex = (currentIndex + 1) % slides.length;
     setCurrentIndex(newIndex);
     resetInactivityTimer();
-  }, [currentIndex, slides.length]);
+  }, [currentIndex, resetInactivityTimer, slides.length]);
   
   // Function to toggle play/pause state
   const togglePlayPause = useCallback(() => {
     setIsPlaying(prev => !prev);
     resetInactivityTimer();
-  }, []);
+  }, [resetInactivityTimer]);
   
   // Function to handle touch start event
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -57,21 +71,7 @@ export default function useCarousel(slides: CarouselSlideProps[], autoPlayDelay 
     }
     
     resetInactivityTimer();
-  }, [touchStart, goToNext, goToPrevious]);
-  
-  // Reset the inactivity timer
-  const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimer) {
-      clearTimeout(inactivityTimer);
-    }
-    
-    // Resume auto-play after 3 seconds of inactivity
-    const timer = setTimeout(() => {
-      setIsPlaying(true);
-    }, 3000);
-    
-    setInactivityTimer(timer);
-  }, [inactivityTimer]);
+  }, [touchStart, goToNext, goToPrevious, resetInactivityTimer]);
   
   // Auto-play logic
   useEffect(() => {

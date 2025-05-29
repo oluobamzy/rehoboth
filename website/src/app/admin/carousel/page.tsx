@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import MainLayout from '@/components/common/MainLayout';
 import Button from '@/components/common/Button';
@@ -196,39 +197,30 @@ export default function AdminCarouselPage() {
                       <div className="w-full md:w-1/3">
                         {slide.imageUrl && (
                           <div className="aspect-video relative bg-gray-100 rounded overflow-hidden">
-                            <img 
+                            <Image
                               src={slide.imageUrl} 
-                              alt={slide.title} 
-                              className="object-cover w-full h-full"
+                              alt={slide.title}
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg">{slide.title}</h3>
-                        {slide.subtitle && <p className="text-gray-600 mb-2">{slide.subtitle}</p>}
-                        <div className="flex items-center gap-2 text-sm mb-2">
-                          <span className="font-semibold">Order:</span>
-                          <span>{(slide as any).displayOrder || 0}</span>
-                        </div>
-                        {slide.ctaText && (
-                          <div className="flex items-center gap-2 text-sm mb-2">
-                            <span className="font-semibold">CTA:</span>
-                            <span>{slide.ctaText}</span>
-                          </div>
-                        )}
-                        <div className="flex gap-2 mt-4">
-                          <Button
+                      <div className="w-full md:w-2/3">
+                        <h3 className="text-lg font-semibold">{slide.title}</h3>
+                        {slide.subtitle && <p className="text-sm text-gray-600">{slide.subtitle}</p>}
+                        <div className="mt-2 space-x-2">
+                          <Button 
+                            onClick={() => handleEdit(slide as CarouselSlideProps & { displayOrder: number; isActive: boolean })}
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEdit(slide as any)}
                           >
                             Edit
                           </Button>
-                          <Button
-                            variant="error"
-                            size="sm"
+                          <Button 
                             onClick={() => handleDelete(slide.id)}
+                            variant="error" // Changed from "destructive" to "error"
+                            size="sm"
                           >
                             Delete
                           </Button>
@@ -239,182 +231,135 @@ export default function AdminCarouselPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
-                <p className="text-gray-600">No carousel slides found.</p>
-              </div>
+              <p>No slides found. Add one using the form.</p>
             )}
           </div>
 
           <div>
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-bold mb-4">
-                {editingSlideId ? 'Edit Slide' : 'Add New Slide'}
-              </h2>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      required
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subtitle
-                    </label>
-                    <textarea
-                      id="subtitle"
-                      name="subtitle"
-                      value={formData.subtitle}
-                      onChange={handleInputChange}
-                      rows={2}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    ></textarea>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                      Image URL *
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        required
-                        value={formData.imageUrl}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                      >
-                        {isUploading ? 'Uploading...' : 'Upload'}
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        disabled={isUploading}
-                      />
+            <h2 className="text-xl font-bold mb-4">
+              {editingSlideId ? 'Edit Slide' : 'Add New Slide'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700">Subtitle</label>
+                <textarea
+                  name="subtitle"
+                  id="subtitle"
+                  value={formData.subtitle}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">Image</label>
+                <input 
+                  type="file" 
+                  id="imageUrl" 
+                  name="imageUrl" 
+                  ref={fileInputRef} 
+                  onChange={handleImageUpload} 
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"
+                />
+                {isUploading && (
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
                     </div>
-                    {isUploading && (
-                      <div className="mt-2">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-600 transition-all duration-300" 
-                            style={{ width: `${uploadProgress}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Uploading: {uploadProgress}%
-                        </p>
-                      </div>
-                    )}
-                    {formData.imageUrl && (
-                      <div className="mt-2">
-                        <img
-                          src={formData.imageUrl}
-                          alt="Preview"
-                          className="h-32 object-cover rounded-md"
+                    <p className="text-sm text-gray-500 mt-1">{uploadProgress}% uploaded</p>
+                  </div>
+                )}
+                {formData.imageUrl && !isUploading && (
+                  <div className="mt-2">
+                    <p className="text-sm text-green-600">Image uploaded successfully!</p>
+                    <div className="aspect-video relative bg-gray-100 rounded overflow-hidden mt-2 w-1/2">
+                        <Image 
+                            src={formData.imageUrl} 
+                            alt="Uploaded preview" 
+                            layout="fill"
+                            objectFit="cover"
                         />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="ctaText" className="block text-sm font-medium text-gray-700 mb-1">
-                        CTA Text
-                      </label>
-                      <input
-                        type="text"
-                        id="ctaText"
-                        name="ctaText"
-                        value={formData.ctaText}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="ctaLink" className="block text-sm font-medium text-gray-700 mb-1">
-                        CTA Link
-                      </label>
-                      <input
-                        type="text"
-                        id="ctaLink"
-                        name="ctaLink"
-                        value={formData.ctaLink}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
                     </div>
                   </div>
-                  
-                  <div>
-                    <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      id="displayOrder"
-                      name="displayOrder"
-                      value={formData.displayOrder}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isActive"
-                      name="isActive"
-                      checked={formData.isActive}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-                      Active
-                    </label>
-                  </div>
-                  
-                  <div className="pt-4 flex gap-2">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                    >
-                      {editingSlideId ? 'Update Slide' : 'Add Slide'}
-                    </Button>
-                    {editingSlideId && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={resetForm}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </form>
-            </div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="ctaText" className="block text-sm font-medium text-gray-700">CTA Text</label>
+                <input
+                  type="text"
+                  name="ctaText"
+                  id="ctaText"
+                  value={formData.ctaText}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="ctaLink" className="block text-sm font-medium text-gray-700">CTA Link</label>
+                <input
+                  type="url"
+                  name="ctaLink"
+                  id="ctaLink"
+                  value={formData.ctaLink}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                  placeholder="https://example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700">Display Order</label>
+                <input
+                  type="number"
+                  name="displayOrder"
+                  id="displayOrder"
+                  value={formData.displayOrder}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  id="isActive"
+                  name="isActive"
+                  type="checkbox"
+                  checked={formData.isActive}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">Active</label>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" onClick={resetForm} variant="outline">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending || isUploading}>
+                  {editingSlideId ? 'Update Slide' : 'Create Slide'}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

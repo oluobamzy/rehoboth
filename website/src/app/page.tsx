@@ -29,7 +29,7 @@ export default function Home() {
               </svg>
             </div>
             <h3 className="text-xl font-bold mb-3 text-gray-800">Latest Sermons</h3>
-            <p className="mb-4 text-gray-600">Listen to our recent messages and grow in your understanding of God's Word.</p>
+            <p className="mb-4 text-gray-600">Listen to our recent messages and grow in your understanding of God&apos;s Word.</p>
             <Link href="/sermons" className="text-orange-500 font-medium hover:underline">Listen Now →</Link>
           </div>
           
@@ -71,10 +71,10 @@ export default function Home() {
           <div>
             <h3 className="text-3xl font-bold mb-5">Our <span className="text-orange-500">Mission</span></h3>
             <p className="text-gray-600 mb-4">
-              At Rehoboth Christian Church, we strive to create a welcoming community where everyone can experience God's love, grow in their faith journey, and find meaningful ways to serve others.
+              At Rehoboth Christian Church, we strive to create a welcoming community where everyone can experience God&apos;s love, grow in their faith journey, and find meaningful ways to serve others.
             </p>
             <p className="text-gray-600 mb-6">
-              Whether you're seeking spiritual growth, community connection, or a place to belong, we invite you to be part of our church family.
+              Whether you&apos;re seeking spiritual growth, community connection, or a place to belong, we invite you to be part of our church family.
             </p>
             <Link href="/about" className="text-orange-500 font-medium hover:underline">Read More About Our Vision →</Link>
           </div>

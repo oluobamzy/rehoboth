@@ -38,11 +38,15 @@ export default function LoginPage() {
 
       router.push(redirectUrl);
       router.refresh();
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during login');
-      posthog.capture('user_login_error', {
-        error: error.message,
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || 'An error occurred during login');
+        posthog.capture('user_login_error', {
+          error: error.message,
+        });
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

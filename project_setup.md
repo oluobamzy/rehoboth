@@ -86,7 +86,7 @@ NEXT_PUBLIC_SITE_URL=
 
 ### Feature 2: Sermon Management System
 - [ ] Database schema implementation
-- [ ] Media storage configuration
+- [x] Media storage configuration
 - [ ] API endpoints creation
 - [ ] Frontend component development
 - [ ] Admin management interface
