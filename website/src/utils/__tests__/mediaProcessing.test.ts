@@ -2,7 +2,7 @@
 import { jest } from '@jest/globals';
 import { processMediaFile } from '../mediaProcessing';
 import type { MediaProcessingOptions } from '../mediaProcessing';
-import type { FFmpeg, FileData, FFMessageLoadConfig, FFMessageOptions } from '@ffmpeg/ffmpeg';
+import type { FFmpeg } from '@ffmpeg/ffmpeg';
 import type {
   UploadResult,
   StorageReference as BaseStorageReference,
@@ -144,15 +144,15 @@ const createMockUploadTask = (path: string): UploadTask => {
 };
 
 // Create the FFmpeg mock with proper return types
-const mockFFmpeg: FFmpeg = {
-  load: jest.fn().mockResolvedValue(true),
-  writeFile: jest.fn().mockResolvedValue(true),
-  readFile: jest.fn().mockResolvedValue(new Uint8Array(0) as FileData),
-  exec: jest.fn().mockResolvedValue(0),
+const mockFFmpeg = {
+  load: jest.fn().mockImplementation(async () => true),
+  writeFile: jest.fn().mockImplementation(async () => undefined),
+  readFile: jest.fn().mockImplementation(async () => new Uint8Array(0)),
+  exec: jest.fn().mockImplementation(async () => 0),
   on: jest.fn(),
-  fetchFile: jest.fn().mockResolvedValue(new Uint8Array(0) as FileData),
-  toBlobURL: jest.fn().mockResolvedValue('blob:url')
-};
+  log: jest.fn(),
+  terminate: jest.fn()
+} as unknown as FFmpeg;
 
 jest.mock('@ffmpeg/ffmpeg', () => ({
   createFFmpeg: jest.fn().mockImplementation(() => mockFFmpeg)
@@ -167,7 +167,7 @@ const storageFunctions = {
     return uploadTask.snapshot.ref;
   }),
   uploadBytes: jest.fn().mockImplementation(
-    async (ref: StorageReference, data: Uint8Array | Blob | ArrayBuffer): Promise<UploadResult> => ({
+    (ref: any, data: any) => Promise.resolve({
       ref,
       metadata: {
         bucket: 'test-bucket',
@@ -185,10 +185,10 @@ const storageFunctions = {
     })
   ),
   uploadBytesResumable: jest.fn().mockImplementation(
-    (ref: StorageReference, data: Uint8Array | Blob | ArrayBuffer) => createMockUploadTask(ref.fullPath)
+    (ref: any, data: any) => createMockUploadTask(ref.fullPath)
   ),
   getDownloadURL: jest.fn().mockImplementation(
-    async (ref: StorageReference): Promise<string> => 'https://example.com/mocked-url'
+    (ref: any) => Promise.resolve('https://example.com/mocked-url')
   )
 };
 
@@ -200,7 +200,7 @@ export const storage = storageFunctions;
 // --- Test Suite ---
 describe('Media Processing Utilities', () => {
   let mockFile: File;
-  let progressCallback: (progress: number) => void;
+  let progressCallback: (progress: number, stage: string) => void;
 
   beforeEach(() => {
     mockFile = new File(['test'], 'test.mp4', { type: 'video/mp4' });
