@@ -18,6 +18,9 @@ const customJestConfig = {
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
   ],
+  moduleDirectories: ['node_modules', '<rootDir>'],
+  automock: false,
+  resetMocks: false,
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
