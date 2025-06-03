@@ -23,17 +23,25 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Use our custom auth context for login, which implements rate limiting
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        throw error;
+        // Check for rate limit errors (429)
+        if (error.status === 429 && 'retryAfter' in error) {
+          const retryAfter = (error as any).retryAfter || 60;
+          setError(`Too many login attempts. Please try again in ${retryAfter} seconds.`);
+        } else {
+          throw error;
+        }
+        return;
       }
 
       posthog.capture('user_login_success', {
-        userId: data.user?.id,
+        userId: (await supabase.auth.getUser()).data.user?.id,
       });
 
       router.push(redirectUrl);

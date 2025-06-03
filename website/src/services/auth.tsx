@@ -6,6 +6,9 @@ import { supabase } from './supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from './store';
+import { setupTokenRefresher } from './tokenRefresher';
+import { checkRateLimit } from './authRateLimiter';
+import { logAuthEvent, AuthEvent } from './authLogger';
 
 
 // Define public and admin paths
@@ -31,6 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter(); // Initialize router
 
   useEffect(() => {
+    // Setup token refresher
+    const { initRefresher, cleanupRefresher } = setupTokenRefresher();
+    
     const fetchSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -38,9 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (currentSession?.user) {
           // const user = await fetchUserProfile(currentSession.user.id); // 'user' is assigned a value but never used.
           // setUserRole(user?.role || null);
-          // For now, let's assume fetchUserProfile might not be fully implemented or needed here
           // If you have a way to get the role directly or from the session, use that.
           setUserRole(currentSession.user.app_metadata?.role || null);
+          
+          // Initialize token refresher when we have a session
+          initRefresher();
         } else {
           setUserRole(null);
         }
@@ -67,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       authListener?.subscription.unsubscribe(); // Correct way to unsubscribe
+      cleanupRefresher(); // Clean up token refresher
     };
   }, [setIsLoading]); // Removed user, setUser from dependencies as they come from zustand and should not cause re-runs of this effect.
 
@@ -81,17 +90,109 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session, userRole, isLoading, pathname, router]); // Add router to dependency array
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // Check rate limit before attempting login
+    const rateLimit = await checkRateLimit(email, 'login');
+    
+    if (!rateLimit.allowed) {
+      // Log rate limit exceeded
+      await logAuthEvent(AuthEvent.LOGIN_FAILURE, {
+        email,
+        errorMessage: 'Rate limit exceeded',
+        metadata: { reason: 'rate_limit' }
+      });
+      
+      return { 
+        error: {
+          message: rateLimit.message || 'Too many login attempts. Please try again later.',
+          status: 429,
+          retryAfter: rateLimit.retryAfter
+        }
+      };
+    }
+    
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      // Log failed login attempt
+      await logAuthEvent(AuthEvent.LOGIN_FAILURE, {
+        email,
+        errorMessage: error.message,
+        metadata: { code: error.code }
+      });
+    } else if (data.user) {
+      // Log successful login
+      await logAuthEvent(AuthEvent.LOGIN_SUCCESS, {
+        userId: data.user.id,
+        email: data.user.email
+      });
+    }
+    
     return { error };
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Check rate limit before attempting signup
+    const rateLimit = await checkRateLimit(email, 'signup');
+    
+    if (!rateLimit.allowed) {
+      // Log rate limit exceeded for signup
+      await logAuthEvent(AuthEvent.SIGNUP_FAILURE, {
+        email,
+        errorMessage: 'Rate limit exceeded',
+        metadata: { reason: 'rate_limit' }
+      });
+      
+      return { 
+        data: null,
+        error: {
+          message: rateLimit.message || 'Too many signup attempts. Please try again later.',
+          status: 429,
+          retryAfter: rateLimit.retryAfter
+        }
+      };
+    }
+    
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      }
+    });
+    
+    if (error) {
+      // Log signup failure
+      await logAuthEvent(AuthEvent.SIGNUP_FAILURE, {
+        email,
+        errorMessage: error.message,
+        metadata: { code: error.code }
+      });
+    } else if (data.user) {
+      // Log signup success
+      await logAuthEvent(AuthEvent.SIGNUP_SUCCESS, {
+        userId: data.user.id,
+        email: data.user.email,
+        metadata: { emailConfirmed: !!data.user.email_confirmed_at }
+      });
+    }
+    
     return { data, error };
   };
 
   const signOut = async () => {
+    // Get user info before signing out
+    const { data: { user } } = await supabase.auth.getUser();
+    
     await supabase.auth.signOut();
+    
+    // Log logout event
+    if (user) {
+      await logAuthEvent(AuthEvent.LOGOUT, {
+        userId: user.id,
+        email: user.email
+      });
+    }
+    
     setUser(null);
     setSupabaseUser(null); // Clear supabaseUser on signout
     setUserRole(null); // Clear userRole on signout

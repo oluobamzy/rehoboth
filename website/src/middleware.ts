@@ -4,8 +4,33 @@ import type { NextRequest } from 'next/server';
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
 export async function middleware(req: NextRequest) {
-  // Create a Supabase client configured to use cookies
-  const res = NextResponse.next();
+  // Create a response with enhanced security headers
+  const res = NextResponse.next({
+    headers: {
+      // Content Security Policy to prevent XSS attacks
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://app.posthog.com https://*.supabase.co; connect-src 'self' https://*.supabase.co https://app.posthog.com; frame-src 'self' https://*.supabase.co; img-src 'self' data: https://*.supabase.co https://www.gravatar.com; style-src 'self' 'unsafe-inline';",
+      
+      // Prevent browsers from MIME-sniffing
+      'X-Content-Type-Options': 'nosniff',
+      
+      // Strict Transport Security to enforce HTTPS
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+      
+      // Frame protection to prevent clickjacking
+      'X-Frame-Options': 'DENY',
+      
+      // Browser XSS filter
+      'X-XSS-Protection': '1; mode=block',
+      
+      // Referrer policy
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      
+      // Permissions policy to disable potentially risky browser features
+      'Permissions-Policy': 'geolocation=(self), microphone=(), camera=(), fullscreen=(self)'
+    }
+  });
+  
+  // Create Supabase client
   const supabase = createMiddlewareClient({ req, res });
 
   // Refresh session if expired - required for Server Components

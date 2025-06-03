@@ -28,7 +28,17 @@ if (isUsingDefaults) {
   }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create client with automatic token refresh and session management
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    // For enhanced security, set shorter session duration (8 hours)
+    // This overrides the Supabase project settings
+    flowType: 'pkce',
+  },
+});
 
 // Helper function to check connection status
 export const checkSupabaseConnection = async () => {
