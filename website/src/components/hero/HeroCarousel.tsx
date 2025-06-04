@@ -33,7 +33,7 @@ export default function HeroCarousel() {
       id: '1',
       title: 'Welcome to Rehoboth Christian Church',
       subtitle: 'Join us for Sunday worship at 10:00 AM',
-      imageUrl: 'https://images.unsplash.com/photo-1602437098422-419392a1b766?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
+      imageUrl: '/assets/images/church-hero.jpg',
       ctaText: 'Learn More',
       ctaLink: '/about'
     },

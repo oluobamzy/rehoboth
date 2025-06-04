@@ -3,14 +3,21 @@
 
 export async function checkRateLimit(email: string, action: 'login' | 'signup' | 'reset') {
   try {
-    // Replace with your actual Supabase project URL
+    // Access environment variables properly in client components
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    // Ensure we have the URL and key
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase URL or anon key missing');
+      return { allowed: true }; // Fall back to allowing the request
+    }
     
     const response = await fetch(`${supabaseUrl}/functions/v1/auth-rate-limit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify({ email, action }),
     });

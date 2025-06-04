@@ -39,16 +39,16 @@ export default function SermonsPage() {
     isFetchingNextPage, 
     isLoading, 
     error 
-  } = useInfiniteQuery<PaginatedSermons, Error>(
-    ['sermons', { sort_by: 'sermon_date', sort_order: 'desc' }], 
-    ({ pageParam = 1 }) => fetchSermons({ page: pageParam, pageSize: sermonsPerPage, sort_by: 'sermon_date', sort_order: 'desc' }), 
-    {
-      getNextPageParam: (lastPage: PaginatedSermons, allPages: PaginatedSermons[]) => {
-        if (!lastPage || !lastPage.sermons || lastPage.sermons.length < sermonsPerPage) return undefined;
-        return allPages.length + 1;
-      },
-    }
-  );
+  } = useInfiniteQuery<PaginatedSermons, Error>({
+    queryKey: ['sermons', { sort_by: 'sermon_date', sort_order: 'desc' }],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchSermons({ page: pageParam as number, pageSize: sermonsPerPage, sort_by: 'sermon_date', sort_order: 'desc' }),
+    getNextPageParam: (lastPage: PaginatedSermons, allPages: PaginatedSermons[]) => {
+      if (!lastPage || !lastPage.sermons || lastPage.sermons.length < sermonsPerPage) return undefined;
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+  });
 
   const { data: seriesList = [] } = useQuery<SermonSeries[], Error>({ // Fetch series list
     queryKey: ['sermonSeries'],

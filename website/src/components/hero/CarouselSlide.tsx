@@ -2,9 +2,9 @@
 
 // src/components/hero/CarouselSlide.tsx
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/common/Button';
+import FallbackImage from '@/components/common/FallbackImage';
 
 export interface CarouselSlideProps {
   id: string;
@@ -25,12 +25,13 @@ export default function CarouselSlide({
   return (
     <div className="relative h-[500px]">
       <div className="absolute inset-0 z-0">
-        <Image
+        <FallbackImage
           src={imageUrl}
           alt={title}
           fill
           className="object-cover"
           priority
+          fallbackSrc="/assets/images/church-hero.jpg"
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
       </div>

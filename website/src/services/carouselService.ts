@@ -6,6 +6,21 @@ import { posthog } from './posthog';
 // Fetch active carousel slides
 export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
   try {
+    // First, check if the carousel_slides table exists
+    try {
+      const result = await supabase.rpc('exec', { 
+        query: "SELECT to_regclass('public.carousel_slides') IS NOT NULL as exists;"
+      });
+      
+      if (result.error || !result.data) {
+        console.log('Could not check if carousel_slides table exists. Using placeholder slides.');
+        return [];
+      }
+    } catch (err) {
+      console.log('Error checking carousel_slides table existence:', err);
+      return [];
+    }
+    
     const now = new Date().toISOString();
     
     const { data, error } = await supabase
@@ -17,14 +32,14 @@ export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
       .order('display_order', { ascending: true });
     
     if (error) {
-      // If the table doesn't exist yet, don't log an error, just return empty array
-      if (error.message?.includes('does not exist')) {
-        console.log('Carousel slides table does not exist yet. Using placeholder slides.');
+      // If the table doesn't exist yet or any other error, don't log an error, just return empty array
+      if (error.message?.includes('does not exist') || error.code === '42P01') {
+        console.log('Carousel slides table does not exist or cannot be queried. Using placeholder slides.');
         return [];
       }
       
       console.error('Error fetching carousel slides:', error);
-      throw error;
+      return []; // Return empty array instead of throwing error
     }
     
     // Track the event in PostHog if we have slides

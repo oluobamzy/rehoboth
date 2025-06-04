@@ -131,52 +131,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    // Check rate limit before attempting signup
-    const rateLimit = await checkRateLimit(email, 'signup');
-    
-    if (!rateLimit.allowed) {
-      // Log rate limit exceeded for signup
-      await logAuthEvent(AuthEvent.SIGNUP_FAILURE, {
-        email,
-        errorMessage: 'Rate limit exceeded',
-        metadata: { reason: 'rate_limit' }
-      });
-      
-      return { 
-        data: null,
-        error: {
-          message: rateLimit.message || 'Too many signup attempts. Please try again later.',
-          status: 429,
-          retryAfter: rateLimit.retryAfter
-        }
-      };
-    }
-    
-    const { data, error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
+    // Disable self-signup through the application
+    await logAuthEvent(AuthEvent.SIGNUP_FAILURE, {
+      email,
+      errorMessage: 'Self-registration is disabled',
+      metadata: { reason: 'feature_disabled' }
     });
     
-    if (error) {
-      // Log signup failure
-      await logAuthEvent(AuthEvent.SIGNUP_FAILURE, {
-        email,
-        errorMessage: error.message,
-        metadata: { code: error.code }
-      });
-    } else if (data.user) {
-      // Log signup success
-      await logAuthEvent(AuthEvent.SIGNUP_SUCCESS, {
-        userId: data.user.id,
-        email: data.user.email,
-        metadata: { emailConfirmed: !!data.user.email_confirmed_at }
-      });
-    }
-    
-    return { data, error };
+    return { 
+      data: null,
+      error: {
+        message: 'User registration is managed by administrators. Please contact an administrator to create an account.',
+        status: 403
+      }
+    };
   };
 
   const signOut = async () => {
@@ -221,6 +189,21 @@ export const useAuth = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function fetchUserProfile(userId: string): Promise<{ role: string | null } | null> {
   try {
+    // First check if the profiles table exists
+    try {
+      const tableCheck = await supabase.rpc('exec', { 
+        query: "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'profiles');"
+      });
+      
+      if (tableCheck.error || !tableCheck.data) {
+        console.log('Profiles table does not exist or cannot be queried.');
+        return { role: 'user' }; // Default role
+      }
+    } catch (err) {
+      console.log('Error checking profiles table existence:', err);
+      return { role: 'user' }; // Default role
+    }
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
@@ -228,12 +211,16 @@ async function fetchUserProfile(userId: string): Promise<{ role: string | null }
       .single();
 
     if (error) {
-      // console.error('Error fetching user profile:', error); // 'error' is assigned a value but never used.
-      return null;
+      if (error.message?.includes('does not exist') || error.code === '42P01') {
+        console.log('Profiles table does not exist. Using default role.');
+        return { role: 'user' }; // Default role
+      }
+      console.warn('Error fetching user profile:', error);
+      return { role: 'user' }; // Default role
     }
-    return data ? { role: data.role } : null;
+    return data ? { role: data.role } : { role: 'user' }; // Default to user role if no profile found
   } catch (e: any) { // Explicitly type e as any or a more specific error type
     console.error('Exception fetching user profile:', e);
-    return null;
+    return { role: 'user' }; // Default role
   }
 }
