@@ -45,10 +45,59 @@ export interface UploadResult {
   path: string;
 }
 
-export interface PaginatedSermons { // Add this interface
+export interface PaginatedSermons { 
   sermons: Sermon[];
   count: number | null;
   connectionError?: string;
+  debug?: {
+    tablesExist?: boolean;
+    errorDetails?: any;
+    queryInfo?: any;
+  };
+}
+
+// Helper function to check if tables exist
+async function checkTablesExist() {
+  try {
+    // Use a direct query instead of exec function which may have issues
+    console.log('Checking if sermons table exists...');
+    const { data: sermonCheck, error: sermonError } = await supabase
+      .from('sermons')
+      .select('id')
+      .limit(1);
+    
+    console.log('Sermon check result:', sermonCheck ? 'Success' : 'Failed', sermonError);
+    
+    const { data: seriesCheck, error: seriesError } = await supabase
+      .from('sermon_series')
+      .select('id')
+      .limit(1);
+    
+    console.log('Series check result:', seriesCheck ? 'Success' : 'Failed', seriesError);
+    
+    // We consider tables to exist if we either get successful queries or get specific errors
+    // (like no rows but not table doesn't exist errors)
+    const sermonTableExists = sermonCheck !== null || (sermonError && !sermonError.message.includes('does not exist'));
+    const seriesTableExists = seriesCheck !== null || (seriesError && !seriesError.message.includes('does not exist'));
+    
+    return {
+      sermonTable: sermonTableExists,
+      seriesTable: seriesTableExists,
+      errors: {
+        sermon: sermonError?.message,
+        series: seriesError?.message
+      }
+    };
+  } catch (error) {
+    console.error('Error checking tables:', error);
+    return {
+      sermonTable: false,
+      seriesTable: false,
+      errors: {
+        general: error instanceof Error ? error.message : 'Unknown error checking tables'
+      }
+    };
+  }
 }
 
 // Fetch sermons with filters
@@ -78,6 +127,50 @@ export async function fetchSermons({
   includeUnpublished?: boolean;
 }): Promise<PaginatedSermons> { // Update return type
   try {
+    // First check if the tables exist
+    console.log('Checking if sermon tables exist...');
+    const tablesExist = await checkTablesExist();
+    
+    if (!tablesExist.sermonTable || !tablesExist.seriesTable) {
+      console.error('Sermon tables not found:', tablesExist);
+      
+      // Try a more aggressive check - just attempt to query directly 
+      // and see if we get "relation does not exist" error
+      console.log('Attempting direct table query as fallback...');
+      
+      try {
+        const { data, error } = await supabase.from('sermons').select('count(*)', { count: 'exact', head: true });
+        console.log('Direct query result:', data ? 'Success' : 'Failed', error);
+        
+        if (error && error.message && error.message.includes('does not exist')) {
+          return { 
+            sermons: [], 
+            count: 0, 
+            connectionError: 'Sermon database tables not found. Please run the setup scripts.',
+            debug: {
+              tablesExist: false,
+              errorDetails: tablesExist.errors
+            }
+          };
+        } else {
+          // The table exists, but our check had issues
+          console.log('Tables appear to exist despite check result. Proceeding...');
+        }
+      } catch (directError) {
+        console.error('Error in direct check:', directError);
+        return { 
+          sermons: [], 
+          count: 0, 
+          connectionError: 'Error checking sermon tables: ' + (directError instanceof Error ? directError.message : String(directError)),
+          debug: {
+            tablesExist: false,
+            errorDetails: tablesExist.errors
+          }
+        };
+      }
+    }
+    
+    console.log('Sermon tables exist, proceeding with query...');
     // Check if Supabase is configured properly
     const usingDefaultCredentials = 
       !process.env.NEXT_PUBLIC_SUPABASE_URL || 
@@ -91,6 +184,21 @@ export async function fetchSermons({
         sermons: [], 
         count: 0, 
         connectionError: 'Database not properly configured. Please check your environment variables.'
+      };
+    }
+    
+    // Check if tables exist
+    const { sermonTable, seriesTable, errors } = await checkTablesExist();
+    
+    if (!sermonTable || !seriesTable) {
+      return {
+        sermons: [],
+        count: 0,
+        connectionError: 'Required tables do not exist in the database.',
+        debug: {
+          tablesExist: false,
+          errorDetails: errors,
+        }
       };
     }
     
@@ -140,14 +248,35 @@ export async function fetchSermons({
     sermonsQuery = sermonsQuery.order(sort_by, { ascending: sort_order === 'asc' });
 
     // Execute the query
+    console.log('Executing sermon query with filters:', {
+      page, pageSize, series_id, speaker, tags, query, 
+      start_date, end_date, sort_by, sort_order, includeUnpublished
+    });
+    
     const { data: sermons, error, count } = await sermonsQuery;
 
     if (error) {
       console.error('Error fetching sermons:', error);
+      // Try a minimal query to diagnose the issue
+      console.log('Trying minimal query for diagnostics...');
+      const { data: minimalData, error: minimalError } = await supabase
+        .from('sermons')
+        .select('id, title')
+        .limit(1);
+      
       return { 
         sermons: [],
         count: 0,
-        connectionError: `Database error: ${error.message || 'Unknown error'}`
+        connectionError: `Database error: ${error.message || 'Unknown error'}`,
+        debug: {
+          tablesExist: true,
+          errorDetails: error,
+          queryInfo: {
+            minimalQuerySuccess: !minimalError,
+            minimalError: minimalError?.message,
+            minimalData: minimalData ? 'data found' : 'no data'
+          }
+        }
       };
     }
 
@@ -170,7 +299,14 @@ export async function fetchSermons({
     return { 
       sermons: [],
       count: 0,
-      connectionError: error instanceof Error ? error.message : 'Unknown database error'
+      connectionError: error instanceof Error ? error.message : 'Unknown database error',
+      debug: {
+        errorDetails: {
+          name: error instanceof Error ? error.name : 'Unknown',
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        }
+      }
     };
   }
 }

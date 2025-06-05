@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next({
     headers: {
       // Content Security Policy to prevent XSS attacks
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://app.posthog.com https://*.supabase.co; connect-src 'self' https://*.supabase.co https://app.posthog.com; frame-src 'self' https://*.supabase.co; img-src 'self' data: https://*.supabase.co https://www.gravatar.com; style-src 'self' 'unsafe-inline';",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://app.posthog.com https://*.supabase.co https://apis.google.com https://*.googleapis.com; script-src-elem 'self' 'unsafe-inline' https://app.posthog.com https://*.supabase.co https://apis.google.com https://*.googleapis.com; connect-src 'self' https://*.supabase.co https://app.posthog.com https://firebasestorage.googleapis.com https://*.googleapis.com; frame-src 'self' https://*.supabase.co https://*.googleapis.com https://*.firebaseapp.com; img-src 'self' data: https://*.supabase.co https://www.gravatar.com https://firebasestorage.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;",
       
       // Prevent browsers from MIME-sniffing
       'X-Content-Type-Options': 'nosniff',
