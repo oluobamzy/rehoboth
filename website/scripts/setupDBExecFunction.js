@@ -15,69 +15,32 @@ async function createExecFunction() {
   try {
     console.log('Creating exec function in Supabase...');
 
-    const { error } = await supabase.rpc('exec', {
-      query: `
-        CREATE OR REPLACE FUNCTION exec(query text) 
-        RETURNS void AS $$
-        BEGIN
-          EXECUTE query;
-        END;
-        $$ LANGUAGE plpgsql SECURITY DEFINER;
-      `
-    }).catch(err => {
-      // If the function doesn't exist yet, this will fail, which is expected
-      // We'll create it directly in that case
-      return { error: { message: 'Function does not exist yet' } };
-    });
+    // Try to call exec function first - it will fail if the function doesn't exist
+    let execError;
+    try {
+      const response = await supabase.rpc('exec', {
+        query: `
+          CREATE OR REPLACE FUNCTION exec(query text) 
+          RETURNS void AS $$
+          BEGIN
+            EXECUTE query;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER;
+        `
+      });
+      execError = response.error;
+    } catch (err) {
+      // If the function doesn't exist yet, this will throw
+      execError = { message: 'Function does not exist yet' };
+    }
 
-    if (error) {
+    if (execError) {
       console.log('Exec function doesn\'t exist yet, creating it directly...');
       
-      // Create the function using SQL directly
-      await supabase.from('_exec_create_function').select('*').then(({ error }) => {
-        if (error && error.message && error.message.includes('does not exist')) {
-          console.log('Creating exec function through direct SQL...');
-          
-          // Using a workaround to execute SQL directly
-          return supabase.auth.admin.createUser({
-            email: 'temp@example.com',
-            password: 'tempPassword123!',
-            app_metadata: {
-              sql: `
-                CREATE OR REPLACE FUNCTION exec(query text) 
-                RETURNS void AS $$
-                BEGIN
-                  EXECUTE query;
-                END;
-                $$ LANGUAGE plpgsql SECURITY DEFINER;
-              `
-            }
-          }).catch(() => {
-            // This isn't expected to succeed, but the SQL might still run
-            return { data: { user: null }, error: null };
-          });
-        }
-        throw error;
-      });
-
-      // Test if the function was created
-      console.log('Testing exec function...');
-      const { error: testError } = await supabase.rpc('exec', {
-        query: 'SELECT 1;'
-      });
-      
-      if (!testError) {
-        console.log('✅ Exec function created successfully');
-      } else {
-        console.error('Failed to create exec function:', testError);
-        console.log('Falling back to alternative method...');
-        
-        // Try a different approach - creating a temporary table and dropping it
-        // This is just to test if we have sufficient permissions
-        await supabase.from('_temp_test_table').insert([{ id: 1 }]).select();
-        console.error('You may need to manually create the exec function in the Supabase dashboard.');
-        console.error('Please run this SQL in the SQL Editor:');
-        console.error(`
+      // Try direct SQL approach
+      try {
+        // Use supabase.sql if available (newer SDK versions)
+        const response = await supabase.sql(`
           CREATE OR REPLACE FUNCTION exec(query text) 
           RETURNS void AS $$
           BEGIN
@@ -85,6 +48,46 @@ async function createExecFunction() {
           END;
           $$ LANGUAGE plpgsql SECURITY DEFINER;
         `);
+        
+        console.log('✅ Exec function created successfully via SQL');
+      } catch (sqlError) {
+        console.log('Unable to create via direct SQL, trying alternative method...');
+        
+        // Test if the function was created or already exists
+        try {
+          console.log('Testing exec function...');
+          const { error: testError } = await supabase.rpc('exec', {
+            query: 'SELECT 1;'
+          });
+          
+          if (!testError) {
+            console.log('✅ Exec function is working');
+          } else {
+            console.error('Failed to create exec function:', testError.message);
+            console.error('You may need to manually create the exec function in the Supabase dashboard.');
+            console.error('Please run this SQL in the SQL Editor:');
+            console.error(`
+              CREATE OR REPLACE FUNCTION exec(query text) 
+              RETURNS void AS $$
+              BEGIN
+                EXECUTE query;
+              END;
+              $$ LANGUAGE plpgsql SECURITY DEFINER;
+            `);
+          }
+        } catch (testError) {
+          console.error('Error testing exec function:', testError.message);
+          console.error('You need to manually create the exec function in the Supabase dashboard.');
+          console.error('Please run this SQL in the SQL Editor:');
+          console.error(`
+            CREATE OR REPLACE FUNCTION exec(query text) 
+            RETURNS void AS $$
+            BEGIN
+              EXECUTE query;
+            END;
+            $$ LANGUAGE plpgsql SECURITY DEFINER;
+          `);
+        }
       }
     } else {
       console.log('✅ Exec function already exists');

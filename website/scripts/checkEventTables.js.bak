@@ -1,0 +1,120 @@
+// Script to check if events tables are set up correctly
+const { createClient } = require('@supabase/supabase-js');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config({ path: '.env.local' });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Error: Supabase URL or service role key not found in environment variables');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+async function checkEventTables() {
+  console.log('🔍 Checking Events schema...');
+
+  try {
+    // Check if events table exists
+    console.log('Checking events table...');
+    const { data: eventsData, error: eventsError } = await supabase
+      .from('events')
+      .select('id')
+      .limit(1);
+    
+    if (eventsError && eventsError.message.includes('does not exist')) {
+      console.error('❌ Events table does not exist:', eventsError.message);
+      console.log('💡 Run setupEventsSchema.js to create the table');
+    } else if (eventsError) {
+      console.error('❌ Error checking events table:', eventsError.message);
+    } else {
+      console.log('✅ Events table exists', eventsData ? `(${eventsData.length} records found)` : '(empty)');
+    }
+    
+    // Check if event_registrations table exists
+    console.log('\nChecking event_registrations table...');
+    const { data: registrationsData, error: registrationsError } = await supabase
+      .from('event_registrations')
+      .select('id')
+      .limit(1);
+    
+    if (registrationsError && registrationsError.message.includes('does not exist')) {
+      console.error('❌ Event_registrations table does not exist:', registrationsError.message);
+      console.log('💡 Run setupEventsSchema.js to create the table');
+    } else if (registrationsError) {
+      console.error('❌ Error checking event_registrations table:', registrationsError.message);
+    } else {
+      console.log('✅ Event_registrations table exists', registrationsData ? `(${registrationsData.length} records found)` : '(empty)');
+    }
+    
+    // Check for PostGIS extension
+    console.log('\nChecking PostGIS extension...');
+    // First method: query pg_extension directly
+    const { data: postgisData, error: postgisError } = await supabase.rpc('exec', {
+      query: `SELECT 1 FROM pg_extension WHERE extname = 'postgis';`
+    });
+    
+    if (postgisError) {
+      console.error('❌ Error checking PostGIS extension:', postgisError.message);
+      // Try alternative approach
+      console.log('Trying alternative PostGIS check...');
+      const { data: altData, error: altError } = await supabase.rpc('exec', {
+        query: `SELECT 1 FROM information_schema.tables WHERE table_name = 'spatial_ref_sys';`
+      });
+      
+      if (!altError && altData && altData.length > 0) {
+        console.log('✅ PostGIS extension is enabled (detected by spatial_ref_sys table)');
+      } else {
+        console.error('❌ PostGIS extension not found');
+        console.log('💡 Run setupEventsSchema.js to enable the PostGIS extension or enable it in the Supabase dashboard');
+      }
+    } else if (postgisData && postgisData.length > 0) {
+      console.log('✅ PostGIS extension is enabled');
+    } else {
+      console.error('❌ PostGIS extension not found');
+      console.log('💡 Run setupEventsSchema.js to enable the PostGIS extension or enable it in the Supabase dashboard');
+      } catch (altErr) {
+        // Ignore errors from alternative approach
+      }
+    }
+    
+    // Insert a test event if events table exists and is empty
+    if (!eventsError && (!eventsData || eventsData.length === 0)) {
+      console.log('\nInserting a test event...');
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const { data: testEvent, error: insertError } = await supabase
+        .from('events')
+        .insert({
+          title: 'Test Event',
+          description: 'This is a test event created by the checkEventTables.js script',
+          event_type: 'test',
+          start_datetime: tomorrow.toISOString(),
+          end_datetime: new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours later
+          location_name: 'Church Main Hall',
+          is_published: true
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('❌ Failed to insert test event:', insertError.message);
+      } else {
+        console.log('✅ Test event inserted successfully:', testEvent.id);
+      }
+    }
+    
+    console.log('\n🎉 Events schema check completed!');
+  } catch (error) {
+    console.error('❌ Unexpected error checking Events schema:', error);
+    process.exit(1);
+  }
+}
+
+checkEventTables();

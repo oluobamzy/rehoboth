@@ -1,0 +1,115 @@
+// scripts/setupDBExecFunction.js
+// This script creates the exec function in Supabase for executing SQL directly
+// To run this script: node scripts/setupDBExecFunction.js
+
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
+
+// Initialize Supabase client with service role key
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function createExecFunction() {
+  try {
+    console.log('Creating exec function in Supabase...');
+
+    // Try to call exec function first - it will fail if the function doesn't exist
+    let error;
+    try {
+      const response = await supabase.rpc('exec', {
+        query: `
+          CREATE OR REPLACE FUNCTION exec(query text) 
+          RETURNS void AS $$
+          BEGIN
+            EXECUTE query;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER;
+        `
+      });
+      error = response.error;
+    } catch (err) {
+      // If the function doesn't exist yet, this will throw, which is expected
+      // We'll create it directly in that case
+      error = { message: 'Function does not exist yet' };
+    }
+
+    if (error) {
+      console.log('Exec function doesn\'t exist yet, creating it directly...');
+      
+      // Create the function using SQL directly
+      try {
+        const { error: tableError } = await supabase.from('_exec_create_function').select('*');
+        
+        if (tableError && tableError.message && tableError.message.includes('does not exist')) {
+          console.log('Creating exec function through direct SQL...');
+          
+          // Using a workaround to execute SQL directly
+          try {
+            await supabase.auth.admin.createUser({
+              email: 'temp@example.com',
+              password: 'tempPassword123!',
+              app_metadata: {
+                sql: `
+                  CREATE OR REPLACE FUNCTION exec(query text) 
+                  RETURNS void AS $$
+                  BEGIN
+                    EXECUTE query;
+                  END;
+                $$ LANGUAGE plpgsql SECURITY DEFINER;
+              `
+            }
+          }).catch(() => {
+            // This isn't expected to succeed, but the SQL might still run
+            return { data: { user: null }, error: null };
+          });
+        }
+        throw error;
+      });
+
+      // Test if the function was created
+      console.log('Testing exec function...');
+      const { error: testError } = await supabase.rpc('exec', {
+        query: 'SELECT 1;'
+      });
+      
+      if (!testError) {
+        console.log('✅ Exec function created successfully');
+      } else {
+        console.error('Failed to create exec function:', testError);
+        console.log('Falling back to alternative method...');
+        
+        // Try a different approach - creating a temporary table and dropping it
+        // This is just to test if we have sufficient permissions
+        await supabase.from('_temp_test_table').insert([{ id: 1 }]).select();
+        console.error('You may need to manually create the exec function in the Supabase dashboard.');
+        console.error('Please run this SQL in the SQL Editor:');
+        console.error(`
+          CREATE OR REPLACE FUNCTION exec(query text) 
+          RETURNS void AS $$
+          BEGIN
+            EXECUTE query;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER;
+        `);
+      }
+    } else {
+      console.log('✅ Exec function already exists');
+    }
+  } catch (error) {
+    console.error('Error creating exec function:', error.message || error);
+    console.error('You may need to manually create the exec function in the Supabase dashboard.');
+    console.error('Please run this SQL in the SQL Editor:');
+    console.error(`
+      CREATE OR REPLACE FUNCTION exec(query text) 
+      RETURNS void AS $$
+      BEGIN
+        EXECUTE query;
+      END;
+      $$ LANGUAGE plpgsql SECURITY DEFINER;
+    `);
+  }
+}
+
+createExecFunction();
