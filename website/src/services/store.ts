@@ -31,7 +31,22 @@ export const useAuthStore = create<AuthState>()(
         logout: () => set({ user: null, isAuthenticated: false }),
       }),
       {
-        name: 'auth-storage',
+        // Use the same name as Supabase so they don't conflict
+        name: 'sb-auth-state',
+        // Store in memory only to avoid conflicts with Supabase's storage
+        // and to make sure session info from Supabase is the source of truth
+        storage: {
+          getItem: (name) => {
+            // We'll rely on Supabase for persistent storage
+            return null;
+          },
+          setItem: (name, value) => {
+            // Don't actually store the Zustand state persistently
+          },
+          removeItem: (name) => {
+            // No-op
+          }
+        },
       }
     )
   )

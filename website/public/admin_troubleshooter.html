@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Troubleshooter</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      color: #2d3748;
+    }
+    .instruction-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #4299e1;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .button {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .button:hover {
+      background-color: #3182ce;
+    }
+    .button.danger {
+      background-color: #e53e3e;
+    }
+    .button.danger:hover {
+      background-color: #c53030;
+    }
+    .button.success {
+      background-color: #38a169;
+    }
+    .button.success:hover {
+      background-color: #2f855a;
+    }
+    .info-section {
+      margin-top: 20px;
+      border: 1px solid #e2e8f0;
+      padding: 15px;
+      border-radius: 4px;
+      background-color: #f7fafc;
+    }
+    pre {
+      background-color: #edf2f7;
+      padding: 10px;
+      border-radius: 4px;
+      overflow: auto;
+    }
+    code {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Session Troubleshooter</h1>
+  
+  <div class="instruction-box">
+    <h2>What's Happening?</h2>
+    <p>You're seeing this page because you're having trouble accessing the admin area. This usually happens because:</p>
+    <ol>
+      <li>Your session cookie is invalid or expired</li>
+      <li>There's a mismatch between your stored session and the server's session</li>
+      <li>Your admin role hasn't been properly applied to your account</li>
+    </ol>
+  </div>
+
+  <h2>Session Information</h2>
+  <div id="session-info" class="info-section">
+    <p>Loading session information...</p>
+  </div>
+
+  <h2>Fix Steps</h2>
+  <div class="instruction-box">
+    <h3>Step 1: Check Your Current Session</h3>
+    <p>First, let's check if you have a valid session and if it has admin rights:</p>
+    <button id="check-session" class="button">Check Current Session</button>
+  </div>
+
+  <div class="instruction-box">
+    <h3>Step 2: Clear All Cookies for This Website</h3>
+    <p>This will remove any corrupted session data:</p>
+    <button id="clear-cookies" class="button danger">Clear All Cookies</button>
+  </div>
+
+  <div class="instruction-box">
+    <h3>Step 3: Log Out Completely</h3>
+    <p>This will ensure you're fully logged out from Supabase:</p>
+    <button id="logout" class="button danger">Log Out</button>
+  </div>
+
+  <div class="instruction-box">
+    <h3>Step 4: Log Back In</h3>
+    <p>After logging out and clearing cookies, log back in:</p>
+    <button id="login" class="button success">Go to Login Page</button>
+  </div>
+
+  <div class="info-section">
+    <h3>If You're Still Having Problems:</h3>
+    <p>Run the admin role verification script on the server:</p>
+    <pre><code>cd /home/labber/rehoboth/website && node scripts/verify_admin_role.js your-email@example.com</code></pre>
+  </div>
+
+  <script>
+    // Function to check and display session info
+    async function checkSession() {
+      const sessionInfoElem = document.getElementById('session-info');
+      sessionInfoElem.innerHTML = '<p>Checking session...</p>';
+
+      try {
+        // Load the Supabase client from a CDN (this is just for display, not for actual use)
+        const { createClient } = supabase;
+        
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const supabaseUrl = urlParams.get('url') || localStorage.getItem('supabase_url');
+        const anonKey = urlParams.get('key') || localStorage.getItem('supabase_key');
+
+        if (!supabaseUrl || !anonKey) {
+          sessionInfoElem.innerHTML = `
+            <p>Supabase URL and Anon Key required to check session.</p>
+            <form id="supabase-form">
+              <div style="margin-bottom: 10px;">
+                <label>Supabase URL:</label><br>
+                <input type="text" id="supabase-url" style="width: 100%; padding: 8px;">
+              </div>
+              <div style="margin-bottom: 10px;">
+                <label>Supabase Anon Key:</label><br>
+                <input type="text" id="supabase-key" style="width: 100%; padding: 8px;">
+              </div>
+              <button type="submit" class="button">Save and Check</button>
+            </form>
+          `;
+
+          document.getElementById('supabase-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const url = document.getElementById('supabase-url').value;
+            const key = document.getElementById('supabase-key').value;
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_key', key);
+            window.location.reload();
+          });
+          return;
+        }
+
+        // Create Supabase client
+        const supabaseClient = createClient(supabaseUrl, anonKey);
+        
+        // Check session
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (error) {
+          sessionInfoElem.innerHTML = `
+            <p style="color: #e53e3e;">Error checking session: ${error.message}</p>
+          `;
+        } else if (!session) {
+          sessionInfoElem.innerHTML = `
+            <p style="color: #dd6b20;">No active session found. You are not logged in.</p>
+            <p>This is why you're being redirected to the login page when trying to access admin areas.</p>
+          `;
+        } else {
+          // Show session information
+          const user = session.user;
+          const expiresAt = new Date(session.expires_at * 1000).toLocaleString();
+          const isAdmin = user.app_metadata?.role === 'admin';
+          
+          sessionInfoElem.innerHTML = `
+            <p><strong>Status:</strong> <span style="color: #38a169;">You are logged in</span></p>
+            <p><strong>User:</strong> ${user.email} (${user.id})</p>
+            <p><strong>Admin Role:</strong> ${isAdmin ? '<span style="color: #38a169;">YES</span>' : '<span style="color: #e53e3e;">NO</span>'}</p>
+            <p><strong>Session Expires:</strong> ${expiresAt}</p>
+            <p><strong>App Metadata:</strong></p>
+            <pre>${JSON.stringify(user.app_metadata, null, 2) || 'None'}</pre>
+          `;
+
+          // Check user_roles table if session exists
+          try {
+            const { data: roles, error: rolesError } = await supabaseClient
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', user.id);
+            
+            if (rolesError) {
+              sessionInfoElem.innerHTML += `
+                <p><strong>Database Roles:</strong> <span style="color: #e53e3e;">Error: ${rolesError.message}</span></p>
+              `;
+            } else if (!roles || roles.length === 0) {
+              sessionInfoElem.innerHTML += `
+                <p><strong>Database Roles:</strong> <span style="color: #e53e3e;">No roles found in database</span></p>
+              `;
+            } else {
+              const hasAdminRole = roles.some(r => r.role === 'admin');
+              sessionInfoElem.innerHTML += `
+                <p><strong>Database Roles:</strong> ${roles.map(r => r.role).join(', ')} ${hasAdminRole ? '✅' : '❌'}</p>
+              `;
+            }
+          } catch (err) {
+            sessionInfoElem.innerHTML += `
+              <p><strong>Database Roles:</strong> <span style="color: #e53e3e;">Error checking database roles</span></p>
+            `;
+          }
+        }
+      } catch (err) {
+        sessionInfoElem.innerHTML = `
+          <p style="color: #e53e3e;">Error: ${err.message}</p>
+          <p>This likely means the Supabase client failed to load or initialize.</p>
+        `;
+      }
+    }
+
+    // Clear all cookies for the current domain
+    function clearAllCookies() {
+      const cookies = document.cookie.split(';');
+      
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+      }
+      
+      alert('All cookies have been cleared! Please logout next.');
+    }
+
+    // Log out from Supabase
+    async function logout() {
+      try {
+        const supabaseUrl = localStorage.getItem('supabase_url');
+        const anonKey = localStorage.getItem('supabase_key');
+        
+        if (!supabaseUrl || !anonKey) {
+          alert('Please check your session first to load Supabase credentials');
+          return;
+        }
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, anonKey);
+        
+        await supabaseClient.auth.signOut();
+        alert('You have been logged out successfully! Now try logging in again.');
+      } catch (err) {
+        alert(`Error during logout: ${err.message}`);
+      }
+    }
+
+    // Event listeners
+    document.getElementById('check-session').addEventListener('click', checkSession);
+    document.getElementById('clear-cookies').addEventListener('click', clearAllCookies);
+    document.getElementById('logout').addEventListener('click', logout);
+    document.getElementById('login').addEventListener('click', function() {
+      window.location.href = '/auth/login?redirectUrl=/admin/dashboard';
+    });
+
+    // Add Supabase JS from CDN
+    function loadSupabase() {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      script.onload = function() {
+        console.log('Supabase client loaded');
+        // Check session automatically if we have the credentials
+        if (localStorage.getItem('supabase_url') && localStorage.getItem('supabase_key')) {
+          checkSession();
+        } else {
+          checkSession(); // This will show the form
+        }
+      };
+      script.onerror = function() {
+        document.getElementById('session-info').innerHTML = `
+          <p style="color: #e53e3e;">Failed to load Supabase client.</p>
+          <p>Try refreshing the page or check your internet connection.</p>
+        `;
+      };
+      document.body.appendChild(script);
+    }
+
+    // Initialize
+    loadSupabase();
+  </script>
+</body>
+</html>

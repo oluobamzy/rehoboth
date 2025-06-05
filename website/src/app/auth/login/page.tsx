@@ -40,12 +40,59 @@ export default function LoginPage() {
         return;
       }
 
-      posthog.capture('user_login_success', {
-        userId: (await supabase.auth.getUser()).data.user?.id,
+      // Get the session to verify login was successful
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Login succeeded but no session was created. Please try again.');
+      }
+      
+      // Get the user
+      const user = session.user;
+      
+      // Debug the user's role
+      console.log('User logged in:', {
+        id: user.id,
+        email: user.email,
+        app_metadata: user.app_metadata,
+        aud: user.aud
       });
+      
+      // Track success event
+      if (user) {
+        posthog.capture('user_login_success', {
+          userId: user.id,
+        });
+      }
 
-      router.push(redirectUrl);
-      router.refresh();
+      console.log(`Login successful, redirecting to: ${redirectUrl}`);
+      
+      // Ensure the session is properly established and available to middleware
+      const storeSession = async () => {
+        try {
+          // Retrieve the session again to ensure it's stored properly
+          const { data: { session: confirmedSession } } = await supabase.auth.getSession();
+          
+          console.log('Session confirmed:', !!confirmedSession);
+          if (confirmedSession?.user) {
+            console.log(`Authenticated as: ${confirmedSession.user.email}`);
+            console.log('App metadata:', JSON.stringify(confirmedSession.user.app_metadata));
+            
+            // Force a full page reload to ensure middleware picks up the new session
+            window.location.href = redirectUrl;
+          } else {
+            console.warn('Session not properly established after login. Retrying...');
+            // Retry after a short delay if session is not confirmed
+            setTimeout(storeSession, 1000);
+          }
+        } catch (err) {
+          console.error('Error confirming session:', err);
+          // Proceed with redirect anyway after one more second
+          setTimeout(() => { window.location.href = redirectUrl; }, 1000);
+        }
+      };
+      
+      // Allow a bit more time to ensure session is properly established
+      setTimeout(storeSession, 2000);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message || 'An error occurred during login');

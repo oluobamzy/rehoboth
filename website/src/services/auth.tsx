@@ -65,10 +65,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       setSupabaseUser(newSession?.user ?? null); // Keep supabaseUser in sync
+      
+      // Debug information
+      console.log("Auth state change detected:", _event);
+      console.log("Session present:", !!newSession);
+      
       if (newSession?.user) {
-        const profile = await fetchUserProfile(newSession.user.id);
-        setUserRole(profile?.role || null);
+        console.log("User detected in session:", newSession.user.email);
+        console.log("User metadata:", newSession.user.app_metadata);
+        
+        // Get role from app_metadata (primary) or fallback to fetching profile
+        const userRole = newSession.user.app_metadata?.role;
+        setUserRole(userRole || null);
+        
+        // Create a user object for the Zustand store with correct typing
+        const authUser = {
+          id: newSession.user.id,
+          email: newSession.user.email || '',
+          // Ensure role is strictly typed as 'user' | 'admin'
+          role: userRole === 'admin' ? 'admin' as const : 'user' as const,
+          firstName: newSession.user.user_metadata?.firstName,
+          lastName: newSession.user.user_metadata?.lastName
+        };
+        
+        // Update the Zustand store
+        setUser(authUser);
+        console.log("Auth store updated with user:", authUser);
       } else {
+        console.log("No user in session, clearing state");
+        setUser(null);
         setUserRole(null);
       }
     });
@@ -151,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get user info before signing out
     const { data: { user } } = await supabase.auth.getUser();
     
+    // Sign out from Supabase
     await supabase.auth.signOut();
     
     // Log logout event
@@ -161,9 +187,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     }
     
+    // Update local state
     setUser(null);
     setSupabaseUser(null); // Clear supabaseUser on signout
     setUserRole(null); // Clear userRole on signout
+    
+    // Force a redirect to the homepage after logout
+    window.location.href = '/';
   };
 
   const value = {

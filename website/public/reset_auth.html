@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Authentication State</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4a76a8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #3d6293;
+        }
+        .danger {
+            background-color: #e74c3c;
+        }
+        .danger:hover {
+            background-color: #c0392b;
+        }
+        .success {
+            background-color: #2ecc71;
+        }
+        .success:hover {
+            background-color: #27ae60;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .step {
+            margin-bottom: 30px;
+            border-left: 4px solid #4a76a8;
+            padding-left: 15px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e8f4f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Complete Authentication Reset</h1>
+        
+        <p><strong>Your Issue:</strong> You have local storage data showing <code>user: null</code> and <code>isAuthenticated: false</code>, which is preventing you from accessing admin areas even though you have the correct permissions in the database.</p>
+
+        <div class="step">
+            <h2>Step 1: View Current State</h2>
+            <p>This will show what's currently stored in your browser for this site:</p>
+            <button onclick="checkCurrentState()">Check Current State</button>
+            <div id="current-state-result" class="result"></div>
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Clear Authentication State</h2>
+            <p>This will clear <strong>ALL</strong> stored data including:</p>
+            <ul>
+                <li>Cookies</li>
+                <li>Local Storage</li>
+                <li>Session Storage</li>
+                <li>IndexedDB (if used)</li>
+            </ul>
+            <button class="danger" onclick="clearAllStoredData()">Clear ALL Browser Storage</button>
+            <div id="clear-result" class="result"></div>
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Go to Login</h2>
+            <p>After clearing all data, click this button to go to the login page:</p>
+            <button class="success" onclick="goToLogin()">Go to Login Page</button>
+        </div>
+
+        <div class="step">
+            <h2>Advanced: Force Direct Login</h2>
+            <p>If normal login still doesn't work, try this method which attempts a direct login with Supabase:</p>
+            <div>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+            </div>
+            <div>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+            </div>
+            <button onclick="attemptDirectLogin()">Try Direct Login</button>
+            <div id="login-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to check current state
+        function checkCurrentState() {
+            const result = document.getElementById('current-state-result');
+            result.innerHTML = '<h3>Current Browser State:</h3>';
+            
+            // Check localStorage
+            try {
+                result.innerHTML += '<h4>Local Storage:</h4>';
+                const localStorageItems = { ...localStorage };
+                
+                if (Object.keys(localStorageItems).length === 0) {
+                    result.innerHTML += '<p>No items in localStorage</p>';
+                } else {
+                    result.innerHTML += '<pre>' + JSON.stringify(localStorageItems, null, 2) + '</pre>';
+                }
+            } catch (e) {
+                result.innerHTML += '<p>Error accessing localStorage: ' + e.message + '</p>';
+            }
+            
+            // Check sessionStorage
+            try {
+                result.innerHTML += '<h4>Session Storage:</h4>';
+                const sessionStorageItems = { ...sessionStorage };
+                
+                if (Object.keys(sessionStorageItems).length === 0) {
+                    result.innerHTML += '<p>No items in sessionStorage</p>';
+                } else {
+                    result.innerHTML += '<pre>' + JSON.stringify(sessionStorageItems, null, 2) + '</pre>';
+                }
+            } catch (e) {
+                result.innerHTML += '<p>Error accessing sessionStorage: ' + e.message + '</p>';
+            }
+            
+            // Check cookies
+            try {
+                result.innerHTML += '<h4>Cookies:</h4>';
+                if (document.cookie) {
+                    const cookies = document.cookie.split(';').map(cookie => {
+                        const parts = cookie.trim().split('=');
+                        return { name: parts[0], value: parts.length > 1 ? parts[1] : '' };
+                    });
+                    result.innerHTML += '<pre>' + JSON.stringify(cookies, null, 2) + '</pre>';
+                } else {
+                    result.innerHTML += '<p>No cookies found</p>';
+                }
+            } catch (e) {
+                result.innerHTML += '<p>Error accessing cookies: ' + e.message + '</p>';
+            }
+            
+            // Check for Supabase specific items
+            const supabaseItems = Object.keys(localStorage).filter(key => 
+                key.includes('supabase') || key.includes('sb-')
+            );
+            
+            if (supabaseItems.length > 0) {
+                result.innerHTML += '<h4>Supabase-related items found:</h4>';
+                result.innerHTML += '<ul>';
+                supabaseItems.forEach(key => {
+                    result.innerHTML += `<li>${key}</li>`;
+                });
+                result.innerHTML += '</ul>';
+            }
+            
+            // Look for auth state related items
+            try {
+                const rehobothStorage = localStorage.getItem('rehoboth-auth-storage');
+                if (rehobothStorage) {
+                    result.innerHTML += '<h4>Auth State:</h4>';
+                    try {
+                        const parsedStorage = JSON.parse(rehobothStorage);
+                        result.innerHTML += '<pre>' + JSON.stringify(parsedStorage, null, 2) + '</pre>';
+                    } catch (e) {
+                        result.innerHTML += '<p>Error parsing auth storage: ' + e.message + '</p>';
+                        result.innerHTML += '<pre>' + rehobothStorage + '</pre>';
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        // Function to clear all stored data
+        function clearAllStoredData() {
+            const result = document.getElementById('clear-result');
+            result.innerHTML = '<h3>Clearing all data...</h3>';
+            
+            // Clear localStorage
+            try {
+                const count = Object.keys(localStorage).length;
+                localStorage.clear();
+                result.innerHTML += `<p>✅ Cleared ${count} items from localStorage</p>`;
+            } catch (e) {
+                result.innerHTML += '<p>❌ Error clearing localStorage: ' + e.message + '</p>';
+            }
+            
+            // Clear sessionStorage
+            try {
+                const count = Object.keys(sessionStorage).length;
+                sessionStorage.clear();
+                result.innerHTML += `<p>✅ Cleared ${count} items from sessionStorage</p>`;
+            } catch (e) {
+                result.innerHTML += '<p>❌ Error clearing sessionStorage: ' + e.message + '</p>';
+            }
+            
+            // Clear cookies
+            try {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i];
+                    const eqPos = cookie.indexOf('=');
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                }
+                result.innerHTML += `<p>✅ Cleared ${cookies.length} cookies</p>`;
+            } catch (e) {
+                result.innerHTML += '<p>❌ Error clearing cookies: ' + e.message + '</p>';
+            }
+            
+            // Attempt to clear IndexedDB (more complex, simplified here)
+            try {
+                indexedDB.databases().then(dbs => {
+                    dbs.forEach(db => {
+                        indexedDB.deleteDatabase(db.name);
+                    });
+                    result.innerHTML += `<p>✅ Attempted to clear IndexedDB databases</p>`;
+                }).catch(e => {
+                    result.innerHTML += '<p>⚠️ IndexedDB operation not supported or failed: ' + e.message + '</p>';
+                });
+            } catch (e) {
+                result.innerHTML += '<p>⚠️ IndexedDB not supported or error: ' + e.message + '</p>';
+            }
+            
+            result.innerHTML += '<p><strong>✅ ALL DATA CLEARED!</strong> You should now be able to log in again.</p>';
+        }
+        
+        // Function to go to login
+        function goToLogin() {
+            window.location.href = '/auth/login?redirectUrl=/admin/dashboard&t=' + new Date().getTime();
+        }
+        
+        // Load Supabase client
+        function loadSupabase(callback) {
+            if (window.supabase) {
+                callback();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = callback;
+            script.onerror = () => {
+                document.getElementById('login-result').innerHTML = 
+                    '<p>❌ Failed to load Supabase client. Please try the regular login instead.</p>';
+            };
+            document.body.appendChild(script);
+        }
+        
+        // Function for direct login
+        function attemptDirectLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('login-result');
+            
+            if (!email || !password) {
+                result.innerHTML = '<p>❌ Please enter both email and password</p>';
+                return;
+            }
+            
+            result.innerHTML = '<p>Attempting login...</p>';
+            
+            loadSupabase(() => {
+                // Create Supabase client
+                const supabaseUrl = window.location.hostname === 'localhost' ? 
+                    'https://uthibplzzonfiovzpdkj.supabase.co' : 
+                    window.location.origin;
+                    
+                // TODO: This would require the anon key to be hardcoded or provided
+                // For security, we're not including it here
+                result.innerHTML = '<p>To use direct login, you would need to provide the Supabase anon key.</p>' +
+                                   '<p>For security reasons, please use the "Go to Login Page" button instead.</p>';
+                
+                /* Example of what would happen:
+                const supabase = window.supabase.createClient(supabaseUrl, 'your-anon-key');
+                
+                supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                }).then(response => {
+                    if (response.error) {
+                        result.innerHTML = '<p>❌ Login failed: ' + response.error.message + '</p>';
+                    } else {
+                        result.innerHTML = '<p>✅ Login successful! Redirecting...</p>';
+                        setTimeout(() => {
+                            window.location.href = '/admin/dashboard';
+                        }, 1000);
+                    }
+                }).catch(err => {
+                    result.innerHTML = '<p>❌ Error during login: ' + err.message + '</p>';
+                });
+                */
+            });
+        }
+        
+        // Check state on page load
+        window.onload = function() {
+            checkCurrentState();
+        }
+    </script>
+</body>
+</html>

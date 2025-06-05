@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Authentication State</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4a76a8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #3d6293;
+        }
+        .danger {
+            background-color: #e74c3c;
+        }
+        .danger:hover {
+            background-color: #c0392b;
+        }
+        .success {
+            background-color: #2ecc71;
+        }
+        .success:hover {
+            background-color: #27ae60;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .step {
+            margin-bottom: 30px;
+            border-left: 4px solid #4a76a8;
+            padding-left: 15px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e8f4f8;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success-msg {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error-msg {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fix Authentication State</h1>
+        
+        <p><strong>Purpose:</strong> This tool will diagnose and fix inconsistencies between your server-side authentication (Supabase) and client-side state (browser storage).</p>
+
+        <div class="step">
+            <h2>Step 1: Load Supabase Client</h2>
+            <p>First, we need to load the Supabase client library:</p>
+            <button onclick="loadSupabase()">Load Supabase Client</button>
+            <div id="load-result" class="result">Click to load the Supabase client</div>
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Diagnose Authentication State</h2>
+            <p>This will check your current auth state in both Supabase and local storage:</p>
+            <button id="diagnose-btn" onclick="diagnoseAuthState()" disabled>Diagnose Auth State</button>
+            <div id="diagnose-result" class="result">Load Supabase client first</div>
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Fix Authentication State</h2>
+            <p>This will attempt to fix your authentication state by correctly setting your admin role:</p>
+            <button id="fix-btn" class="success" onclick="fixAuthState()" disabled>Fix Auth State</button>
+            <div id="fix-result" class="result">Run diagnosis first</div>
+            
+            <div class="warning" id="warning-box" style="display: none;">
+                <strong>Warning:</strong> This will modify your browser's local storage data. Make sure you've diagnosed the issue first.
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 4: Go to Admin Dashboard</h2>
+            <p>After fixing the state, try accessing the admin dashboard:</p>
+            <button id="admin-btn" class="success" onclick="goToAdminDashboard()" disabled>Go to Admin Dashboard</button>
+        </div>
+
+        <div class="step">
+            <h2>Advanced Options</h2>
+            <button class="danger" onclick="clearAllStorage()">Clear All Browser Storage</button>
+            <button onclick="goToLogin()">Go to Login Page</button>
+        </div>
+    </div>
+
+    <script>
+        let supabase = null;
+        let currentUser = null;
+        let authStateFixed = false;
+        let supabaseKey = null;
+
+        // Function to load Supabase
+        function loadSupabase() {
+            const result = document.getElementById('load-result');
+            result.innerHTML = 'Loading Supabase client...';
+            
+            // Try to extract key from URL if provided
+            const urlParams = new URLSearchParams(window.location.search);
+            supabaseKey = urlParams.get('key'); // Only use for debugging, never in production
+            
+            if (!supabaseKey) {
+                // Default to environment variable in prod
+                supabaseKey = 'NEXT_PUBLIC_SUPABASE_ANON_KEY';
+            }
+            
+            // Load the Supabase JS library
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = function() {
+                result.innerHTML = '<p class="success-msg">✅ Supabase client loaded successfully</p>';
+                document.getElementById('diagnose-btn').disabled = false;
+                
+                // Try to get Supabase URL from different sources
+                const supabaseUrl = window.location.hostname === 'localhost' 
+                    ? 'https://uthibplzzonfiovzpdkj.supabase.co' 
+                    : new URL('/', window.location.href).origin;
+                    
+                // Initialize Supabase client
+                try {
+                    // Use createClient with minimal config
+                    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                    result.innerHTML += '<p>Connected to Supabase at: ' + supabaseUrl + '</p>';
+                } catch (error) {
+                    result.innerHTML = '<p class="error-msg">❌ Error initializing Supabase client: ' + error.message + '</p>';
+                }
+            };
+            script.onerror = function() {
+                result.innerHTML = '<p class="error-msg">❌ Failed to load Supabase client library</p>';
+            };
+            document.body.appendChild(script);
+        }
+        
+        // Function to diagnose auth state
+        async function diagnoseAuthState() {
+            if (!supabase) {
+                alert('Supabase client not loaded. Please load it first.');
+                return;
+            }
+            
+            const result = document.getElementById('diagnose-result');
+            result.innerHTML = '<p>Diagnosing authentication state...</p>';
+            
+            try {
+                // Table for displaying auth state comparison
+                let tableHtml = '<table><thead><tr>' +
+                    '<th>Component</th><th>Value</th><th>Status</th></tr></thead><tbody>';
+                
+                // Check session from Supabase
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError) {
+                    result.innerHTML = '<p class="error-msg">❌ Error getting session: ' + sessionError.message + '</p>';
+                    return;
+                }
+                
+                const session = sessionData?.session;
+                currentUser = session?.user || null;
+                
+                // Check if we have a session
+                if (!session) {
+                    tableHtml += '<tr><td>Supabase Session</td><td>Not found</td>' +
+                        '<td class="error-msg">❌ Not logged in</td></tr>';
+                    result.innerHTML = tableHtml + '</tbody></table>' +
+                        '<p class="error-msg">❌ You are not logged in. Please <a href="/auth/login">log in</a> first.</p>';
+                    return;
+                }
+                
+                // We have a session, add to table
+                tableHtml += '<tr><td>Supabase Session</td><td>Valid until ' + 
+                    new Date(session.expires_at * 1000).toLocaleString() + 
+                    '</td><td class="success-msg">✅ Found</td></tr>';
+                
+                // Check user in session
+                tableHtml += '<tr><td>User ID</td><td>' + currentUser.id + '</td>' +
+                    '<td class="success-msg">✅ Found</td></tr>';
+                    
+                tableHtml += '<tr><td>User Email</td><td>' + currentUser.email + '</td>' +
+                    '<td class="success-msg">✅ Found</td></tr>';
+                
+                // Check app_metadata
+                const appMetadata = currentUser.app_metadata || {};
+                const appMetadataRole = appMetadata.role;
+                
+                if (appMetadataRole === 'admin') {
+                    tableHtml += '<tr><td>App Metadata Role</td><td>admin</td>' +
+                        '<td class="success-msg">✅ Admin role found</td></tr>';
+                } else {
+                    tableHtml += '<tr><td>App Metadata Role</td><td>' + (appMetadataRole || 'none') + '</td>' +
+                        '<td class="warning">⚠️ Admin role not found in metadata</td></tr>';
+                }
+                
+                // Check localStorage
+                let zustandState = null;
+                try {
+                    // Look for auth storage
+                    const authStorage = localStorage.getItem('auth-storage');
+                    if (authStorage) {
+                        zustandState = JSON.parse(authStorage);
+                        const zustandUser = zustandState?.state?.user;
+                        const isAuthenticated = zustandState?.state?.isAuthenticated;
+                        
+                        if (!zustandUser || !isAuthenticated) {
+                            tableHtml += '<tr><td>Local Storage</td>' +
+                                '<td>User: ' + (zustandUser ? 'Found' : 'null') + 
+                                ', isAuthenticated: ' + isAuthenticated + '</td>' +
+                                '<td class="error-msg">❌ Local state is incorrect</td></tr>';
+                        } else {
+                            tableHtml += '<tr><td>Local Storage</td>' +
+                                '<td>User: Found, isAuthenticated: ' + isAuthenticated + '</td>' +
+                                '<td class="success-msg">✅ Local state is correct</td></tr>';
+                        }
+                        
+                        // Check role in local storage
+                        const localRole = zustandUser?.role;
+                        if (localRole === 'admin') {
+                            tableHtml += '<tr><td>Local Role</td><td>admin</td>' +
+                                '<td class="success-msg">✅ Admin role in local storage</td></tr>';
+                        } else {
+                            tableHtml += '<tr><td>Local Role</td><td>' + (localRole || 'none') + '</td>' +
+                                '<td class="error-msg">❌ Admin role not in local storage</td></tr>';
+                        }
+                    } else {
+                        tableHtml += '<tr><td>Local Storage</td><td>Not found</td>' +
+                            '<td class="error-msg">❌ Auth storage not found</td></tr>';
+                    }
+                } catch (e) {
+                    tableHtml += '<tr><td>Local Storage</td><td>Error: ' + e.message + '</td>' +
+                        '<td class="error-msg">❌ Error reading local storage</td></tr>';
+                }
+                
+                // Check database roles table
+                try {
+                    const { data: userRoles, error: rolesError } = await supabase
+                        .from('user_roles')
+                        .select('role')
+                        .eq('user_id', currentUser.id);
+                        
+                    if (rolesError) {
+                        tableHtml += '<tr><td>Database Role</td><td>Error: ' + rolesError.message + '</td>' +
+                            '<td class="error-msg">❌ Error checking database role</td></tr>';
+                    } else if (!userRoles || userRoles.length === 0) {
+                        tableHtml += '<tr><td>Database Role</td><td>No roles found</td>' +
+                            '<td class="error-msg">❌ No roles in database</td></tr>';
+                    } else {
+                        const isAdmin = userRoles.some(r => r.role === 'admin');
+                        if (isAdmin) {
+                            tableHtml += '<tr><td>Database Role</td><td>admin</td>' +
+                                '<td class="success-msg">✅ Admin role in database</td></tr>';
+                        } else {
+                            tableHtml += '<tr><td>Database Role</td>' +
+                                '<td>' + userRoles.map(r => r.role).join(', ') + '</td>' +
+                                '<td class="error-msg">❌ Admin role not in database</td></tr>';
+                        }
+                    }
+                } catch (e) {
+                    tableHtml += '<tr><td>Database Role</td><td>Error: ' + e.message + '</td>' +
+                        '<td class="error-msg">❌ Error checking database role</td></tr>';
+                }
+                
+                // Complete the table
+                tableHtml += '</tbody></table>';
+                
+                // Add summary and recommendations
+                const hasAdminInMetadata = appMetadataRole === 'admin';
+                const hasAdminInLocalStorage = zustandState?.state?.user?.role === 'admin';
+                const isAuthenticatedInLocalStorage = zustandState?.state?.isAuthenticated === true;
+                
+                if (hasAdminInMetadata && hasAdminInLocalStorage && isAuthenticatedInLocalStorage) {
+                    result.innerHTML = tableHtml +
+                        '<p class="success-msg">✅ Your authentication state looks good! You should be able to access admin areas.</p>';
+                    document.getElementById('fix-btn').disabled = true;
+                    document.getElementById('admin-btn').disabled = false;
+                } else if (!hasAdminInMetadata) {
+                    result.innerHTML = tableHtml +
+                        '<p class="error-msg">❌ You don\'t have admin role in your app_metadata. This needs to be fixed server-side.</p>' +
+                        '<p>Try running the server-side fix script: <code>node scripts/fix_admin_users.js youremail@example.com</code></p>';
+                    document.getElementById('fix-btn').disabled = true;
+                } else {
+                    result.innerHTML = tableHtml +
+                        '<p class="warning">⚠️ Your local browser state is inconsistent with your server permissions.</p>' +
+                        '<p>Click "Fix Auth State" to correct your local browser state.</p>';
+                    document.getElementById('fix-btn').disabled = false;
+                    document.getElementById('warning-box').style.display = 'block';
+                }
+            } catch (error) {
+                result.innerHTML = '<p class="error-msg">❌ Error diagnosing auth state: ' + error.message + '</p>';
+            }
+        }
+        
+        // Function to fix auth state
+        async function fixAuthState() {
+            if (!supabase || !currentUser) {
+                alert('Please diagnose the auth state first.');
+                return;
+            }
+            
+            const result = document.getElementById('fix-result');
+            result.innerHTML = '<p>Attempting to fix authentication state...</p>';
+            
+            try {
+                // Check for auth-storage in localStorage
+                let fixed = false;
+                
+                // Try to fix auth-storage
+                const authStorage = localStorage.getItem('auth-storage');
+                if (authStorage) {
+                    try {
+                        const parsedStorage = JSON.parse(authStorage);
+                        
+                        // Create a fixed version of the state
+                        const fixedState = {
+                            state: {
+                                user: {
+                                    id: currentUser.id,
+                                    email: currentUser.email,
+                                    role: 'admin',
+                                    firstName: currentUser.user_metadata?.first_name || '',
+                                    lastName: currentUser.user_metadata?.last_name || ''
+                                },
+                                isAuthenticated: true,
+                                isLoading: false
+                            },
+                            version: parsedStorage.version || 0
+                        };
+                        
+                        // Save the fixed state
+                        localStorage.setItem('auth-storage', JSON.stringify(fixedState));
+                        fixed = true;
+                        
+                        result.innerHTML = '<p class="success-msg">✅ Successfully fixed auth state in localStorage!</p>' +
+                            '<pre>' + JSON.stringify(fixedState, null, 2) + '</pre>';
+                            
+                        // Enable the admin dashboard button
+                        document.getElementById('admin-btn').disabled = false;
+                        authStateFixed = true;
+                    } catch (e) {
+                        result.innerHTML += '<p class="error-msg">❌ Error fixing auth-storage: ' + e.message + '</p>';
+                    }
+                } else {
+                    // Create a new auth-storage item
+                    try {
+                        const newState = {
+                            state: {
+                                user: {
+                                    id: currentUser.id,
+                                    email: currentUser.email,
+                                    role: 'admin',
+                                    firstName: currentUser.user_metadata?.first_name || '',
+                                    lastName: currentUser.user_metadata?.last_name || ''
+                                },
+                                isAuthenticated: true,
+                                isLoading: false
+                            },
+                            version: 0
+                        };
+                        
+                        localStorage.setItem('auth-storage', JSON.stringify(newState));
+                        fixed = true;
+                        
+                        result.innerHTML = '<p class="success-msg">✅ Created new auth state in localStorage!</p>' +
+                            '<pre>' + JSON.stringify(newState, null, 2) + '</pre>';
+                            
+                        // Enable the admin dashboard button
+                        document.getElementById('admin-btn').disabled = false;
+                        authStateFixed = true;
+                    } catch (e) {
+                        result.innerHTML += '<p class="error-msg">❌ Error creating auth-storage: ' + e.message + '</p>';
+                    }
+                }
+                
+                // Also try to fix rehoboth-auth-storage if it exists
+                const rehobothStorage = localStorage.getItem('rehoboth-auth-storage');
+                if (rehobothStorage) {
+                    try {
+                        const parsedStorage = JSON.parse(rehobothStorage);
+                        
+                        // Create a fixed version
+                        const fixedState = {
+                            state: {
+                                user: {
+                                    id: currentUser.id,
+                                    email: currentUser.email,
+                                    role: 'admin',
+                                    firstName: currentUser.user_metadata?.first_name || '',
+                                    lastName: currentUser.user_metadata?.last_name || ''
+                                },
+                                isAuthenticated: true,
+                                isLoading: false
+                            },
+                            version: parsedStorage.version || 0
+                        };
+                        
+                        localStorage.setItem('rehoboth-auth-storage', JSON.stringify(fixedState));
+                        fixed = true;
+                        
+                        result.innerHTML += '<p class="success-msg">✅ Also fixed rehoboth-auth-storage!</p>';
+                    } catch (e) {
+                        result.innerHTML += '<p class="error-msg">❌ Error fixing rehoboth-auth-storage: ' + e.message + '</p>';
+                    }
+                }
+                
+                if (fixed) {
+                    result.innerHTML += '<p class="success-msg">✅ You should now be able to access admin areas. Click "Go to Admin Dashboard" to try it.</p>';
+                } else {
+                    result.innerHTML = '<p class="error-msg">❌ Could not fix authentication state. Try clearing all storage and logging in again.</p>';
+                }
+            } catch (error) {
+                result.innerHTML = '<p class="error-msg">❌ Error fixing auth state: ' + error.message + '</p>';
+            }
+        }
+        
+        // Function to go to admin dashboard
+        function goToAdminDashboard() {
+            window.location.href = '/admin/dashboard';
+        }
+        
+        // Function to clear all storage
+        function clearAllStorage() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Clear cookies
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i];
+                    const eqPos = cookie.indexOf('=');
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                }
+                
+                alert('All browser storage cleared. You will need to log in again.');
+                
+                // Redirect to login
+                setTimeout(() => {
+                    window.location.href = '/auth/login?redirectUrl=/admin/dashboard';
+                }, 1000);
+            } catch (e) {
+                alert('Error clearing storage: ' + e.message);
+            }
+        }
+        
+        // Function to go to login
+        function goToLogin() {
+            window.location.href = '/auth/login?redirectUrl=/admin/dashboard&t=' + Date.now();
+        }
+    </script>
+</body>
+</html>

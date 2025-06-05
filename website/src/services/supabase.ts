@@ -29,14 +29,38 @@ if (isUsingDefaults) {
 }
 
 // Create client with automatic token refresh and session management
+// Using the correct configuration for NextJS integration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // For enhanced security, set shorter session duration (8 hours)
-    // This overrides the Supabase project settings
     flowType: 'pkce',
+    // Use cookies for auth storage for NextJS middleware compatibility
+    storage: {
+      getItem: (key) => {
+        if (typeof window === 'undefined') {
+          return null;
+        }
+        const cookie = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith(`${key}=`));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+      },
+      setItem: (key, value) => {
+        if (typeof window !== 'undefined') {
+          // Store in cookies with Secure and SameSite attributes
+          // Set max-age to 8 hours (28800 seconds)
+          document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=28800; SameSite=Lax; Secure`;
+        }
+      },
+      removeItem: (key) => {
+        if (typeof window !== 'undefined') {
+          // Remove by setting expired date
+          document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure`;
+        }
+      },
+    },
   },
 });
 
@@ -44,7 +68,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export const checkSupabaseConnection = async () => {
   try {
     // Perform a simple query to check the connection, e.g., select the current version
-    const { /*data,*/ error } = await supabase.rpc('get_postgres_version'); // 'data' is assigned a value but never used.
+    const { error } = await supabase.rpc('get_postgres_version');
 
     if (error) throw error;
     return { connected: true };
