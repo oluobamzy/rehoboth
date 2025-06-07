@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchEvents } from '@/services/eventService';
+import { fetchEvents } from '@/services/server/eventService.server';
 
 // GET /api/events
 // Get a list of events with optional filters

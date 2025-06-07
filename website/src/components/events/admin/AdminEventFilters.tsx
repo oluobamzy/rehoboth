@@ -1,14 +1,22 @@
 'use client';
 
-export default function AdminEventFilters({ filters, onFilterChange }) {
+import { EventFilters } from '@/hooks/useEvents';
+import React from 'react';
+
+interface AdminEventFiltersProps {
+  filters: EventFilters;
+  onFilterChange: (filters: Partial<EventFilters>) => void;
+}
+
+export default function AdminEventFilters({ filters, onFilterChange }: AdminEventFiltersProps) {
   // Handle input changes
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     onFilterChange({ [name]: value || null });
   };
   
   // Handle search submission
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // If needed, can handle specific search behavior here
   };

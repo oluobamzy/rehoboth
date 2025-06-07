@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchEventRegistrations } from '@/services/eventService';
+import { getEventRegistrations } from '@/services/server/adminEventService.server';
 
 // GET /api/admin/events/[id]/registrations
 // Get all registrations for an event (admin only)
@@ -18,7 +18,7 @@ export async function GET(
     }
     
     // Fetch all registrations for this event
-    const registrations = await fetchEventRegistrations(id);
+    const { registrations } = await getEventRegistrations(id);
     
     // Return registrations list
     return NextResponse.json({

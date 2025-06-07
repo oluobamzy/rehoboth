@@ -1,12 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { useEventRegistration } from '@/hooks/useEvents';
+import { useTypedEventRegistration, type RegistrationResponse, type RegistrationFormData } from '@/hooks/useEvents';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-export default function RegistrationForm({ eventId, onSuccess, onCancel }) {
+interface RegistrationErrors {
+  attendee_name?: string;
+  attendee_email?: string;
+  party_size?: string;
+  [key: string]: string | undefined;
+}
+
+interface RegistrationFormProps {
+  eventId: string;
+  onSuccess: (data: RegistrationResponse) => void;
+  onCancel: () => void;
+}
+
+export default function RegistrationForm({ eventId, onSuccess, onCancel }: RegistrationFormProps) {
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegistrationFormData>({
     attendee_name: '',
     attendee_email: '',
     attendee_phone: '',
@@ -15,13 +28,17 @@ export default function RegistrationForm({ eventId, onSuccess, onCancel }) {
   });
 
   // Validation state
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<RegistrationErrors>({});
 
-  // Registration mutation
-  const { mutate: registerForEvent, isPending, error } = useEventRegistration();
+  // Registration mutation with explicit typing
+  const { mutate: registerForEvent, isPending, error } = useTypedEventRegistration();
+  
+  // Additional state for payment flow
+  const [registrationComplete, setRegistrationComplete] = useState<boolean>(false);
+  const [registrationData, setRegistrationData] = useState<RegistrationResponse | null>(null);
 
   // Handle form changes
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -32,17 +49,17 @@ export default function RegistrationForm({ eventId, onSuccess, onCancel }) {
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: null,
+        [name]: undefined,
       }));
     }
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
-    const newErrors = {};
+    const newErrors: RegistrationErrors = {};
     if (!formData.attendee_name.trim()) {
       newErrors.attendee_name = 'Name is required';
     }
@@ -66,9 +83,24 @@ export default function RegistrationForm({ eventId, onSuccess, onCancel }) {
     registerForEvent(
       { eventId, registrationData: formData },
       {
-        onSuccess: (data) => {
-          if (onSuccess) {
-            onSuccess(data);
+        onSuccess: (data: RegistrationResponse) => {
+          // Store registration data for potential payment step
+          setRegistrationData(data);
+          
+          // Add eventId to the response data for easier navigation
+          const responseWithEventId = {
+            ...data,
+            eventId
+          };
+          
+          if (data.paymentRequired) {
+            // If payment is required, redirect to payment page
+            window.location.href = `/events/${eventId}/payment?registration=${data.registrationId}`;
+          } else {
+            // If no payment is needed, proceed with success
+            if (onSuccess) {
+              onSuccess(responseWithEventId);
+            }
           }
         },
       }

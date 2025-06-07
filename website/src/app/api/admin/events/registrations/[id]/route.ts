@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateRegistrationStatus } from '@/services/eventService';
+import { updateRegistrationStatus } from '@/services/server/adminEventService.server';
 
 // PUT /api/admin/events/registrations/[id]
 // Update registration status (admin only)
@@ -28,7 +28,7 @@ export async function PUT(
     }
     
     // Update registration status
-    const success = await updateRegistrationStatus(
+    const { success, registration } = await updateRegistrationStatus(
       id, 
       status as 'confirmed' | 'waitlist' | 'cancelled'
     );

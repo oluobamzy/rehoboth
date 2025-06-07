@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { registerForEvent } from '@/services/eventService';
+import { registerForEvent, fetchEventById } from '@/services/server/eventService.server';
+import { sendRegistrationConfirmation, sendAdminRegistrationNotification } from '@/services/server/emailService.server';
 
 // POST /api/events/[id]/register
 // Register for an event
@@ -9,7 +10,7 @@ export async function POST(
 ) {
   try {
     // Extract event ID from params
-    const { id } = params;
+    const id = params.id;
     
     if (!id) {
       return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
@@ -34,6 +35,23 @@ export async function POST(
         { error: result.error || 'Registration failed' },
         { status: 400 }
       );
+    }
+    
+    // Get event details for email
+    if (result.registration) {
+      try {
+        const event = await fetchEventById(id);
+        if (event) {
+          // Send confirmation email to attendee
+          await sendRegistrationConfirmation(result.registration, event);
+          
+          // Send notification to admin
+          await sendAdminRegistrationNotification(result.registration, event);
+        }
+      } catch (emailError) {
+        console.error('Failed to send registration emails:', emailError);
+        // Don't fail the registration if email fails
+      }
     }
     
     // Return registration result

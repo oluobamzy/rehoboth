@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { formatDate, formatTime } from '@/utils/dateUtils';
-import { useDeleteEvent } from '@/hooks/useEvents';
+import { deleteEvent } from '@/services/eventService';
 import { useState } from 'react';
+import { Event } from '@/hooks/useEvents';
 
-export default function AdminEventCard({ event }) {
+interface AdminEventCardProps {
+  event: Event;
+}
+
+export default function AdminEventCard({ event }: AdminEventCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  const { mutate: deleteEvent } = useDeleteEvent();
   
   if (!event) return null;
   
@@ -17,18 +20,23 @@ export default function AdminEventCard({ event }) {
   const startTime = formatTime(event.start_datetime);
   
   // Handle delete click
-  const handleDeleteClick = () => {
+  const handleDeleteClick = async () => {
     if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
       setIsDeleting(true);
-      deleteEvent(event.id, {
-        onSuccess: () => {
-          setIsDeleting(false);
-        },
-        onError: () => {
-          setIsDeleting(false);
-          alert("Failed to delete event. Please try again.");
+      try {
+        const { success, error } = await deleteEvent(event.id);
+        
+        if (!success) {
+          throw new Error(error || 'Failed to delete event');
         }
-      });
+        
+        // Refresh the page after successful deletion
+        window.location.reload();
+      } catch (err) {
+        console.error('Error deleting event:', err);
+        alert("Failed to delete event. Please try again.");
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -50,7 +58,7 @@ export default function AdminEventCard({ event }) {
             <div className="text-sm font-medium text-gray-900">{event.title}</div>
             <div className="text-sm text-gray-500 truncate max-w-md">
               {event.description?.substring(0, 60)}
-              {event.description?.length > 60 ? '...' : ''}
+              {event.description && event.description.length > 60 ? '...' : ''}
             </div>
           </div>
         </div>

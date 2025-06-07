@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchEvents } from '@/services/eventService';
+import { fetchAllEvents } from '@/services/server/adminEventService.server';
 
 // GET /api/admin/events
 // Get a list of all events including unpublished (admin only)
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = (url.searchParams.get('sort_order') || 'asc') as 'asc' | 'desc';
     
     // Include unpublished events for admin view
-    const { events, count } = await fetchEvents({
+    const { events, count } = await fetchAllEvents({
       page,
       pageSize,
       fromDate,
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       query,
       sortBy,
       sortOrder,
-      onlyPublished: false // Include unpublished events
+      // No need to pass onlyPublished parameter since the admin service includes all events by default
     });
     
     // Return formatted response

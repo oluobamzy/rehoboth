@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Access Fix</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: #4338CA;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .info {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #e8f4fd;
+      border-left: 4px solid #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Access Troubleshooter</h1>
+  
+  <div class="info">
+    <p>This tool helps you fix issues with admin access by:</p>
+    <ol>
+      <li>Setting an admin bypass cookie in your browser</li>
+      <li>Checking your current authentication status</li>
+      <li>Providing direct links to admin sections</li>
+    </ol>
+  </div>
+
+  <h2>Current Authentication Status</h2>
+  <div id="authStatus">Checking...</div>
+  
+  <h2>Set Admin Bypass Cookie</h2>
+  <p>This creates a temporary cookie that bypasses the admin role check.</p>
+  <button id="setBypassCookie">Set Admin Bypass</button>
+  <div id="cookieStatus"></div>
+  
+  <h2>Quick Links</h2>
+  <ul>
+    <li><a href="/admin/dashboard">Admin Dashboard</a></li>
+    <li><a href="/admin/events">Admin Events</a></li>
+    <li><a href="/admin/sermons">Admin Sermons</a></li>
+    <li><a href="/admin/carousel">Admin Carousel</a></li>
+    <li><a href="/auth/login">Login Page</a></li>
+  </ul>
+
+  <h2>Manual Fix with Developer Console</h2>
+  <p>You can use the browser console to manually set the admin bypass cookie:</p>
+  <pre>document.cookie = "admin_bypass=YOUR_USER_ID; path=/; max-age=3600; SameSite=Strict";</pre>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    
+    const supabaseUrl = window.location.origin;
+    const supabase = createClient(
+      supabaseUrl,
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+    );
+
+    const authStatus = document.getElementById('authStatus');
+    const setBypassButton = document.getElementById('setBypassCookie');
+    const cookieStatus = document.getElementById('cookieStatus');
+    
+    // Check current auth status
+    async function checkAuth() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          authStatus.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+          return null;
+        }
+        
+        if (!session) {
+          authStatus.innerHTML = `<span class="error">Not logged in. Please <a href="/auth/login">login</a> first.</span>`;
+          return null;
+        }
+        
+        const user = session.user;
+        authStatus.innerHTML = `
+          <div>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>User ID:</strong> ${user.id}</p>
+            <p><strong>Role:</strong> ${user.app_metadata?.role || 'No role assigned'}</p>
+            <p><strong>Admin Bypass Cookie:</strong> ${document.cookie.includes('admin_bypass') ? 'Set' : 'Not set'}</p>
+          </div>
+        `;
+        return user;
+      } catch (e) {
+        authStatus.innerHTML = `<span class="error">Error checking auth status: ${e.message}</span>`;
+        return null;
+      }
+    }
+
+    // Set bypass cookie
+    setBypassButton.addEventListener('click', async () => {
+      const user = await checkAuth();
+      if (!user) {
+        cookieStatus.innerHTML = `<span class="error">You need to be logged in to set the bypass cookie.</span>`;
+        return;
+      }
+      
+      try {
+        document.cookie = `admin_bypass=${user.id}; path=/; max-age=3600; SameSite=Strict`;
+        cookieStatus.innerHTML = `<span class="success">Admin bypass cookie set successfully for 1 hour!</span>`;
+        
+        // Refresh auth display
+        await checkAuth();
+      } catch (e) {
+        cookieStatus.innerHTML = `<span class="error">Failed to set cookie: ${e.message}</span>`;
+      }
+    });
+    
+    // Initial auth check
+    checkAuth();
+  </script>
+</body>
+</html>

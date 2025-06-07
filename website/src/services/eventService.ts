@@ -54,6 +54,7 @@ export interface EventRegistration {
 export interface PaginatedEvents {
   events: Event[];
   count: number | null;
+  error?: string | null;
 }
 
 // Helper function to check if tables exist
@@ -109,7 +110,9 @@ export async function fetchEvents({
   query = null,
   sortBy = 'start_datetime',
   sortOrder = 'asc',
-  onlyPublished = true
+  onlyPublished = true,
+  includeUnpublished = false,
+  limit
 }: {
   page?: number;
   pageSize?: number;
@@ -122,7 +125,9 @@ export async function fetchEvents({
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   onlyPublished?: boolean;
-}): Promise<PaginatedEvents> {
+  includeUnpublished?: boolean;
+  limit?: number;
+}): Promise<{ events: Event[], count: number, error?: string | null }> {
   try {
     // Check if tables exist first
     const tables = await checkTablesExist();
@@ -132,8 +137,9 @@ export async function fetchEvents({
     }
 
     // Calculate pagination
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+    const actualLimit = limit || pageSize;
+    const from = (page - 1) * actualLimit;
+    const to = from + actualLimit - 1;
 
     // Start building the query
     let queryBuilder = supabase
@@ -141,7 +147,7 @@ export async function fetchEvents({
       .select('*', { count: 'exact' });
 
     // Add filters if provided
-    if (onlyPublished) {
+    if (onlyPublished && !includeUnpublished) {
       queryBuilder = queryBuilder.eq('is_published', true);
     }
 
@@ -176,7 +182,7 @@ export async function fetchEvents({
 
     if (error) {
       console.error('Error fetching events:', error);
-      return { events: [], count: 0 };
+      return { events: [], count: 0, error: error.message };
     }
 
     // Log analytics
@@ -196,16 +202,21 @@ export async function fetchEvents({
 
     return {
       events: events || [],
-      count
+      count: count ?? 0, // Convert null to 0
+      error: null
     };
   } catch (error) {
     console.error('Error in fetchEvents:', error);
-    return { events: [], count: 0 };
+    return { 
+      events: [], 
+      count: 0, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
   }
 }
 
 // Fetch a single event by ID
-export async function fetchEventById(id: string): Promise<Event | null> {
+export async function fetchEventById(id: string): Promise<{ event: Event | null, error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('events')
@@ -215,7 +226,7 @@ export async function fetchEventById(id: string): Promise<Event | null> {
 
     if (error) {
       console.error('Error fetching event:', error);
-      return null;
+      return { event: null, error: error.message };
     }
 
     // Track event view
@@ -225,10 +236,10 @@ export async function fetchEventById(id: string): Promise<Event | null> {
       eventType: data.event_type
     });
 
-    return data;
+    return { event: data, error: null };
   } catch (error) {
     console.error('Error in fetchEventById:', error);
-    return null;
+    return { event: null, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -500,7 +511,7 @@ END:VCALENDAR`;
 // Admin functions
 
 // Create a new event
-export async function createEvent(eventData: Partial<Event>): Promise<Event | null> {
+export async function createEvent(eventData: Partial<Event>): Promise<{ event: Event | null, error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('events')
@@ -529,18 +540,18 @@ export async function createEvent(eventData: Partial<Event>): Promise<Event | nu
 
     if (error) {
       console.error('Error creating event:', error);
-      return null;
+      return { event: null, error: error.message };
     }
 
-    return data;
+    return { event: data, error: null };
   } catch (error) {
     console.error('Error in createEvent:', error);
-    return null;
+    return { event: null, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
 // Update an existing event
-export async function updateEvent(id: string, eventData: Partial<Event>): Promise<Event | null> {
+export async function updateEvent(eventData: { id: string } & Partial<Event>): Promise<{ success: boolean, error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('events')
@@ -565,24 +576,24 @@ export async function updateEvent(id: string, eventData: Partial<Event>): Promis
         category: eventData.category,
         updated_at: new Date().toISOString()
       })
-      .eq('id', id)
+      .eq('id', eventData.id)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating event:', error);
-      return null;
+      return { success: false, error: error.message };
     }
 
-    return data;
+    return { success: true, error: null };
   } catch (error) {
     console.error('Error in updateEvent:', error);
-    return null;
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error updating event' };
   }
 }
 
 // Delete an event
-export async function deleteEvent(id: string): Promise<boolean> {
+export async function deleteEvent(id: string): Promise<{ success: boolean, error: string | null }> {
   try {
     // Check if there are registrations
     const { count } = await supabase
@@ -599,7 +610,7 @@ export async function deleteEvent(id: string): Promise<boolean> {
       
       if (error) {
         console.error('Error unpublishing event:', error);
-        return false;
+        return { success: false, error: error.message };
       }
     } else {
       // Otherwise, delete the event
@@ -610,19 +621,19 @@ export async function deleteEvent(id: string): Promise<boolean> {
       
       if (error) {
         console.error('Error deleting event:', error);
-        return false;
+        return { success: false, error: error.message };
       }
     }
 
-    return true;
+    return { success: true, error: null };
   } catch (error) {
     console.error('Error in deleteEvent:', error);
-    return false;
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error deleting event' };
   }
 }
 
 // Fetch registrations for an event
-export async function fetchEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+export async function fetchEventRegistrations(eventId: string): Promise<{ registrations: EventRegistration[], error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('event_registrations')
@@ -632,13 +643,13 @@ export async function fetchEventRegistrations(eventId: string): Promise<EventReg
 
     if (error) {
       console.error('Error fetching event registrations:', error);
-      return [];
+      return { registrations: [], error: error.message };
     }
 
-    return data || [];
+    return { registrations: data || [], error: null };
   } catch (error) {
     console.error('Error in fetchEventRegistrations:', error);
-    return [];
+    return { registrations: [], error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 

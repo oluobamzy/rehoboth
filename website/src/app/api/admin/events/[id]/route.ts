@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateEvent, deleteEvent } from '@/services/eventService';
+import { updateEvent, deleteEvent } from '@/services/server/adminEventService.server';
 
 // GET /api/admin/events/[id]
 // Admin version to get a single event (already covered by public API, could add more details)

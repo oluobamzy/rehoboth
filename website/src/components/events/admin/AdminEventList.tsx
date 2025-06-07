@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAdminEvents } from '@/hooks/useEvents';
+import { useAdminEvents, EventFilters, Event } from '@/hooks/useEvents';
 import AdminEventCard from './AdminEventCard';
 import AdminEventFilters from './AdminEventFilters';
 import Pagination from '@/components/common/Pagination';
@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function AdminEventList() {
   // State for filters
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<EventFilters>({
     page: 1,
     pageSize: 20,
     fromDate: null,
@@ -32,7 +32,7 @@ export default function AdminEventList() {
   } = useAdminEvents(filters);
 
   // Handle filter changes
-  const handleFilterChange = (newFilters) => {
+  const handleFilterChange = (newFilters: Partial<EventFilters>) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters,
@@ -41,7 +41,7 @@ export default function AdminEventList() {
   };
 
   // Handle pagination
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     setFilters(prev => ({
       ...prev,
       page: newPage,
@@ -135,7 +135,7 @@ export default function AdminEventList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {events.map((event) => (
+              {events.map((event: Event) => (
                 <AdminEventCard key={event.id} event={event} />
               ))}
             </tbody>

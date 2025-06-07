@@ -4,13 +4,24 @@ import { useState, useMemo } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import EventCard from './EventCard';
 import EventFilters from './EventFilters';
-import Pagination from '@/components/common/Pagination';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import ErrorMessage from '@/components/common/ErrorMessage';
+import Pagination from '../common/Pagination';
+import LoadingSpinner from '../common/LoadingSpinner';
+import ErrorMessage from '../common/ErrorMessage';
+
+interface FilterState {
+  page: number;
+  pageSize: number;
+  fromDate: string | null;
+  toDate: string | null;
+  category: string | null;
+  eventType: string | null;
+  featured: boolean | null;
+  query: string;
+}
 
 export default function EventList() {
   // State for filters
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterState>({
     page: 1,
     pageSize: 12,
     fromDate: null,
@@ -30,7 +41,7 @@ export default function EventList() {
   } = useEvents(filters);
 
   // Handle filter changes
-  const handleFilterChange = (newFilters) => {
+  const handleFilterChange = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters,
@@ -39,7 +50,7 @@ export default function EventList() {
   };
 
   // Handle pagination
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     setFilters(prev => ({
       ...prev,
       page: newPage,
@@ -49,7 +60,7 @@ export default function EventList() {
   // Extract events and pagination data
   const events = data?.events || [];
   const pagination = data?.pagination || { 
-    page: 1, 
+    currentPage: 1, 
     pageSize: 12, 
     totalItems: 0, 
     totalPages: 0 
@@ -91,7 +102,7 @@ export default function EventList() {
       {/* Events grid */}
       {!isLoading && !isError && events.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {events.map((event) => (
+          {events.map((event: any) => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>
@@ -100,7 +111,7 @@ export default function EventList() {
       {/* Pagination */}
       {pagination.totalPages > 1 && (
         <Pagination 
-          currentPage={pagination.page} 
+          currentPage={pagination.currentPage} 
           totalPages={pagination.totalPages} 
           onPageChange={handlePageChange} 
         />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createEvent } from '@/services/eventService';
+import { createEvent } from '@/services/server/adminEventService.server';
 
 // POST /api/admin/events
 // Create a new event (admin only)

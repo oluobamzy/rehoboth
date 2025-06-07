@@ -1,6 +1,17 @@
 'use client';
 
-export default function RegistrationSuccess({ data, eventTitle }) {
+interface RegistrationSuccessProps {
+  data: {
+    registrationId: string;
+    status: string;
+    confirmationCode?: string;
+    paymentRequired: boolean;
+    eventId?: string;
+  };
+  eventTitle: string;
+}
+
+export default function RegistrationSuccess({ data, eventTitle }: RegistrationSuccessProps) {
   return (
     <div className="bg-green-50 border border-green-200 rounded-md p-4">
       <div className="flex items-start mb-3">
@@ -38,9 +49,11 @@ export default function RegistrationSuccess({ data, eventTitle }) {
           <p className="text-sm text-yellow-700 mt-1">
             Please complete your payment to secure your registration.
           </p>
-          <button className="mt-2 bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 w-full">
-            Proceed to Payment
-          </button>
+          <a href={`/events/${data.eventId}/payment?registration=${data.registrationId}`} className="block">
+            <button className="mt-2 bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 w-full">
+              Proceed to Payment
+            </button>
+          </a>
         </div>
       )}
     </div>
