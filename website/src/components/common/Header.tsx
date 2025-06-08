@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/services/auth';
 import Button from './Button';
@@ -79,7 +80,14 @@ export default function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center">
-              <Link href="/" className="flex-shrink-0">
+              <Link href="/" className="flex-shrink-0 flex items-center">
+                <Image 
+                  src="/rehoboth_logo_plain.png" 
+                  alt="Rehoboth Christian Church Logo" 
+                  width={50} 
+                  height={50}
+                  className="mr-3"
+                />
                 <span className="text-2xl font-bold text-gray-800">Rehoboth <span className="text-orange-500">Church</span></span>
               </Link>
             </div>

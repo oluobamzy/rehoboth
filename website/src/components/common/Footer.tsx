@@ -1,5 +1,6 @@
 // src/components/common/Footer.tsx
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,7 +10,16 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-bold mb-4">Rehoboth Christian Church</h3>
+            <div className="flex items-center mb-4">
+              <Image 
+                src="/rehoboth_logo_plain.png" 
+                alt="Rehoboth Christian Church Logo" 
+                width={40} 
+                height={40}
+                className="mr-3 bg-white rounded-md p-1"
+              />
+              <h3 className="text-lg font-bold">Rehoboth Christian Church</h3>
+            </div>
             <p className="mb-4">Join us for worship and fellowship as we grow together in faith.</p>
             <div className="flex space-x-4">
               <a href="https://facebook.com" className="text-gray-300 hover:text-white">
