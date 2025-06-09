@@ -164,3 +164,164 @@ export async function sendAdminRegistrationNotification(
     return false;
   }
 }
+
+/**
+ * Send donation receipt to donor
+ */
+export async function sendDonationReceipt(
+  email: string,
+  donation: any
+): Promise<boolean> {
+  try {
+    if (!transporter) {
+      console.warn('Server: Email service not configured');
+      return false;
+    }
+
+    // Generate a receipt number based on donation ID and date
+    const receiptNumber = `D-${donation.id.substring(0, 8)}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}`;
+    
+    // Format donation amount with currency symbol
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: donation.currency || 'USD'
+    });
+    const formattedAmount = formatter.format(Number(donation.amount));
+    
+    await transporter.sendMail({
+      from: emailFrom,
+      to: email,
+      subject: `Thank You for Your Donation - Receipt #${receiptNumber}`,
+      html: `
+        <h1>Donation Receipt</h1>
+        <p>Dear ${donation.donor_name || 'Friend'},</p>
+        <p>Thank you for your generous donation to Rehoboth Church. Your contribution helps us continue our mission.</p>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; margin: 20px 0; background-color: #f9f9f9;">
+          <h2>Donation Details</h2>
+          <p><strong>Receipt #:</strong> ${receiptNumber}</p>
+          <p><strong>Date:</strong> ${new Date(donation.created_at).toLocaleDateString()}</p>
+          <p><strong>Amount:</strong> ${formattedAmount}</p>
+          <p><strong>Designation:</strong> ${donation.fund_designation || 'General Fund'}</p>
+          ${donation.is_recurring ? `<p><strong>Type:</strong> Recurring (${donation.frequency})</p>` : '<p><strong>Type:</strong> One-time</p>'}
+          ${donation.stripe_payment_id ? `<p><strong>Transaction ID:</strong> ${donation.stripe_payment_id}</p>` : ''}
+        </div>
+        
+        <p>Rehoboth Church is a registered nonprofit organization. Please save this receipt for your tax records.</p>
+        
+        <p>If you have any questions about your donation, please contact us at ${process.env.ADMIN_EMAIL || 'donations@rehobothchurch.org'}.</p>
+        
+        <p>With gratitude,</p>
+        <p>Rehoboth Church</p>
+        
+        <hr />
+        <p style="font-size: 12px; color: #666;">This receipt was automatically generated and is valid without a signature.</p>
+      `,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Server: Error sending donation receipt:', error);
+    return false;
+  }
+}
+
+/**
+ * Send year-end donation summary
+ */
+export async function sendYearEndDonationSummary(
+  email: string,
+  donations: any[],
+  year: number
+): Promise<boolean> {
+  try {
+    if (!transporter) {
+      console.warn('Server: Email service not configured');
+      return false;
+    }
+
+    // Calculate total donated amount
+    const totalAmount = donations.reduce((sum, d) => sum + Number(d.amount), 0);
+    
+    // Format donation amount with currency symbol
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    });
+    const formattedTotal = formatter.format(totalAmount);
+    
+    // Get donor name from the first donation
+    const donorName = donations[0]?.donor_name || 'Supporter';
+    
+    // Generate summary table of donations
+    let donationRows = '';
+    donations.forEach(d => {
+      const date = new Date(d.created_at).toLocaleDateString();
+      const amount = formatter.format(Number(d.amount));
+      const fund = d.fund_designation || 'General Fund';
+      
+      donationRows += `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${date}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${amount}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${fund}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${d.stripe_payment_id || 'N/A'}</td>
+        </tr>
+      `;
+    });
+    
+    await transporter.sendMail({
+      from: emailFrom,
+      to: email,
+      subject: `${year} Donation Summary - Rehoboth Church`,
+      html: `
+        <h1>${year} Donation Summary</h1>
+        <p>Dear ${donorName},</p>
+        <p>Thank you for your generous support of Rehoboth Church throughout ${year}. We're grateful for your partnership in our mission.</p>
+        <p>Below is a summary of your donations for the tax year ${year}:</p>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; margin: 20px 0; background-color: #f9f9f9;">
+          <h2>Donation Summary</h2>
+          <p><strong>Total Donations for ${year}:</strong> ${formattedTotal}</p>
+          <p><strong>Total Number of Donations:</strong> ${donations.length}</p>
+          <p><strong>Tax ID:</strong> XX-XXXXXXX</p>
+        </div>
+        
+        <h3>Donation Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Date</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Amount</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Fund</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Transaction ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${donationRows}
+          </tbody>
+        </table>
+        
+        <p>This summary serves as an official receipt for tax purposes. No goods or services were provided in exchange for these contributions.</p>
+        
+        <p>If you have any questions about your donation history, please contact us at ${process.env.ADMIN_EMAIL || 'donations@rehobothchurch.org'}.</p>
+        
+        <p>With gratitude for your generosity,</p>
+        <p>Rehoboth Church</p>
+        
+        <hr />
+        <p style="font-size: 12px; color: #666;">This is an automatically generated tax receipt summary. Please consult your tax professional for advice on deductibility.</p>
+      `,
+      attachments: [{
+        filename: `Rehoboth_Church_${year}_Donation_Receipt.pdf`,
+        content: Buffer.from(`Year-end donation summary for ${year}`),
+        contentType: 'application/pdf'
+      }]
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Server: Error sending year-end donation summary:', error);
+    return false;
+  }
+}

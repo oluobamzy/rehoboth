@@ -4,8 +4,8 @@ const path = require('path');
 const https = require('https');
 
 // URLs for FFmpeg core files
-const FFMPEG_CORE_JS_URL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/ffmpeg-core.js';
-const FFMPEG_CORE_WASM_URL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/ffmpeg-core.wasm';
+const FFMPEG_CORE_JS_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js';
+const FFMPEG_CORE_WASM_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm';
 
 // Destination directory
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');

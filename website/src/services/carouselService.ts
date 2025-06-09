@@ -73,6 +73,23 @@ export async function createCarouselSlide(slideData: Omit<CarouselSlideProps, 'i
   endDate?: string;
 }) {
   try {
+    // Check if table exists first to provide better error messages
+    try {
+      const { data: tableCheck, error: checkError } = await supabase
+        .from('carousel_slides')
+        .select('id')
+        .limit(1);
+        
+      if (checkError) {
+        if (checkError.message?.includes('does not exist') || checkError.code === '42P01') {
+          throw new Error(`Table 'carousel_slides' does not exist. Please run the setup script: npm run setup:carousel`);
+        }
+      }
+    } catch (checkErr) {
+      console.error('Error checking carousel_slides table:', checkErr);
+    }
+    
+    // Proceed with insert
     const { data, error } = await supabase
       .from('carousel_slides')
       .insert([{
@@ -89,13 +106,25 @@ export async function createCarouselSlide(slideData: Omit<CarouselSlideProps, 'i
       .select();
     
     if (error) {
-      console.error('Error creating carousel slide:', error);
-      throw error;
+      // Don't log here as we'll log in the catch block
+      if (error.code === '23505') {
+        throw new Error('A carousel slide with these values already exists');
+      } else if (error.code === '42501') {
+        throw new Error('Permission denied. Your user account may not have access to create carousel slides');
+      } else if (error.message) {
+        throw new Error(`Database error: ${error.message}`);
+      } else {
+        throw new Error(`Unknown database error: ${JSON.stringify(error)}`);
+      }
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from insertion');
     }
     
     return data[0];
   } catch (error) {
-    console.error('Failed to create carousel slide:', error);
+    console.error('Failed to create carousel slide:', error instanceof Error ? error.message : JSON.stringify(error));
     throw error;
   }
 }
@@ -129,12 +158,24 @@ export async function updateCarouselSlide(
     
     if (error) {
       console.error('Error updating carousel slide:', error);
-      throw error;
+      if (error.code === '42P01') {
+        throw new Error(`Table 'carousel_slides' does not exist. Please run the setup script: npm run setup:carousel`);
+      } else if (error.code === '42501') {
+        throw new Error('Permission denied. Your user account may not have access to update carousel slides');
+      } else if (error.message) {
+        throw new Error(`Database error: ${error.message}`);
+      } else {
+        throw new Error(`Unknown database error: ${JSON.stringify(error)}`);
+      }
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error(`Carousel slide with ID ${id} not found`);
     }
     
     return data[0];
   } catch (error) {
-    console.error('Failed to update carousel slide:', error);
+    console.error('Failed to update carousel slide:', error instanceof Error ? error.message : JSON.stringify(error));
     throw error;
   }
 }
@@ -149,12 +190,20 @@ export async function deleteCarouselSlide(id: string) {
     
     if (error) {
       console.error('Error deleting carousel slide:', error);
-      throw error;
+      if (error.code === '42P01') {
+        throw new Error(`Table 'carousel_slides' does not exist. Please run the setup script: npm run setup:carousel`);
+      } else if (error.code === '42501') {
+        throw new Error('Permission denied. Your user account may not have access to delete carousel slides');
+      } else if (error.message) {
+        throw new Error(`Database error: ${error.message}`);
+      } else {
+        throw new Error(`Unknown database error: ${JSON.stringify(error)}`);
+      }
     }
     
     return true;
   } catch (error) {
-    console.error('Failed to delete carousel slide:', error);
+    console.error('Failed to delete carousel slide:', error instanceof Error ? error.message : JSON.stringify(error));
     throw error;
   }
 }
