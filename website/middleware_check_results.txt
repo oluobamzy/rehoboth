@@ -1,0 +1,41 @@
+===== MIDDLEWARE CHECK RESULTS =====
+
+Checking middleware auth functionality...
+
+Step 1: Listing users
+✅ Found 1 users in the system
+
+Admin user information:
+Email: oluobamzy@gmail.com
+User ID: c4bf0cd6-03e8-4c0d-afcf-6679785276c1
+Created at: 6/3/2025, 1:02:00 AM
+
+Checking app_metadata (used by middleware):
+App metadata: {
+  "provider": "email",
+  "providers": [
+    "email"
+  ],
+  "role": "admin"
+}
+Admin role in app_metadata: ✅ YES
+
+Checking user_roles table (middleware fallback):
+✅ User roles: [
+  {
+    "id": "bc9f0af9-a686-4329-9f5e-86083e93bda7",
+    "user_id": "c4bf0cd6-03e8-4c0d-afcf-6679785276c1",
+    "role": "admin",
+    "created_at": "2025-06-04T04:06:25.027204",
+    "updated_at": "2025-06-04T05:30:22.725"
+  }
+]
+Admin role in table: ✅ YES
+
+Simulating middleware auth check logic:
+✅ Middleware would ALLOW access based on app_metadata
+
+Summary:
+Middleware would: ✅ ALLOW admin access
+
+===== CHECK COMPLETED =====

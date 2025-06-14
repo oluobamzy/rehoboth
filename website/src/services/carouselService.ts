@@ -100,8 +100,8 @@ export async function createCarouselSlide(slideData: Omit<CarouselSlideProps, 'i
         cta_link: slideData.ctaLink,
         display_order: slideData.displayOrder,
         is_active: slideData.isActive !== undefined ? slideData.isActive : true,
-        start_date: slideData.startDate,
-        end_date: slideData.endDate,
+        start_date: slideData.startDate ? slideData.startDate : null,
+        end_date: slideData.endDate ? slideData.endDate : null,
       }])
       .select();
     

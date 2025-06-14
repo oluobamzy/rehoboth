@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CarouselSlide {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String    @db.VarChar(255)
+  subtitle     String?   @db.VarChar(255)
+  description  String?   @db.Text
+  image_url    String    @db.VarChar(500)
+  cta_text     String?   @db.VarChar(100) // Changed from button_text to match code
+  cta_link     String?   @db.VarChar(500) // Changed from button_link to match code
+  display_order Int
+  start_date   DateTime? @db.Timestamp()
+  end_date     DateTime? @db.Timestamp()
+  created_at   DateTime  @default(now()) @db.Timestamp()
+  updated_at   DateTime  @default(now()) @db.Timestamp()
+  is_active    Boolean   @default(true)
+
+  @@map("carousel_slides")
+}

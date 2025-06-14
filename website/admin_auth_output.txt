@@ -1,0 +1,26 @@
+
+======== ADMIN AUTHENTICATION TEST ========
+Testing admin auth for user: oluobamzy@gmail.com
+
+1. User Information:
+✅ Found user: oluobamzy@gmail.com (ID: c4bf0cd6-03e8-4c0d-afcf-6679785276c1)
+Created: 6/3/2025, 1:02:00 AM
+Last Sign In: 6/9/2025, 12:47:01 PM
+
+2. App Metadata (auth.users):
+{
+  "provider": "email",
+  "providers": [
+    "email"
+  ],
+  "role": "admin"
+}
+Admin role in app_metadata: ✅ YES
+
+3. User Roles Table:
+Roles: admin
+Admin role in user_roles: ✅ YES
+
+4. Active Sessions:
+
+❌ Error testing admin auth: supabase.auth.admin.listUserSessions is not a function
