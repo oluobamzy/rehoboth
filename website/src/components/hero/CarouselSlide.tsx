@@ -22,6 +22,8 @@ export default function CarouselSlide({
   ctaText,
   ctaLink,
 }: CarouselSlideProps) {
+
+  console.log('Rendering CarouselSlide:', { title, subtitle, imageUrl, ctaText, ctaLink });
   return (
     <div className="relative h-[500px]">
       <div className="absolute inset-0 z-0">

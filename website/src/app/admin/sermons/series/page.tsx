@@ -34,7 +34,7 @@ export default function AdminSermonSeriesPage() {
   };
 
   useEffect(() => {
-    if (seriesList) {
+    if (seriesList && JSON.stringify(seriesList) !== JSON.stringify(series)) {
       setSeries(seriesList);
     }
   }, [seriesList]);
