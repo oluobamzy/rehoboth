@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import SermonAnalytics from '@/services/analyticsService';
 import Hls from 'hls.js';
+import { getProxiedStorageUrl } from '@/utils/storageProxy';
 
 interface SermonPlayerProps {
   audioUrl?: string;
@@ -44,10 +45,16 @@ export default function SermonPlayer({
   // Determine media type
   const mediaType = videoUrl ? 'video' : audioUrl ? 'audio' : null;
   const mediaRef = videoUrl ? videoRef : audioUrl ? audioRef : null;
-  const mediaUrl = videoUrl || audioUrl;
+  
+  // Process URLs to use the proxy
+  const proxyVideoUrl = videoUrl ? getProxiedStorageUrl(videoUrl) : undefined;
+  const proxyAudioUrl = audioUrl ? getProxiedStorageUrl(audioUrl) : undefined;
+  const proxyThumbnailUrl = thumbnailUrl ? getProxiedStorageUrl(thumbnailUrl) : undefined;
+  
+  const mediaUrl = proxyVideoUrl || proxyAudioUrl;
   
   // Check if the video URL is an HLS stream (.m3u8 extension)
-  const isHlsVideo = videoUrl && videoUrl.includes('.m3u8');
+  const isHlsVideo = proxyVideoUrl && (proxyVideoUrl.includes('.m3u8') || videoUrl?.includes('.m3u8'));
 
   // Load saved progress if any
   useEffect(() => {
@@ -63,7 +70,7 @@ export default function SermonPlayer({
 
   // Setup HLS.js for streaming
   useEffect(() => {
-    if (!videoUrl || !videoRef.current || !isHlsVideo) return;
+    if (!proxyVideoUrl || !videoRef.current || !isHlsVideo) return;
     
     const video = videoRef.current;
     
@@ -76,7 +83,8 @@ export default function SermonPlayer({
         startLevel: -1 // Auto select quality
       });
       
-      hls.loadSource(videoUrl);
+      console.log("Loading HLS source:", proxyVideoUrl);
+      hls.loadSource(proxyVideoUrl);
       hls.attachMedia(video);
       
       // Handle HLS events
@@ -136,14 +144,18 @@ export default function SermonPlayer({
       };
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // For browsers that support HLS natively (Safari)
-      video.src = videoUrl;
-      console.log('Using native HLS support');
+      if (proxyVideoUrl) {
+        video.src = proxyVideoUrl;
+        console.log('Using native HLS support with proxy URL');
+      }
     } else {
       console.error('HLS is not supported in this browser and no fallback is available');
       // Fallback to regular video if available
-      video.src = videoUrl.replace('master.m3u8', '../video.mp4');
+      if (proxyVideoUrl) {
+        video.src = proxyVideoUrl.replace('master.m3u8', '../video.mp4');
+      }
     }
-  }, [videoUrl, isHlsVideo, sermonId, isPlaying]);
+  }, [proxyVideoUrl, isHlsVideo, sermonId, isPlaying]);
 
   // Handle quality change
   const handleQualityChange = (level: number) => {
@@ -319,8 +331,8 @@ export default function SermonPlayer({
       {videoUrl && (
         <video
           ref={videoRef}
-          src={!isHlsVideo ? videoUrl : undefined}
-          poster={thumbnailUrl}
+          src={!isHlsVideo ? proxyVideoUrl : undefined}
+          poster={proxyThumbnailUrl}
           className="w-full"
           playsInline
           data-testid="sermon-video-player"
@@ -330,13 +342,13 @@ export default function SermonPlayer({
       {/* Audio Player */}
       {audioUrl && !videoUrl && (
         <>
-          <audio ref={audioRef} src={audioUrl} className="hidden" data-testid="sermon-audio-player" />
+          <audio ref={audioRef} src={proxyAudioUrl} className="hidden" data-testid="sermon-audio-player" />
           <div className="aspect-video bg-gray-800 flex items-center justify-center">
-            {thumbnailUrl ? (
+            {proxyThumbnailUrl ? (
               <div className="w-full h-full relative">
                 <div 
                   className="absolute inset-0 bg-cover bg-center" 
-                  style={{ backgroundImage: `url(${thumbnailUrl})` }}
+                  style={{ backgroundImage: `url(${proxyThumbnailUrl})` }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40" />
               </div>

@@ -9,6 +9,8 @@ import Button from '@/components/common/Button';
 import { CarouselSlideProps } from '@/components/hero/CarouselSlide';
 import { fetchCarouselSlides, createCarouselSlide, updateCarouselSlide, deleteCarouselSlide } from '@/services/carouselService';
 import { uploadImage, generateUniqueFilePath } from '@/utils/imageUpload';
+import FallbackImage from '@/components/common/FallbackImage';
+import { getProxiedStorageUrl } from '@/utils/storageProxy';
 
 interface CarouselSlideFormData extends Omit<CarouselSlideProps, 'id'> {
   displayOrder: number;
@@ -124,10 +126,10 @@ export default function AdminCarouselPage() {
         });
       }, 300);
       
-      // Upload the image to Firebase Storage
-      const imageUrl = await uploadImage(file, path);
+      // Upload the image to Firebase Storage (with proxy enabled)
+      const imageUrl = await uploadImage(file, path, true);
       
-      // Update the form data with the image URL
+      // Update the form data with the proxied image URL
       setFormData(prev => ({
         ...prev,
         imageUrl,
@@ -210,11 +212,11 @@ export default function AdminCarouselPage() {
                       <div className="w-full md:w-1/3">
                         {slide.imageUrl && (
                           <div className="aspect-video relative bg-gray-100 rounded overflow-hidden">
-                            <Image
+                            <FallbackImage
                               src={slide.imageUrl} 
                               alt={slide.title}
-                              layout="fill"
-                              objectFit="cover"
+                              fill
+                              style={{ objectFit: "cover" }}
                             />
                           </div>
                         )}
@@ -303,7 +305,7 @@ export default function AdminCarouselPage() {
                   <div className="mt-2">
                     <p className="text-sm text-green-600">Image uploaded successfully!</p>
                     <div className="aspect-video relative bg-gray-100 rounded overflow-hidden mt-2 w-1/2">
-                        <Image 
+                        <FallbackImage 
                             src={formData.imageUrl} 
                             alt="Uploaded preview" 
                             layout="fill"

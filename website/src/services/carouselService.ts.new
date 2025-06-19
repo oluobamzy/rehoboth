@@ -2,7 +2,7 @@
 import { supabase } from './supabase';
 import { CarouselSlideProps } from '@/components/hero/CarouselSlide';
 import { posthog } from './posthog';
-import { getProxiedStorageUrl } from '@/utils/storageProxy';
+import { proxyImageUrl } from '@/utils/imageUpload';
 
 // Fetch active carousel slides
 export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
@@ -41,7 +41,7 @@ export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
       id: slide.id,
       title: slide.title,
       subtitle: slide.subtitle || undefined,
-      imageUrl: getProxiedStorageUrl(slide.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
+      imageUrl: proxyImageUrl(slide.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
       ctaText: slide.cta_text || undefined,
       ctaLink: slide.cta_link || undefined,
     })) as CarouselSlideProps[]; // Type assertion to satisfy TS
@@ -103,7 +103,7 @@ export async function createCarouselSlide(
       id: data.id,
       title: data.title,
       subtitle: data.subtitle || undefined,
-      imageUrl: getProxiedStorageUrl(data.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
+      imageUrl: proxyImageUrl(data.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
       ctaText: data.cta_text || undefined,
       ctaLink: data.cta_link || undefined,
     } as CarouselSlideProps;
@@ -149,7 +149,7 @@ export async function updateCarouselSlide(
       id: data.id,
       title: data.title,
       subtitle: data.subtitle || undefined,
-      imageUrl: getProxiedStorageUrl(data.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
+      imageUrl: proxyImageUrl(data.image_url) || '/assets/images/church-hero.jpg', // Use proxy and provide fallback
       ctaText: data.cta_text || undefined,
       ctaLink: data.cta_link || undefined,
     } as CarouselSlideProps;

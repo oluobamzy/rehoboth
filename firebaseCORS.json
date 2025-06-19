@@ -3,6 +3,12 @@
     "origin": ["*"],
     "method": ["GET"],
     "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type"]
+    "responseHeader": [
+      "Content-Type", 
+      "Cross-Origin-Resource-Policy", 
+      "Content-Length", 
+      "Date", 
+      "ETag"
+    ]
   }
 ]
