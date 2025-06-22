@@ -131,7 +131,7 @@ export default function DonorInfoForm({
               <p className="mt-1 text-sm text-red-600">{errors.donorEmail}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              We'll use this to send your donation receipt.
+              We&apos;ll use this to send your donation receipt.
             </p>
           </div>
           

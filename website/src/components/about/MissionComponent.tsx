@@ -10,14 +10,14 @@ export default function MissionComponent() {
         transition={{ duration: 0.5 }}
       >
         <p className="text-lg">
-          We are dedicated to sharing God's unconditional love and boundless mercy, inviting everyone into a transformative 
+          We are dedicated to sharing God&apos;s unconditional love and boundless mercy, inviting everyone into a transformative 
           relationship with Jesus Christ.
         </p>
 
         <p className="mt-4">
           No matter their background or circumstances, we provide opportunities for individuals to experience His grace 
           and be renewed in faith. Through prayer, worship, biblical teaching, and compassionate service, we foster a 
-          vibrant faith community that reflects God's heart for the world.
+          vibrant faith community that reflects God&apos;s heart for the world.
         </p>
 
         <p className="mt-4">
@@ -32,14 +32,14 @@ export default function MissionComponent() {
             <h3 className="text-xl font-medium text-blue-700">Deepen Understanding of the Trinity</h3>
             <p className="mt-2">
               Deepen the understanding and belief in the Trinity—God the Father, Jesus Christ the Son, and the Holy 
-              Spirit—acknowledging God's sovereignty and redemptive power.
+              Spirit—acknowledging God&apos;s sovereignty and redemptive power.
             </p>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-md shadow-sm">
             <h3 className="text-xl font-medium text-blue-700">Salvation Through Jesus Christ</h3>
             <p className="mt-2">
-              Share the good news of Jesus Christ as the Savior and Redeemer, emphasizing His sacrifice for humanity's 
+              Share the good news of Jesus Christ as the Savior and Redeemer, emphasizing His sacrifice for humanity&apos;s 
               sins and the promise of eternal life through faith in Him.
             </p>
           </div>
@@ -48,14 +48,14 @@ export default function MissionComponent() {
             <h3 className="text-xl font-medium text-blue-700">Guidance of the Holy Spirit</h3>
             <p className="mt-2">
               Foster an environment where the Holy Spirit is welcomed and embraced, leading individuals and the church 
-              to spiritual maturity, discernment, and alignment with God's will.
+              to spiritual maturity, discernment, and alignment with God&apos;s will.
             </p>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-md shadow-sm">
             <h3 className="text-xl font-medium text-blue-700">Biblical Authority</h3>
             <p className="mt-2">
-              Uphold the Bible as the sole and infallible Scripture, guiding the church in understanding God's will 
+              Uphold the Bible as the sole and infallible Scripture, guiding the church in understanding God&apos;s will 
               and providing inspiration for Christian living.
             </p>
           </div>
@@ -64,7 +64,7 @@ export default function MissionComponent() {
             <h3 className="text-xl font-medium text-blue-700">Baptism and Spiritual Rebirth</h3>
             <p className="mt-2">
               Encourage and practice full immersion baptism as a symbolic act of death, burial, and resurrection in 
-              Christ, signifying a union with God the Son and a commitment to fulfilling God's mission.
+              Christ, signifying a union with God the Son and a commitment to fulfilling God&apos;s mission.
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export default function MissionComponent() {
             <h3 className="text-xl font-medium text-blue-700">Promoting Equality</h3>
             <p className="mt-2">
               Embrace and preach the biblical principle of equality before God, recognizing and celebrating the 
-              diversity within the human race as a reflection of God's power.
+              diversity within the human race as a reflection of God&apos;s power.
             </p>
           </div>
 

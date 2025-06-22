@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTypedEventRegistration, type RegistrationResponse, type RegistrationFormData } from '@/hooks/useEvents';
+import { useEventRegistration, type RegistrationResponse, type RegistrationFormData } from '@/hooks/useEvents.js';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface RegistrationErrors {
@@ -31,11 +31,11 @@ export default function RegistrationForm({ eventId, onSuccess, onCancel }: Regis
   const [errors, setErrors] = useState<RegistrationErrors>({});
 
   // Registration mutation with explicit typing
-  const { mutate: registerForEvent, isPending, error } = useTypedEventRegistration();
+  const { mutate: registerForEvent, isPending, error } = useEventRegistration();
   
-  // Additional state for payment flow
-  const [registrationComplete, setRegistrationComplete] = useState<boolean>(false);
-  const [registrationData, setRegistrationData] = useState<RegistrationResponse | null>(null);
+  // Additional state for payment flow - commented out unused variables
+  // const [registrationComplete, setRegistrationComplete] = useState<boolean>(false);
+  // const [registrationData, setRegistrationData] = useState<RegistrationResponse | null>(null);
 
   // Handle form changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -85,7 +85,7 @@ export default function RegistrationForm({ eventId, onSuccess, onCancel }: Regis
       {
         onSuccess: (data: RegistrationResponse) => {
           // Store registration data for potential payment step
-          setRegistrationData(data);
+          // setRegistrationData(data);
           
           // Add eventId to the response data for easier navigation
           const responseWithEventId = {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import AboutContent from '@/components/about/AboutContent';
@@ -8,7 +8,7 @@ import MissionComponent from '@/components/about/MissionComponent';
 import VisionComponent from '@/components/about/VisionComponent';
 import TabButton from '@/components/ui/TabButton';
 
-export default function AboutPage() {
+function AboutPageContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<'about' | 'mission' | 'vision'>('about');
@@ -66,5 +66,13 @@ export default function AboutPage() {
         </motion.div>
       </div>
     </main>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AboutPageContent />
+    </Suspense>
   );
 }

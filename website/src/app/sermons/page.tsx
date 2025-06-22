@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from 'react';
 import SermonList from '@/components/sermons/SermonList';
 import SermonSearch from '@/components/sermons/SermonSearch';
 import { fetchSermons, fetchSermonSeries, Sermon, SermonSeries, PaginatedSermons } from '@/services/sermonService'; 
@@ -11,7 +12,7 @@ import DatabaseErrorPage from '@/components/common/DatabaseErrorPage';
 // Metadata can't be exported from client components in Next.js App Router
 // Instead, create a separate file for metadata or use a layout.tsx file
 
-export default function SermonsPage() {
+function SermonsPageContent() {
   const searchParams = useSearchParams();
   const sermonsPerPage = 12;
 
@@ -95,5 +96,13 @@ export default function SermonsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SermonsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SermonsPageContent />
+    </Suspense>
   );
 }

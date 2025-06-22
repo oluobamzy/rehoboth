@@ -1,13 +1,13 @@
 // src/app/auth/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/services/supabase';
 import Button from '@/components/common/Button';
 import { posthog } from '@/services/posthog';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -175,5 +175,13 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

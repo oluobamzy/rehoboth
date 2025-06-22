@@ -36,7 +36,7 @@ export default function RegistrationSuccess({ data, eventTitle }: RegistrationSu
       
       <p className="text-sm text-green-700">
         {data.status === 'waitlist' ? (
-          <span className="font-medium">You have been added to the waitlist. We'll notify you if a spot becomes available.</span>
+          <span className="font-medium">You have been added to the waitlist. We&apos;ll notify you if a spot becomes available.</span>
         ) : (
           <span>A confirmation email has been sent with the event details.</span>
         )}

@@ -9,11 +9,13 @@ export const metadata: Metadata = {
 };
 
 interface RecurringDonationDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // This page would be client-side but we'll extend it later with the proper component
-export default function RecurringDonationDetailPage({ params }: RecurringDonationDetailPageProps) {
+export default async function RecurringDonationDetailPage({ params }: RecurringDonationDetailPageProps) {
+  const { id } = await params;
+  
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
@@ -24,12 +26,12 @@ export default function RecurringDonationDetailPage({ params }: RecurringDonatio
           <FiArrowLeft className="mr-1" /> Back to recurring donations
         </Link>
         <h1 className="text-2xl font-semibold text-gray-900">Recurring Donation Details</h1>
-        <p className="text-gray-500">ID: {params.id}</p>
+        <p className="text-gray-500">ID: {id}</p>
       </div>
       
       <div className="bg-white shadow rounded-lg p-6">
         <p className="text-center text-gray-500 py-6">
-          Detailed interface for recurring donation {params.id} will be implemented in a future update.
+          Detailed interface for recurring donation {id} will be implemented in a future update.
         </p>
       </div>
     </div>

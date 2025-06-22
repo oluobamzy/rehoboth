@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import EventCalendar from '@/components/events/EventCalendar';
 import EventFilters from '@/components/events/EventFilters';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function CalendarPage() {
+function CalendarPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -106,5 +106,13 @@ export default function CalendarPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CalendarPageContent />
+    </Suspense>
   );
 }

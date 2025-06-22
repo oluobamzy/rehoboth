@@ -128,8 +128,8 @@ export default function Home() {
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image 
-                src="/children's corner2.jpeg" 
-                alt="Children's corner" 
+                src="/children&apos;s corner2.jpeg" 
+                alt="Children&apos;s corner" 
                 width={600} 
                 height={400} 
                 className="w-full h-full object-cover"
@@ -139,14 +139,14 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Pastor's section */}
+      {/* Pastor&apos;s section */}
       <section className="bg-gray-50 py-16 mb-20 rounded-lg">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
               <h3 className="text-3xl font-bold mb-5">Meet Our <span className="text-orange-500">Pastor</span></h3>
               <p className="text-gray-600 mb-4">
-                Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God's love and transforming lives through the power of the gospel.
+                Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God&apos;s love and transforming lives through the power of the gospel.
               </p>
               <p className="text-gray-600 mb-6">
                 We invite you to connect with us, join our services, and become part of our growing community of faith.
@@ -237,7 +237,7 @@ export default function Home() {
                   </svg>
                   Fellowship Hall
                 </div>
-                <p className="text-gray-600 mb-4">Dive deeper into God's Word with our interactive Bible study and discussion group.</p>
+                <p className="text-gray-600 mb-4">Dive deeper into God&apos;s Word with our interactive Bible study and discussion group.</p>
                 <Link href="/events/bible-study">
                   <button className="w-full bg-gray-100 hover:bg-orange-50 text-orange-500 py-2 rounded-md font-medium transition-colors">
                     Event Details
@@ -311,7 +311,7 @@ export default function Home() {
             <div>
               <h3 className="text-3xl font-bold mb-5">Visit <span className="text-orange-500">Us</span></h3>
               <p className="text-gray-600 mb-6">
-                We'd love to see you at our next service. Come experience the warmth and welcome of our church family.
+                We&apos;d love to see you at our next service. Come experience the warmth and welcome of our church family.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start">

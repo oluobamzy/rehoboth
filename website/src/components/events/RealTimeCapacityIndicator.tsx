@@ -56,7 +56,7 @@ export default function RealTimeCapacityIndicator({ eventId }: RealTimeCapacityI
       
       {isWaitlist && (
         <p className="text-xs text-red-600 mt-1">
-          Event is full. You'll be added to the waitlist.
+          Event is full. You&apos;ll be added to the waitlist.
         </p>
       )}
     </div>

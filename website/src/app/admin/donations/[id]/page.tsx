@@ -8,13 +8,15 @@ export const metadata: Metadata = {
 };
 
 interface AdminDonationDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function AdminDonationDetailPage({ params }: AdminDonationDetailPageProps) {
+export default async function AdminDonationDetailPage({ params }: AdminDonationDetailPageProps) {
+  const { id } = await params;
+  
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <AdminDonationDetail donationId={params.id} />
+      <AdminDonationDetail donationId={id} />
     </div>
   );
 }

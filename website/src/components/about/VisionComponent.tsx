@@ -18,7 +18,7 @@ export default function VisionComponent() {
         
         <p className="text-lg">
           At Rehoboth Christian Church, our vision is rooted in <strong>Ephesians 1:7-8</strong>, which speaks of 
-          God's abundant grace and the redemption found through Jesus Christ. We are called to share His boundless love 
+          God&apos;s abundant grace and the redemption found through Jesus Christ. We are called to share His boundless love 
           and mercy with all people, creating an environment where individuals experience spiritual transformation 
           and a deep connection with God.
         </p>
@@ -39,7 +39,7 @@ export default function VisionComponent() {
             <h3 className="text-xl font-medium text-blue-700">Spiritual Growth and Discipleship</h3>
             <p className="mt-2">
               We see a church deeply committed to discipleship, where believers are equipped and empowered to grow 
-              in their faith and knowledge of God's Word, becoming mature followers of Christ who impact their 
+              in their faith and knowledge of God&apos;s Word, becoming mature followers of Christ who impact their 
               families, workplaces, and communities.
             </p>
           </div>
@@ -65,8 +65,8 @@ export default function VisionComponent() {
           <div>
             <h3 className="text-xl font-medium text-blue-700">Global Impact</h3>
             <p className="mt-2">
-              We envision making a global impact through missions and partnerships, extending God's kingdom beyond 
-              our local community to reach people around the world with the message of God's redeeming love.
+              We envision making a global impact through missions and partnerships, extending God&apos;s kingdom beyond 
+              our local community to reach people around the world with the message of God&apos;s redeeming love.
             </p>
           </div>
         </div>

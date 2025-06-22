@@ -17,7 +17,7 @@ export default function AboutContent() {
         </p>
 
         <p className="mt-4">
-          At Rehoboth Christian Church, we believe in the power of God's love to redeem, restore, and renew 
+          At Rehoboth Christian Church, we believe in the power of God&apos;s love to redeem, restore, and renew 
           lives. Our mission is to proclaim His love by fostering a Christ-centered community where individuals 
           grow in faith, experience His boundless grace, and extend that love to others. Through sound biblical 
           teaching, heartfelt worship, and a strong commitment to discipleship, we strive to nurture spiritual 
@@ -25,7 +25,7 @@ export default function AboutContent() {
         </p>
 
         <p className="mt-4">
-          We are dedicated to making a lasting impact for God's kingdom by bringing hope, healing, and restoration 
+          We are dedicated to making a lasting impact for God&apos;s kingdom by bringing hope, healing, and restoration 
           to all who seek Him. Whether you are new to the faith or have been walking with Christ for years, 
           Rehoboth Christian Church is a place where you can belong, grow, and serve. We welcome you to join 
           us on this journey of faith as we seek to glorify God and live out His purpose in our lives.
