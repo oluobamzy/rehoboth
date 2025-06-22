@@ -21,7 +21,7 @@ export default function CarouselSlide({
   ctaText,
   ctaLink,
 }: CarouselSlideProps) {
-  // Fallback to a default image if none is provided
+  // Use pastoral_care.jpeg as the primary background image
   const backgroundImage = '/pastoral_care.jpeg';
   
   // Track image loading status
@@ -92,67 +92,67 @@ export default function CarouselSlide({
         data-image-url={backgroundImage}
       />
       
-      {/* Overlay with gradient for better text readability */}
+      {/* Overlay with gradient for better text readability - more subtle */}
       <div 
-        className="absolute inset-0 bg-gradient-to-r from-gray-900/95 via-gray-900/80 to-gray-900/30"
+        className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50"
         style={{
           zIndex: 2
         }}
       />
       
-      {/* Content layout */}
+      {/* Content layout - Full width with centered text overlay */}
       <div 
-        className="relative flex flex-col-reverse md:flex-row h-full w-full"
+        className="relative flex items-center justify-center h-full w-full"
         style={{
           zIndex: 3
         }}
       >
-        {/* Text content area */}
+        {/* Text content area - Centered over the full background */}
         <div 
-          className="relative md:w-1/2 h-full md:h-full flex items-center backdrop-blur-sm"
+          className="relative flex items-center justify-center h-full w-full"
           style={{
             minHeight: '300px'
           }}
           data-testid="carousel-slide-content"
         >
-          <div className="px-8 py-10 md:py-0 md:px-16 w-full relative">
-            {/* Subtle accent line above title */}
-            <div className="w-20 h-1 bg-orange-500 mb-6 rounded-full"></div>
-            
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-5 md:mb-7 leading-tight">
-              {title.split(' ').map((word, i) => 
-                i % 3 === 1 ? 
-                  <span key={i} className="text-orange-400">{word} </span> : 
-                  <span key={i}>{word} </span>
+          <div className="px-8 py-12 md:py-20 w-full max-w-5xl mx-auto text-center relative">
+            {/* Content container with glass effect */}
+            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
+              {/* Subtle accent line above title */}
+              <div className="w-24 h-1.5 bg-gradient-to-r from-orange-400 to-orange-600 mb-8 rounded-full mx-auto shadow-lg"></div>
+              
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight" 
+                  style={{ textShadow: '0 4px 8px rgba(0,0,0,0.5)' }}>
+                {title.split(' ').map((word, i) => 
+                  i % 3 === 1 ? 
+                    <span key={i} className="text-orange-300 drop-shadow-lg">{word} </span> : 
+                    <span key={i}>{word} </span>
+                )}
+              </h2>
+              
+              {subtitle && (
+                <p className="text-xl md:text-2xl text-gray-100 mb-10 md:mb-12 leading-relaxed max-w-4xl mx-auto font-light" 
+                   style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
+                  {subtitle}
+                </p>
               )}
-            </h2>
-            
-            {subtitle && (
-              <p className="text-lg md:text-xl text-gray-300 mb-8 md:mb-10 leading-relaxed max-w-xl">
-                {subtitle}
-              </p>
-            )}
-            
-            <div className="flex flex-wrap gap-4 items-center mt-10">
-              {ctaText && ctaLink && (
-                <Link href={ctaLink}>
-                  <Button variant="primary" size="lg" className="shadow-lg hover:shadow-orange-500/20 transition-all duration-300">
-                    {ctaText}
+              
+              <div className="flex flex-wrap gap-6 items-center justify-center">
+                {ctaText && ctaLink && (
+                  <Link href={ctaLink}>
+                    <Button variant="primary" size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-xl hover:shadow-orange-500/30 transition-all duration-300 transform hover:scale-105 px-8 py-4 text-lg font-semibold">
+                      {ctaText}
+                    </Button>
+                  </Link>
+                )}
+                <Link href="/about">
+                  <Button variant="outline" size="lg" className="border-2 border-white/60 text-white hover:bg-white hover:text-gray-900 shadow-xl hover:shadow-white/20 transition-all duration-300 transform hover:scale-105 px-8 py-4 text-lg font-semibold backdrop-blur-sm">
+                    Learn More
                   </Button>
                 </Link>
-              )}
-              <Link href="/about">
-                <Button variant="outline" size="lg" className="border-orange-400 text-orange-400 hover:bg-orange-500 hover:text-white shadow-lg hover:shadow-orange-500/20 transition-all duration-300">
-                  Learn More
-                </Button>
-              </Link>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* Visual side - empty container that shows the background image */}
-        <div className="relative md:w-1/2 h-[250px] md:h-full overflow-hidden">
-          {/* This area will show the background image with gradient overlay */}
         </div>
       </div>
     </div>
