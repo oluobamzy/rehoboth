@@ -55,12 +55,7 @@ export default function AdminCarouselPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: { id: string } & Partial<Omit<CarouselSlideProps, 'id'>> & {
-      displayOrder?: number;
-      isActive?: boolean;
-      startDate?: string;
-      endDate?: string;
-    }) => updateCarouselSlide(data.id, data),
+    mutationFn: updateCarouselSlide,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['carouselSlides'] });
       resetForm();
@@ -113,13 +108,13 @@ export default function AdminCarouselPage() {
     setErrorMessage(null);
 
     try {
-      const filePath = generateUniqueFilePath(file, 'carousel');
+      const filePath = generateUniqueFilePath(file.name);
       
       const onProgress = (progress: number) => {
         setUploadProgress(Math.round(progress * 100));
       };
       
-      const url = await uploadImage(file, filePath);
+      const url = await uploadImage(file, filePath, onProgress);
       
       setFormData({
         ...formData,
@@ -408,7 +403,7 @@ export default function AdminCarouselPage() {
                         </Button>
                         <Button
                           onClick={() => handleDelete(slide.id)}
-                          variant="error"
+                          variant="danger"
                           size="sm"
                         >
                           Delete

@@ -3,7 +3,6 @@
 // src/components/common/FallbackImage.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import Image, { ImageProps } from 'next/image';
-import { getProxiedStorageUrl } from '@/utils/storageProxy';
 
 // Remove legacy props from ImageProps
 type ModernImageProps = Omit<ImageProps, 'onError' | 'layout' | 'objectFit'>;
@@ -23,11 +22,12 @@ const DEFAULT_FALLBACK = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWln
 
 export default function FallbackImage({
   src,
-  fallbackSrc = '/rehoboth_logo_plain.png', // Use logo as fallback instead of missing church-hero.jpg
+  fallbackSrc = '/rehoboth_logo_plain.png', // Use logo as fallback
   maxRetries = 1,
   alt,
   fill,
   style = {},
+  className,
   // Filter out any legacy props that might be passed
   layout,
   objectFit,
@@ -37,26 +37,35 @@ export default function FallbackImage({
   const processedSrc = useMemo(() => {
     // Make sure we have a string URL to work with
     if (!src || typeof src !== 'string') {
+      console.log('FallbackImage: Non-string src provided, using fallback', { src, fallbackSrc });
       return fallbackSrc;
     }
     
     const srcStr = src as string;
     
-    // Skip processing for local assets or non-Firebase URLs
-    if (srcStr.startsWith('/') || srcStr.startsWith('data:') || srcStr.startsWith('blob:') || 
-        srcStr.startsWith('http://localhost') || srcStr.includes('unsplash.com')) {
+    // External URLs (like Unsplash) should be used directly
+    if (srcStr.startsWith('http://') || srcStr.startsWith('https://')) {
+      // Skip our proxy for all external URLs, including Unsplash
+      console.log('FallbackImage: Using external URL directly:', srcStr);
       return srcStr;
     }
     
-    // Use our proxy for Firebase Storage URLs
+    // Handle data URLs and blobs directly
+    if (srcStr.startsWith('/') || srcStr.startsWith('data:') || srcStr.startsWith('blob:')) {
+      return srcStr;
+    }
+    
+    // Use Firebase Storage URLs directly
     if (srcStr.includes('firebasestorage.googleapis.com')) {
-      return getProxiedStorageUrl(srcStr);
+      return srcStr;
     }
     
     // Handle direct paths that might be Firebase storage paths
     if (srcStr.startsWith('carousel/') || srcStr.startsWith('sermons/') || 
         srcStr.startsWith('events/') || srcStr.startsWith('sermon_series/')) {
-      return `/api/proxy/${srcStr}`;
+      // Construct direct Firebase URL instead of going through proxy
+      const encodedPath = encodeURIComponent(srcStr);
+      return `https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o/${encodedPath}?alt=media`;
     }
     
     return srcStr;
@@ -73,12 +82,23 @@ export default function FallbackImage({
     setFallbackAttempts(0);
   }, [processedSrc]);
 
+  // Extract objectFit from className if present
+  const hasObjectCoverClass = className?.includes('object-cover');
+  const hasObjectContainClass = className?.includes('object-contain');
+
   // Convert legacy props to modern styles
   const imageStyle: React.CSSProperties = {
     ...(style || {}),
-    // Convert objectFit to modern style prop if provided
-    ...(objectFit ? { objectFit: objectFit as 'cover' | 'contain' | 'fill' | 'none' | 'scale-down' } : {})
+    // Set object-fit based on props or className
+    ...(objectFit ? { objectFit: objectFit as 'cover' | 'contain' | 'fill' | 'none' | 'scale-down' } : {}),
+    ...(hasObjectCoverClass && !objectFit ? { objectFit: 'cover' } : {}),
+    ...(hasObjectContainClass && !objectFit ? { objectFit: 'contain' } : {})
   };
+
+  // Always ensure we have objectFit when using fill
+  if (fill && !imageStyle.objectFit) {
+    imageStyle.objectFit = 'cover';
+  }
 
   const handleError = () => {
     // Increment fallback attempts to track how many times we've tried
@@ -115,8 +135,15 @@ export default function FallbackImage({
       return;
     }
     
+    // The fallback path is not found, use our reliable fallback
+    if (fallbackSrc === '/assets/images/church-hero.jpg') {
+      setImgSrc('/rehoboth_logo_plain.png');
+      console.log('Using logo as fallback instead of missing church-hero.jpg');
+      return;
+    }
+    
     // If we've reached max retries or the fallback is already failing, use default
-    if (attempts >= maxRetries || fallbackSrc === '/assets/images/church-hero.jpg') {
+    if (attempts >= maxRetries) {
       setImgSrc(DEFAULT_FALLBACK);
       setHasError(true);
     } else {
@@ -141,8 +168,9 @@ export default function FallbackImage({
   delete (safeRest as any).objectPosition;
   
   // Determine if this img should be unoptimized
+  // External URLs (like unsplash.com) and data URLs need to be unoptimized
   const isUnoptimized = typeof imgSrc === 'string' && 
-    (imgSrc.startsWith('https://') || imgSrc.startsWith('data:'));
+    (imgSrc.startsWith('https://') || imgSrc.startsWith('http://') || imgSrc.startsWith('data:'));
     
   // Handle dimensions based on fill property
   // When using fill, don't use width/height

@@ -66,7 +66,7 @@ export default function CalendarPage() {
 
       <div className="mb-6">
         <EventFilters 
-          initialFilters={filters} 
+          filters={filters} 
           onFilterChange={handleFilterChange}
         />
       </div>

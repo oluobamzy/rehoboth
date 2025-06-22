@@ -22,6 +22,15 @@ export function getProxiedStorageUrl(path: string, debug: boolean = false): stri
     return path;
   }
   
+  // Skip proxying for external URLs like Unsplash
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    // Don't proxy external URLs unless they're Firebase Storage
+    if (!path.includes('firebasestorage.googleapis.com')) {
+      if (debug) console.log('External URL - not proxying:', path);
+      return path;
+    }
+  }
+  
   // Handle URLs with protocol-relative format (//firebasestorage...)
   if (path.startsWith('//firebasestorage.googleapis.com')) {
     path = `https:${path}`;

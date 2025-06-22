@@ -3,7 +3,6 @@
 import SermonList from '@/components/sermons/SermonList';
 import SermonSearch from '@/components/sermons/SermonSearch';
 import { fetchSermons, fetchSermonSeries, Sermon, SermonSeries, PaginatedSermons } from '@/services/sermonService'; 
-import MainLayout from '@/components/common/MainLayout';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';

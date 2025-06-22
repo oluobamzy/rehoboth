@@ -4,7 +4,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatDate, formatTime } from '@/utils/dateUtils';
 
-export default function EventCard({ event }) {
+interface EventCardProps {
+  event: {
+    id: string;
+    title: string;
+    description?: string;
+    start_datetime: string;
+    end_datetime: string;
+    location_name?: string;
+    location_address?: string;
+    registration_required: boolean;
+    registration_deadline?: string;
+    is_featured: boolean;
+    event_type: string;
+    category?: string;
+    image_url?: string;
+    cost_cents: number;
+  }
+}
+
+export default function EventCard({ event }: EventCardProps) {
   // Format date and time
   const formattedDate = formatDate(event.start_datetime);
   const startTime = formatTime(event.start_datetime);

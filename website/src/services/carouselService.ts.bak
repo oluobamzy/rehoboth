@@ -1,5 +1,19 @@
 // src/services/carouselService.ts
-import { supabase } from './supabase';
+imp    return data.map(slide => ({
+      id: slide.id,
+      title: slid    return {
+      id: data.id,
+      title: data.title,
+      subtitle: data.subtitle || undefined,
+      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
+      ctaText: data.cta_text || undefined,
+      ctaLink: data.cta_link || undefined,
+    } as CarouselSlideProps;
+      subtitle: slide.subtitle || undefined,
+      imageUrl: slide.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
+      ctaText: slide.cta_text || undefined,
+      ctaLink: slide.cta_link || undefined,
+    })) as CarouselSlideProps[]; // Type assertion to satisfy TSpabase } from './supabase';
 import { CarouselSlideProps } from '@/components/hero/CarouselSlide';
 import { posthog } from './posthog';
 
@@ -40,7 +54,7 @@ export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
       id: slide.id,
       title: slide.title,
       subtitle: slide.subtitle || undefined,
-      imageUrl: slide.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
+      imageUrl: slide.image_url || '/assets/images/church-hero.jpg', // Provide fallback
       ctaText: slide.cta_text || undefined,
       ctaLink: slide.cta_link || undefined,
     })) as CarouselSlideProps[]; // Type assertion to satisfy TS
@@ -102,7 +116,7 @@ export async function createCarouselSlide(
       id: data.id,
       title: data.title,
       subtitle: data.subtitle || undefined,
-      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
+      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Provide fallback
       ctaText: data.cta_text || undefined,
       ctaLink: data.cta_link || undefined,
     } as CarouselSlideProps;
@@ -148,7 +162,7 @@ export async function updateCarouselSlide(
       id: data.id,
       title: data.title,
       subtitle: data.subtitle || undefined,
-      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
+      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Provide fallback
       ctaText: data.cta_text || undefined,
       ctaLink: data.cta_link || undefined,
     } as CarouselSlideProps;

@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import MainLayout from '@/components/common/MainLayout';
 import Link from 'next/link';
 import { useAuth } from '@/services/auth';
 
@@ -35,25 +34,22 @@ export default function AdminDashboardPage() {
 
   if (!user) {
     return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p>Please sign in to access the admin dashboard.</p>
-            <Link 
-              href="/auth/login"
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Sign In
-            </Link>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <p>Please sign in to access the admin dashboard.</p>
+          <Link 
+            href="/auth/login"
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Sign In
+          </Link>
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">
@@ -143,6 +139,5 @@ export default function AdminDashboardPage() {
           />
         </div>
       </div>
-    </MainLayout>
   );
 }

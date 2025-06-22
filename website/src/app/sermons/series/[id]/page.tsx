@@ -5,7 +5,6 @@ import { fetchSermonSeriesById } from '@/services/sermonService';
 import SermonSeries from '@/components/sermons/SermonSeries';
 import { notFound, useParams } from 'next/navigation';
 import DatabaseErrorPage from '@/components/common/DatabaseErrorPage';
-import MainLayout from '@/components/common/MainLayout';
 import Card from '@/components/common/Card';
 import Image from 'next/image';
 import Link from 'next/link'; // Ensure Link is imported
@@ -97,9 +96,8 @@ export default function SermonSeriesPage() {
   }
 
   return (
-    <MainLayout>
-      <div className="bg-gray-50">
-        <div className="container mx-auto px-4 py-12"> {/* Ensure this div is correctly structured */}
+    <div className="bg-gray-50">
+      <div className="container mx-auto px-4 py-12"> {/* Ensure this div is correctly structured */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{series.title}</h1>
             <p className="text-lg text-gray-700">{series.description}</p>
@@ -133,6 +131,5 @@ export default function SermonSeriesPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }

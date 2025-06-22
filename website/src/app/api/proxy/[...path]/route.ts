@@ -15,6 +15,12 @@ export async function GET(
     // Reconstruct the path from the path segments
     const path = pathSegments.join('/');
     
+    // Generate a request ID for tracking this request through logs
+    const requestId = `proxy-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
+    
+    // Log debugging information
+    console.log(`[${requestId}] Proxy request received for: ${path}`);
+    
     // Handle external URLs that mistakenly got routed through our proxy
     if (path.startsWith('http')) {
       console.error(`❌ ERROR: External URL routed to proxy: ${path}`);
@@ -22,6 +28,12 @@ export async function GET(
         { error: `Cannot proxy external URLs` },
         { status: 400 }
       );
+    }
+    
+    // Handle Unsplash URLs (they should never reach here but just in case)
+    if (path.includes('unsplash.com')) {
+      console.error(`❌ ERROR: Unsplash URL should not be proxied: ${path}`);
+      return NextResponse.redirect(new URL(path.startsWith('/') ? path.slice(1) : path));
     }
     
     // Get the Firebase storage URL from env variables or construct it
@@ -102,7 +114,16 @@ export async function GET(
     }
     
     if (!response?.ok) {
-      console.error(`❌ Failed to proxy resource after ${retryCount} retries: ${response?.status} ${response?.statusText}`);
+      console.error(`[${requestId}] ❌ Failed to proxy resource after ${retryCount} retries: ${response?.status} ${response?.statusText}`);
+      console.error(`[${requestId}] Problem URL: ${url}`);
+      
+      // If it's a 404, send a more user-friendly response with the fallback image
+      if (response?.status === 404) {
+        console.log(`[${requestId}] Resource not found, redirecting to fallback logo`);
+        // Return a redirect to the fallback image rather than a JSON error
+        return NextResponse.redirect(new URL('/rehoboth_logo_plain.png', request.url));
+      }
+      
       return NextResponse.json(
         { error: `Failed to fetch resource: ${response?.statusText || 'Unknown error'}` },
         { status: response?.status || 500 }

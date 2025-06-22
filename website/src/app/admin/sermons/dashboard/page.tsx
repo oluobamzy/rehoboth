@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchSermons } from '@/services/sermonService';
-import MainLayout from '@/components/common/MainLayout';
 
 // Define a local Sermon interface; ideally, this should be imported if shared
 interface Sermon {
@@ -126,8 +125,7 @@ export default function SermonDashboardPage() {
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Sermon Insights</h1>
@@ -296,6 +294,5 @@ export default function SermonDashboardPage() {
           </>
         )}
       </div>
-    </MainLayout>
   );
 }

@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { formatDate, formatTime } from '@/utils/dateUtils';
 
-export default function AddToCalendarButton({ event }) {
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  start_datetime: string;
+  end_datetime: string;
+  location_name?: string;
+  location_address?: string;
+}
+
+export default function AddToCalendarButton({ event }: { event: CalendarEvent }) {
   const [isOpen, setIsOpen] = useState(false);
   
   if (!event) return null;
@@ -96,10 +106,10 @@ export default function AddToCalendarButton({ event }) {
 }
 
 // Helper functions for date formatting
-function formatGoogleDate(date) {
+function formatGoogleDate(date: Date): string {
   return date.toISOString().replace(/-|:|\.\d+/g, '');
 }
 
-function formatOutlookDate(date) {
+function formatOutlookDate(date: Date): string {
   return date.toISOString().replace(/[-:]/g, '').split('.')[0];
 }

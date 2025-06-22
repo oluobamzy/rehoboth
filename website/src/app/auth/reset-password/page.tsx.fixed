@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
       
       if (updateError) {
         await logAuthEvent(AuthEvent.PASSWORD_RESET_FAILURE, {
-          errorMessage: updateError.message
+          error: updateError.message
         });
         
         throw updateError;

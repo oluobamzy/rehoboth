@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Display Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 20px;
+    }
+    .test-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .test-case {
+      flex: 1;
+      min-width: 300px;
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .img-regular {
+      max-width: 100%;
+      height: auto;
+      border: 1px dashed blue;
+    }
+    .img-container {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      border: 1px dashed green;
+    }
+    .img-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .bg-image {
+      width: 100%;
+      height: 300px;
+      background-position: center;
+      background-size: cover;
+      border: 1px dashed red;
+    }
+    h2 {
+      margin-top: 10px;
+    }
+    .log {
+      background: #f5f5f5;
+      padding: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow: auto;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #0070f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0051a2;
+    }
+    .status-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .status-loading {
+      background-color: #ffd500;
+    }
+    .status-success {
+      background-color: #00c853;
+    }
+    .status-error {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Display Test</h1>
+  <p>This page tests different image display methods to help debug issues with images not showing properly.</p>
+  
+  <div class="controls">
+    <button id="testAll">Test All Images</button>
+    <button id="clearLogs">Clear Logs</button>
+  </div>
+  
+  <div id="results"></div>
+
+  <script>
+    const images = [{"url":"https://images.unsplash.com/photo-1536500152107-01ab1422f932?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80","description":"Unsplash Community Image"},{"url":"https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80","description":"Unsplash Sunday School Image"},{"url":"/rehoboth_logo_plain.png","description":"Local Logo (Fallback)"}];
+    const resultsContainer = document.getElementById('results');
+    
+    // Create test sections for each image
+    images.forEach((image, index) => {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `
+        <h2>
+          <span class="status-icon" id="status-${index}"></span>
+          Test Image ${index + 1}: ${image.description}
+        </h2>
+        <p>URL: <code>${image.url}</code></p>
+        <div class="test-container">
+          <div class="test-case">
+            <h3>Regular &lt;img&gt; Tag</h3>
+            <img 
+              src="${image.url}" 
+              alt="${image.description}" 
+              class="img-regular" 
+              id="img-regular-${index}"
+              onerror="logImageError(${index}, 'regular')"
+              onload="logImageSuccess(${index}, 'regular')"
+            />
+          </div>
+          <div class="test-case">
+            <h3>Fill &lt;img&gt; (object-fit: cover)</h3>
+            <div class="img-container">
+              <img 
+                src="${image.url}" 
+                alt="${image.description}" 
+                class="img-fill" 
+                id="img-fill-${index}"
+                onerror="logImageError(${index}, 'fill')"
+                onload="logImageSuccess(${index}, 'fill')"
+              />
+            </div>
+          </div>
+          <div class="test-case">
+            <h3>CSS Background Image</h3>
+            <div 
+              class="bg-image" 
+              id="bg-image-${index}"
+              style="background-image: url('${image.url}')"
+            ></div>
+          </div>
+        </div>
+        <div class="log" id="log-${index}"></div>
+      `;
+      resultsContainer.appendChild(section);
+      
+      // Set initial status icon
+      document.getElementById(`status-${index}`).className = 'status-icon status-loading';
+    });
+
+    // Helper functions for logging
+    function logMessage(index, message) {
+      const logElement = document.getElementById(`log-${index}`);
+      const timestamp = new Date().toLocaleTimeString();
+      logElement.innerHTML += `[${timestamp}] ${message}\n`;
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    function logImageError(index, type) {
+      logMessage(index, `❌ ${type.toUpperCase()} image failed to load`);
+      document.getElementById(`status-${index}`).className = 'status-icon status-error';
+    }
+
+    function logImageSuccess(index, type) {
+      const img = document.getElementById(`img-${type}-${index}`);
+      logMessage(index, `✅ ${type.toUpperCase()} image loaded successfully (${img.naturalWidth}×${img.naturalHeight})`);
+      document.getElementById(`status-${index}`).className = 'status-icon status-success';
+    }
+
+    // Test background images (can't use onload/onerror)
+    function testBackgroundImage(index) {
+      const url = images[index].url;
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        logMessage(index, `✅ BACKGROUND image loaded successfully (${tempImg.width}×${tempImg.height})`);
+      };
+      tempImg.onerror = () => {
+        logMessage(index, `❌ BACKGROUND image failed to load`);
+      };
+      tempImg.src = url;
+    }
+
+    // Test all images button
+    document.getElementById('testAll').addEventListener('click', () => {
+      images.forEach((_, index) => {
+        // Reset status
+        document.getElementById(`status-${index}`).className = 'status-icon status-loading';
+        
+        // Force reload images
+        const regularImg = document.getElementById(`img-regular-${index}`);
+        const fillImg = document.getElementById(`img-fill-${index}`);
+        
+        regularImg.src = regularImg.src.includes('?') 
+          ? regularImg.src.split('?')[0] + '?t=' + Date.now()
+          : regularImg.src + '?t=' + Date.now();
+          
+        fillImg.src = fillImg.src.includes('?')
+          ? fillImg.src.split('?')[0] + '?t=' + Date.now()
+          : fillImg.src + '?t=' + Date.now();
+          
+        // Test background image
+        testBackgroundImage(index);
+      });
+    });
+
+    // Clear logs button
+    document.getElementById('clearLogs').addEventListener('click', () => {
+      images.forEach((_, index) => {
+        document.getElementById(`log-${index}`).innerHTML = '';
+      });
+    });
+
+    // Run background image tests on load
+    window.addEventListener('load', () => {
+      images.forEach((_, index) => {
+        testBackgroundImage(index);
+      });
+    });
+  </script>
+</body>
+</html>

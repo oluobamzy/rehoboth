@@ -2,7 +2,6 @@
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import  firebaseApp  from '@/services/firebase';
 import { posthog } from '@/services/posthog';
-import { getProxiedStorageUrl } from './storageProxy';
 
 const storage = getStorage(firebaseApp);
 
@@ -10,7 +9,7 @@ const storage = getStorage(firebaseApp);
  * Upload an image to Firebase Storage
  * @param file The file to upload
  * @param path The storage path (e.g., 'carousel/image1.jpg')
- * @param useProxy Whether to return a proxied URL
+ * @param useProxy Whether to return a proxied URL (deprecated, kept for backward compatibility)
  * @returns The download URL of the uploaded file
  */
 export async function uploadImage(file: File, path: string, useProxy: boolean = false): Promise<string> {
@@ -31,8 +30,8 @@ export async function uploadImage(file: File, path: string, useProxy: boolean = 
       path,
     });
     
-    // Return either the direct URL or the proxied URL based on the useProxy flag
-    return useProxy ? getProxiedStorageUrl(downloadURL) : downloadURL;
+    // Always return the direct URL now
+    return downloadURL;
   } catch (error) {
     console.error('Error uploading image:', error);
     
@@ -62,27 +61,29 @@ export function generateUniqueFilePath(file: File, directory: string): string {
 }
 
 /**
- * Get a proxied URL for the uploaded image
+ * Get a direct URL for the uploaded image (formerly proxied)
  * @param path The storage path of the image
- * @returns The proxied URL of the image
+ * @returns The direct URL of the image
+ * @deprecated - No longer needed as we use direct URLs
  */
 export function getProxiedImageUrl(path: string): string {
-  return getProxiedStorageUrl(path);
+  // For backward compatibility, now just returns the path or constructs a direct URL
+  if (path.startsWith('http')) {
+    return path;
+  }
+  
+  // If this is a relative path without http, assume it's a Firebase Storage path
+  // and construct the direct URL
+  const encodedPath = encodeURIComponent(path);
+  return `https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o/${encodedPath}?alt=media`;
 }
 
 /**
- * Proxy an existing image URL
+ * No longer proxies URLs, just returns the original
  * @param url The original URL of the image
- * @returns The proxied URL if applicable, otherwise the original URL
+ * @returns The original URL unchanged
+ * @deprecated - No longer proxies images
  */
 export function proxyImageUrl(url: string | null | undefined): string | null | undefined {
-  if (!url) return url;
-  if (typeof url !== 'string') return url;
-  
-  // Only proxy Firebase Storage URLs
-  if (url.includes('firebasestorage.googleapis.com')) {
-    return getProxiedStorageUrl(url);
-  }
-  
-  return url;
+  return url; // Simply return the URL unchanged
 }

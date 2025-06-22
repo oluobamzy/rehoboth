@@ -3,7 +3,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/services/supabase';
 import Button from '@/components/common/Button';
 import { logAuthEvent, AuthEvent } from '@/services/authLogger';
@@ -30,7 +29,7 @@ export default function ForgotPasswordPage() {
         // Log rate limit exceeded
         await logAuthEvent(AuthEvent.PASSWORD_RESET_FAILURE, {
           email,
-          errorMessage: 'Rate limit exceeded',
+          error: 'Rate limit exceeded',
         });
         
         setError(`Too many reset attempts. Please try again in ${rateLimit.retryAfter} seconds.`);
@@ -46,7 +45,7 @@ export default function ForgotPasswordPage() {
         // Log failure
         await logAuthEvent(AuthEvent.PASSWORD_RESET_FAILURE, {
           email,
-          errorMessage: resetError.message,
+          error: resetError.message,
         });
         
         setError(resetError.message);
@@ -70,7 +69,7 @@ export default function ForgotPasswordPage() {
       
       await logAuthEvent(AuthEvent.PASSWORD_RESET_FAILURE, {
         email,
-        errorMessage: err.message,
+        error: err.message,
       });
       
       setError('An unexpected error occurred. Please try again.');

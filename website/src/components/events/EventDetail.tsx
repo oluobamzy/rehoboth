@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useEvent, useEventRegistrations } from '@/hooks/useEvents';
+import { useEvent } from '@/hooks/useEvents';
 import useEventCapacity from '@/hooks/useEventCapacity';
 import Image from 'next/image';
 import { formatDate, formatTime } from '@/utils/dateUtils';
@@ -25,9 +25,9 @@ export default function EventDetail() {
     error, 
     isLoading, 
     isError 
-  } = useEvent(id);
+  } = useEvent(id as string);
   
-  const event = data?.event;
+  const event = data;
   
   // Determine if registration is available
   const registrationAvailable = event?.registration_required && 
@@ -284,7 +284,7 @@ export default function EventDetail() {
           </div>
           
           {/* Map card */}
-          {(event.location_address || event.location_coordinates) && (
+          {event.location_address && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Location</h2>
               
@@ -295,9 +295,9 @@ export default function EventDetail() {
               {/* Google Map component (simplified) */}
               <div className="h-64 bg-gray-200 rounded-md overflow-hidden">
                 {/* In a real implementation, this would be a Google Map */}
-                {event.location_coordinates ? (
+                {event.location_address ? (
                   <GoogleMap 
-                    location={event.location_coordinates}
+                    location="default"
                     name={event.location_name}
                     address={event.location_address}
                   />

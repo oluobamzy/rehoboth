@@ -3,7 +3,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import MainLayout from '@/components/common/MainLayout';
 import MFASetup from '@/components/auth/MFASetup';
 import { useAuth } from '@/services/auth';
 
@@ -19,11 +18,9 @@ export default function MFAPage() {
 
   if (isLoading) {
     return (
-      <MainLayout>
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <p>Loading...</p>
-        </div>
-      </MainLayout>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p>Loading...</p>
+      </div>
     );
   }
 
@@ -32,11 +29,9 @@ export default function MFAPage() {
   }
 
   return (
-    <MainLayout>
-      <div className="max-w-3xl mx-auto py-12">
-        <h1 className="text-3xl font-semibold text-gray-900 mb-8">Account Security</h1>
-        <MFASetup />
-      </div>
-    </MainLayout>
+    <div className="max-w-3xl mx-auto py-12">
+      <h1 className="text-3xl font-semibold text-gray-900 mb-8">Account Security</h1>
+      <MFASetup />
+    </div>
   );
 }

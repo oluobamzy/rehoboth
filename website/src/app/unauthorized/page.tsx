@@ -1,13 +1,11 @@
 // src/app/unauthorized/page.tsx
 import React from 'react';
-import MainLayout from '@/components/common/MainLayout';
 import Link from 'next/link';
 import Button from '@/components/common/Button';
 
 export default function UnauthorizedPage() {
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-16 text-center">
+    <div className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-md mx-auto">
           <svg
             className="mx-auto h-16 w-16 text-red-500"
@@ -39,6 +37,5 @@ export default function UnauthorizedPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }

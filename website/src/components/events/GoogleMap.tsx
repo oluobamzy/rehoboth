@@ -2,7 +2,13 @@
 
 // Placeholder component for Google Maps integration
 // In a real implementation, this would use the Google Maps API
-export default function GoogleMap({ location, name, address }) {
+interface GoogleMapProps {
+  location: string;
+  name?: string;
+  address?: string;
+}
+
+export default function GoogleMap({ location, name, address }: GoogleMapProps) {
   return (
     <div className="flex items-center justify-center h-full w-full bg-gray-100">
       <div className="text-center p-4">

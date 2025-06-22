@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Storage Proxy Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .test-container {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .test-image {
+      max-width: 100%;
+      margin: 15px 0;
+      border: 2px dashed #aaa;
+      padding: 5px;
+    }
+    .status {
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .loading {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    button {
+      padding: 10px 15px;
+      background: #0070f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #0051a2;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      overflow: auto;
+      max-height: 300px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Firebase Storage Proxy Test</h1>
+  
+  <div class="test-container">
+    <h2>Test Proxy with Image Path</h2>
+    <input type="text" id="imagePathInput" placeholder="Enter image path (e.g., carousel/1750328686704-823.jpeg)" value="carousel/1750328686704-823.jpeg">
+    <div>
+      <button id="testProxyButton">Test Proxy</button>
+      <button id="testDirectButton">Test Direct Image</button>
+    </div>
+    
+    <div>
+      <h3>Image with Proxy</h3>
+      <div id="proxyStatus" class="status loading">Loading...</div>
+      <img id="proxyImage" class="test-image" alt="Proxy Test" src="">
+    </div>
+    
+    <div>
+      <h3>Direct Image (for comparison)</h3>
+      <div id="directStatus" class="status">Not tested yet</div>
+      <img id="directImage" class="test-image" alt="Direct Test" style="display:none;">
+    </div>
+  </div>
+  
+  <div class="test-container">
+    <h2>Test with Other Known Paths</h2>
+    <button class="test-path-btn" data-path="/rehoboth_logo_plain.png">Test with Logo</button>
+    <button class="test-path-btn" data-path="https://images.unsplash.com/photo-1536500152107-01ab1422f932">Test with Unsplash</button>
+    <button class="test-path-btn" data-path="carousel/test-image.jpg">Test with Example Carousel Image</button>
+  </div>
+  
+  <div class="test-container">
+    <h2>Debug Information</h2>
+    <pre id="debugInfo">No debug information available yet.</pre>
+  </div>
+  
+  <script>
+    // Initialize elements
+    const imagePathInput = document.getElementById('imagePathInput');
+    const testProxyButton = document.getElementById('testProxyButton');
+    const testDirectButton = document.getElementById('testDirectButton');
+    const proxyImage = document.getElementById('proxyImage');
+    const directImage = document.getElementById('directImage');
+    const proxyStatus = document.getElementById('proxyStatus');
+    const directStatus = document.getElementById('directStatus');
+    const debugInfo = document.getElementById('debugInfo');
+    const pathButtons = document.querySelectorAll('.test-path-btn');
+    
+    // Logging function
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      debugInfo.textContent = `[${timestamp}] ${message}\n${debugInfo.textContent}`;
+      console.log(`[${timestamp}] ${message}`);
+    }
+    
+    // Test the proxy with the given path
+    function testProxy(path) {
+      // Clear previous results
+      proxyImage.src = '';
+      proxyStatus.className = 'status loading';
+      proxyStatus.textContent = 'Loading...';
+      
+      // Construct the proxy URL
+      let proxyUrl;
+      if (path.startsWith('/')) {
+        // Just use the path as is if it starts with /
+        proxyUrl = path;
+      } else if (path.startsWith('http')) {
+        // Use direct URL for external resources
+        proxyUrl = path;
+      } else {
+        // Construct API proxy path
+        proxyUrl = `/api/proxy/${path}`;
+      }
+      
+      log(`Testing proxy with path: ${path}`);
+      log(`Proxy URL: ${proxyUrl}`);
+      
+      // Load the image
+      proxyImage.onload = () => {
+        proxyStatus.className = 'status success';
+        proxyStatus.textContent = `✅ Success: Image loaded (${proxyImage.naturalWidth}x${proxyImage.naturalHeight})`;
+        log(`Proxy image loaded successfully: ${proxyUrl}`);
+      };
+      
+      proxyImage.onerror = () => {
+        proxyStatus.className = 'status error';
+        proxyStatus.textContent = `❌ Error: Failed to load image`;
+        log(`Proxy image failed to load: ${proxyUrl}`);
+      };
+      
+      proxyImage.src = proxyUrl;
+    }
+    
+    // Test with direct Firebase Storage URL
+    function testDirect(path) {
+      // Skip if not a Firebase path
+      if (path.startsWith('/') || path.startsWith('http')) {
+        directStatus.textContent = 'Not applicable for local or external URLs';
+        return;
+      }
+      
+      directImage.style.display = 'block';
+      directStatus.className = 'status loading';
+      directStatus.textContent = 'Loading...';
+      
+      // Construct direct Firebase Storage URL
+      const storageUrl = `https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o/${encodeURIComponent(path)}?alt=media`;
+      
+      log(`Testing direct Firebase URL: ${storageUrl}`);
+      
+      // Load the image
+      directImage.onload = () => {
+        directStatus.className = 'status success';
+        directStatus.textContent = `✅ Success: Image loaded (${directImage.naturalWidth}x${directImage.naturalHeight})`;
+        log(`Direct image loaded successfully: ${storageUrl}`);
+      };
+      
+      directImage.onerror = () => {
+        directStatus.className = 'status error';
+        directStatus.textContent = `❌ Error: Failed to load image`;
+        log(`Direct image failed to load: ${storageUrl}`);
+      };
+      
+      directImage.src = storageUrl;
+    }
+    
+    // Event listeners
+    testProxyButton.addEventListener('click', () => {
+      const path = imagePathInput.value.trim();
+      if (path) {
+        testProxy(path);
+      }
+    });
+    
+    testDirectButton.addEventListener('click', () => {
+      const path = imagePathInput.value.trim();
+      if (path) {
+        testDirect(path);
+      }
+    });
+    
+    pathButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const path = button.getAttribute('data-path');
+        imagePathInput.value = path;
+        testProxy(path);
+      });
+    });
+    
+    // Initialize with the default value
+    if (imagePathInput.value) {
+      testProxy(imagePathInput.value);
+    }
+  </script>
+</body>
+</html>

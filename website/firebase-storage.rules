@@ -58,6 +58,16 @@ service firebase.storage {
                    request.auth.token.admin == true;
     }
     
+    // Public carousel images - anyone can read, only authenticated admins can write
+    match /carousel/{filename} {
+      // Allow public read access to carousel images
+      allow read: if true;
+      
+      // Only authenticated admin users can write
+      allow write: if request.auth != null && 
+                   request.auth.token.admin == true;
+    }
+    
     // Admin-specific media files
     match /admin/{userId}/{filename} {
       // Only the owner and admins can read and write their own files

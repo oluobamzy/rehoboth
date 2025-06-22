@@ -22,29 +22,41 @@ const CATEGORIES = [
   { value: 'community', label: 'Community' },
 ];
 
-export default function EventFilters({ filters, onFilterChange }) {
+interface EventFiltersProps {
+  filters: {
+    category?: string;
+    eventType?: string;
+    featured?: boolean | null;
+    query?: string;
+    fromDate?: string;
+    toDate?: string;
+  };
+  onFilterChange: (newFilters: any) => void;
+}
+
+export default function EventFilters({ filters, onFilterChange }: EventFiltersProps) {
   // Local state for search input (to prevent excessive API calls while typing)
   const [searchInput, setSearchInput] = useState(filters.query || '');
   
   // Handle input changes
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
   
   // Handle search submission
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onFilterChange({ query: searchInput });
   };
   
   // Handle select changes
-  const handleSelectChange = (e) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     onFilterChange({ [name]: value || null });
   };
   
   // Handle date changes
-  const handleDateChange = (e) => {
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onFilterChange({ [name]: value || null });
   };

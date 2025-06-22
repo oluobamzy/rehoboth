@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/services/auth';
 import Link from 'next/link';
-import MainLayout from '@/components/common/MainLayout';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -25,16 +24,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading || authLoading) {
     return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-12 flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </MainLayout>
+      <div className="container mx-auto px-4 py-12 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <nav className="mb-6">
@@ -116,6 +112,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </div>
       </div>
-    </MainLayout>
   );
 }
