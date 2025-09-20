@@ -225,7 +225,7 @@ export default function SermonSearch() {
             <button
               type="button"
               onClick={clearFilters}
-              className="text-orange-600 hover:text-orange-800 ml-auto focus:outline-none font-medium"
+              className="text-blue-600 hover:text-blue-700 ml-auto focus:outline-none font-medium"
             >
               Clear all filters
             </button>

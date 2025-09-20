@@ -22,41 +22,41 @@ export default function Home() {
       <section className="relative z-20 bg-gradient-to-b from-white to-gray-50 pb-16">
         <div className="container mx-auto px-4 -mt-24">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-orange-500">
-              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500">
+              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Sunday Services</h3>
+              <h3 className="text-2xl font-bold mb-3 text-blue-900">Sunday Services</h3>
               <p className="mb-5 text-gray-600">Join us every Sunday at 10:00 AM for worship, prayer, and fellowship.</p>
-              <Link href="/events" className="text-orange-500 font-medium hover:underline flex items-center justify-center gap-1 group">
+              <Link href="/events" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 View Schedule <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
             </div>
             
-            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-orange-500">
-              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500">
+              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Latest Sermons</h3>
+              <h3 className="text-2xl font-bold mb-3 text-blue-900">Latest Sermons</h3>
               <p className="mb-5 text-gray-600">Listen to our recent messages and grow in your understanding of God&apos;s Word.</p>
-              <Link href="/sermons" className="text-orange-500 font-medium hover:underline flex items-center justify-center gap-1 group">
+              <Link href="/sermons" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 Listen Now <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
             </div>
             
-            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-orange-500">
-              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+            <div className="bg-white rounded-lg shadow-xl p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500">
+              <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Giving Back</h3>
+              <h3 className="text-2xl font-bold mb-3 text-blue-900">Giving Back</h3>
               <p className="mb-5 text-gray-600">Discover opportunities to serve, connect, and make a difference in our community.</p>
-              <Link href="/donate" className="text-orange-500 font-medium hover:underline flex items-center justify-center gap-1 group">
+              <Link href="/donate" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 Donate Now <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
             </div>
@@ -78,7 +78,7 @@ export default function Home() {
           <section className="mb-16">
             <div className="flex flex-col items-center justify-center mb-12">
               <div className="relative mb-8">
-                <div className="absolute -inset-6 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-full opacity-70 blur-xl"></div>
+                <div className="absolute -inset-6 bg-gradient-to-r from-blue-100 to-green-100 rounded-full opacity-70 blur-xl"></div>
                 <Image 
                   src="/rehoboth_logo.jpg" 
                   alt="Rehoboth Christian Church Logo" 
@@ -88,9 +88,9 @@ export default function Home() {
                   priority
                 />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-center relative">
-                Welcome to <span className="text-orange-500">Rehoboth</span> Christian Church
-                <span className="absolute -bottom-2 left-1/2 w-20 h-1 bg-orange-500 transform -translate-x-1/2"></span>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-center relative text-blue-900">
+                Welcome to <span className="text-green-600">Rehoboth</span> Christian Church
+                <span className="absolute -bottom-2 left-1/2 w-20 h-1 bg-blue-600 transform -translate-x-1/2"></span>
               </h2>
             </div>
             <div className="max-w-3xl mx-auto text-center">
@@ -99,7 +99,7 @@ export default function Home() {
               </p>
               <div className="flex justify-center">
                 <Link href="/about" className="inline-block">
-                  <button className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg">
+                  <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg">
                     Learn More About Us
                   </button>
                 </Link>
@@ -110,7 +110,7 @@ export default function Home() {
           {/* Additional content section */}
           <section className="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
-              <h3 className="text-3xl font-bold mb-5">Our <span className="text-orange-500">Mission</span></h3>
+              <h3 className="text-3xl font-bold mb-5 text-blue-900">Our <span className="text-green-600">Mission</span></h3>
               <p className="text-gray-600 mb-4">
                 At Rehoboth Christian Church, we strive to create a welcoming community where everyone can experience God&apos;s love, grow in their faith journey, and find meaningful ways to serve others.
               </p>
@@ -119,10 +119,10 @@ export default function Home() {
               </p>
               <div className="space-y-3">
                 <div>
-                  <Link href="/about?tab=mission" className="text-orange-500 font-medium hover:underline">Read More About Our Mission →</Link>
+                  <Link href="/about?tab=mission" className="text-blue-600 font-medium hover:underline">Read More About Our Mission →</Link>
                 </div>
                 <div>
-                  <Link href="/about?tab=vision" className="text-orange-500 font-medium hover:underline">Discover Our Vision →</Link>
+                  <Link href="/about?tab=vision" className="text-blue-600 font-medium hover:underline">Discover Our Vision →</Link>
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
-              <h3 className="text-3xl font-bold mb-5">Meet Our <span className="text-orange-500">Pastor</span></h3>
+              <h3 className="text-3xl font-bold mb-5 text-blue-900">Meet Our <span className="text-green-600">Pastor</span></h3>
               <p className="text-gray-600 mb-4">
                 Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God&apos;s love and transforming lives through the power of the gospel.
               </p>
@@ -153,12 +153,12 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/about#pastor" className="inline-block">
-                  <button className="bg-orange-500 text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition-colors">
+                  <button className="bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
                     Meet the Team
                   </button>
                 </Link>
                 <Link href="/contact" className="inline-block">
-                  <button className="border-2 border-orange-500 text-orange-500 px-6 py-3 rounded-md font-medium hover:bg-orange-50 transition-colors">
+                  <button className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition-colors">
                     Contact Us
                   </button>
                 </Link>
@@ -181,7 +181,7 @@ export default function Home() {
       <section className="mb-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Upcoming <span className="text-orange-500">Events</span></h2>
+            <h2 className="text-3xl font-bold mb-4 text-blue-900">Upcoming <span className="text-green-600">Events</span></h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
               Join us for these special events and activities at Rehoboth Christian Church. All are welcome!
             </p>
@@ -190,7 +190,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Event Card 1 */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100">
-              <div className="bg-orange-500 text-white p-2 text-center font-bold">
+              <div className="bg-blue-600 text-white p-2 text-center font-bold">
                 SUNDAY, JUNE 23, 2025
               </div>
               <div className="p-6">
@@ -210,7 +210,7 @@ export default function Home() {
                 </div>
                 <p className="text-gray-600 mb-4">Join us for worship, prayer, and an inspiring message from Pastor Patrick.</p>
                 <Link href="/events/sunday-worship">
-                  <button className="w-full bg-gray-100 hover:bg-orange-50 text-orange-500 py-2 rounded-md font-medium transition-colors">
+                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 rounded-md font-medium transition-colors">
                     Event Details
                   </button>
                 </Link>
@@ -219,7 +219,7 @@ export default function Home() {
             
             {/* Event Card 2 */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100">
-              <div className="bg-orange-500 text-white p-2 text-center font-bold">
+              <div className="bg-blue-600 text-white p-2 text-center font-bold">
                 WEDNESDAY, JUNE 26, 2025
               </div>
               <div className="p-6">
@@ -239,7 +239,7 @@ export default function Home() {
                 </div>
                 <p className="text-gray-600 mb-4">Dive deeper into God&apos;s Word with our interactive Bible study and discussion group.</p>
                 <Link href="/events/bible-study">
-                  <button className="w-full bg-gray-100 hover:bg-orange-50 text-orange-500 py-2 rounded-md font-medium transition-colors">
+                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 rounded-md font-medium transition-colors">
                     Event Details
                   </button>
                 </Link>
@@ -248,7 +248,7 @@ export default function Home() {
             
             {/* Event Card 3 */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100">
-              <div className="bg-orange-500 text-white p-2 text-center font-bold">
+              <div className="bg-blue-600 text-white p-2 text-center font-bold">
                 SATURDAY, JUNE 29, 2025
               </div>
               <div className="p-6">
@@ -268,7 +268,7 @@ export default function Home() {
                 </div>
                 <p className="text-gray-600 mb-4">Volunteer with us as we serve our local community through this family-friendly event.</p>
                 <Link href="/events/outreach">
-                  <button className="w-full bg-gray-100 hover:bg-orange-50 text-orange-500 py-2 rounded-md font-medium transition-colors">
+                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 rounded-md font-medium transition-colors">
                     Event Details
                   </button>
                 </Link>
@@ -278,7 +278,7 @@ export default function Home() {
           
           <div className="text-center mt-8">
             <Link href="/events">
-              <button className="bg-orange-500 text-white px-8 py-3 rounded-md font-medium hover:bg-orange-600 transition-colors">
+              <button className="bg-green-600 text-white px-8 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
                 View All Events
               </button>
             </Link>
@@ -289,14 +289,14 @@ export default function Home() {
       <section className="mb-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Latest <span className="text-orange-500">Sermons</span></h2>
+            <h2 className="text-3xl font-bold mb-4 text-blue-900">Latest <span className="text-green-600">Sermons</span></h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
               Listen to our most recent messages to grow in your faith and biblical understanding.
             </p>
           </div>
           <div className="flex justify-center">
             <Link href="/sermons">
-              <button className="bg-orange-500 text-white px-8 py-3 rounded-md font-medium hover:bg-orange-600 transition-colors">
+              <button className="bg-green-600 text-white px-8 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
                 Browse All Sermons
               </button>
             </Link>
@@ -309,43 +309,43 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 className="text-3xl font-bold mb-5">Visit <span className="text-orange-500">Us</span></h3>
+              <h3 className="text-3xl font-bold mb-5 text-blue-900">Visit <span className="text-green-600">Us</span></h3>
               <p className="text-gray-600 mb-6">
                 We&apos;d love to see you at our next service. Come experience the warmth and welcome of our church family.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <div>
-                    <h4 className="font-semibold text-gray-800">Address</h4>
+                    <h4 className="font-semibold text-blue-800">Address</h4>
                     <p className="text-gray-600">123 Faith Avenue, Rehoboth, MA 02769</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <h4 className="font-semibold text-gray-800">Service Times</h4>
+                    <h4 className="font-semibold text-blue-800">Service Times</h4>
                     <p className="text-gray-600">Sunday: 10:00 AM<br />Wednesday: 7:00 PM</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <h4 className="font-semibold text-gray-800">Contact</h4>
+                    <h4 className="font-semibold text-blue-800">Contact</h4>
                     <p className="text-gray-600">info@rehobothchurch.org<br />+1 (555) 123-4567</p>
                   </div>
                 </div>
               </div>
               <div className="mt-8">
                 <Link href="/contact" className="inline-block">
-                  <button className="bg-orange-500 text-white px-8 py-3 rounded-md font-medium hover:bg-orange-600 transition-colors">
+                  <button className="bg-green-600 text-white px-8 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
                     Contact Us
                   </button>
                 </Link>
@@ -353,7 +353,7 @@ export default function Home() {
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
               <div className="bg-gray-300 h-[300px] w-full flex items-center justify-center">
-                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 flex items-center">
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 flex items-center">
                   <span className="mr-2">View on Google Maps</span>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

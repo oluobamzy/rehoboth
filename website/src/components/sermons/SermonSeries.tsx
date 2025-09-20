@@ -48,11 +48,11 @@ export default function SermonSeries({ seriesId, initialData }: SermonSeriesProp
   if (isError || !series) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">Series Not Found</h2>
+        <h2 className="text-2xl font-bold text-blue-600 mb-4">Series Not Found</h2>
         <p className="text-gray-600 mb-6">
           The sermon series you are looking for may have been removed or does not exist.
         </p>
-        <Link href="/sermons" className="text-orange-600 hover:text-orange-800 font-medium">
+        <Link href="/sermons" className="text-blue-600 hover:text-blue-700 font-medium">
           ← Browse all sermons
         </Link>
       </div>
@@ -117,7 +117,7 @@ export default function SermonSeries({ seriesId, initialData }: SermonSeriesProp
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Sermons in this series</h2>
-          <Link href="/sermons" className="text-orange-600 hover:text-orange-800">
+          <Link href="/sermons" className="text-blue-600 hover:text-blue-700">
             All sermons
           </Link>
         </div>
@@ -148,7 +148,7 @@ export default function SermonSeries({ seriesId, initialData }: SermonSeriesProp
           <div className="text-center">
             <button
               onClick={() => setShowAll(!showAll)}
-              className="px-6 py-2 border border-orange-600 text-orange-600 rounded-md hover:bg-orange-600 hover:text-white transition-colors"
+              className="px-6 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition-colors"
             >
               {showAll ? 'Show less' : `Show all ${series.sermons?.length} sermons`}
             </button>

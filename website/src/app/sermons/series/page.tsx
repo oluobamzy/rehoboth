@@ -113,7 +113,7 @@ export default function SermonSeriesListPage() {
                 
                 {/* Series content */}
                 <div className="p-6 flex-grow">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                     {series.title}
                   </h2>
                   
@@ -141,7 +141,7 @@ export default function SermonSeriesListPage() {
                 
                 {/* View button */}
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                  <span className="text-orange-600 font-medium text-sm group-hover:text-orange-700 transition-colors flex items-center">
+                  <span className="text-blue-600 font-medium text-sm group-hover:text-blue-700 transition-colors flex items-center">
                     View Series
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

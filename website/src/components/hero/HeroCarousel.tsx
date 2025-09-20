@@ -1,23 +1,28 @@
 "use client";
 
 // src/components/hero/HeroCarousel.tsx
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import CarouselSlide, { CarouselSlideProps } from './CarouselSlide';
+import CarouselSlide from './CarouselSlide';
 import CarouselControls from './CarouselControls';
 import CarouselIndicators from './CarouselIndicators';
 import { fetchCarouselSlides } from '@/services/carouselService';
 import useCarousel from '@/hooks/useCarousel';
+import { HeroCarousels } from '@/data/heroCarouselData';
 
 export default function HeroCarousel() {
-  const { data: slides, isLoading } = useQuery({
+  const { data: apiSlides, isLoading, error } = useQuery({
     queryKey: ['carouselSlides'],
     queryFn: fetchCarouselSlides,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1, // Only retry once for better UX
   });
 
-  // Reference to the carousel element for debugging
+  // Use curated slides as primary content, fallback to API if available
+  const displaySlides = HeroCarousels; // Always use our curated content for now
+  
   const carouselRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const {
     currentIndex,
@@ -28,146 +33,171 @@ export default function HeroCarousel() {
     togglePlayPause,
     handleTouchStart,
     handleTouchEnd
-  } = useCarousel(slides || [], 5000);
-  
-  // Placeholder slides for development, will be replaced by API data
-  const placeholderSlides: CarouselSlideProps[] = [
-    {
-      id: '1',
-      title: 'Welcome to Rehoboth Christian Church',
-      subtitle: 'Join us for Sunday worship at 10:00 AM. We are a community committed to following Jesus Christ and serving our neighbors with compassion and love.',
-      imageUrl: '/rehoboth_logo_plain.png',
-      ctaText: 'Learn More',
-      ctaLink: '/about'
-    },
-    {
-      id: '2',
-      title: 'Join Our Community',
-      subtitle: 'Find fellowship, purpose, and spiritual growth in our vibrant church family. Connect with others who share your faith and values.',
-      imageUrl: 'https://images.unsplash.com/photo-1536500152107-01ab1422f932?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
-      ctaText: 'Get Involved',
-      ctaLink: '/ministries'
-    },
-    {
-      id: '3',
-      title: 'Sunday School for All Ages',
-      subtitle: 'Every Sunday at 9:00 AM. Our classes provide Biblical teaching and spiritual formation for children, teens, and adults.',
-      imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
-      ctaText: 'View Schedule',
-      ctaLink: '/events'
-    }
-  ];
-  
-  // Use placeholder slides during development or when API fails
-  const displaySlides = slides?.length ? slides : placeholderSlides;
+  } = useCarousel(displaySlides, 6000); // 6 second intervals for professional feel
 
-  // Debug slide visibility issues
+  // Intersection Observer for animation triggers
   useEffect(() => {
-    // Only run in development mode
-    if (process.env.NODE_ENV !== 'development') return;
-    
-    console.log(`Carousel has ${displaySlides.length} slides, current index: ${currentIndex}`);
-    console.log('Active slide:', displaySlides[currentIndex]);
-  }, [displaySlides, currentIndex]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
 
-  // Handle edge cases
+    if (carouselRef.current) {
+      observer.observe(carouselRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Preload next slide for smooth transitions
+  useEffect(() => {
+    const nextIndex = (currentIndex + 1) % displaySlides.length;
+    const nextSlide = displaySlides[nextIndex];
+    
+    if (nextSlide?.image) {
+      const img = new Image();
+      img.src = nextSlide.image;
+    }
+  }, [currentIndex, displaySlides]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goToPrevious();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        goToNext();
+      } else if (event.key === ' ') {
+        event.preventDefault();
+        togglePlayPause();
+      } else if (event.key >= '1' && event.key <= '9') {
+        const slideIndex = parseInt(event.key) - 1;
+        if (slideIndex < displaySlides.length) {
+          event.preventDefault();
+          goToSlide(slideIndex);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToPrevious, goToNext, togglePlayPause, goToSlide, displaySlides.length]);
+
   if (isLoading) {
-    return <div className="flex items-center justify-center h-[600px] bg-gray-900">Loading...</div>;
-  }
-  
-  // Only show error if both API data and placeholders are unavailable
-  if (!slides?.length && !placeholderSlides.length) {
     return (
-      <div className="flex items-center justify-center h-[600px] bg-gray-900">
-        <p className="text-gray-300">Unable to load carousel content</p>
-      </div>
+      <section className="relative w-full h-[90vh] bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+            <p className="text-white/90 text-lg font-medium">Loading Experience...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || displaySlides.length === 0) {
+    return (
+      <section className="relative w-full h-[90vh] bg-gradient-to-br from-slate-800 to-slate-600 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Welcome to Rehoboth Christian Church</h2>
+          <p className="text-xl mb-8">Experience faith, community, and transformation</p>
+          <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            Learn More
+          </button>
+        </div>
+      </section>
     );
   }
 
   return (
-    <section 
+    <section
       ref={carouselRef}
-      className="relative w-full h-[600px] bg-gradient-to-r from-gray-900 to-gray-800"
-      style={{ 
-        position: 'relative',
-        width: '100%',
-        height: '600px', 
-        overflow: 'hidden'
-      }}
+      className="relative w-full h-[90vh] overflow-hidden bg-black mb-16 md:mb-20 lg:mb-24"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       data-testid="hero-carousel"
-      data-carousel="hero"
-      id="hero-carousel"
+      style={{
+        minHeight: '90vh',
+        maxHeight: '90vh'
+      }}
     >
-      {/* Carousel Slides Container */}
-      <div 
-        className="carousel-slides-container" 
-        style={{ 
-          position: 'relative',
-          width: '100%',
-          height: '100%' 
-        }} 
-        data-slides-container
-      >
+      {/* Progress Bar */}
+      <div className="absolute top-0 left-0 right-0 z-50">
+        <div className="h-1 bg-white/20">
+          <div 
+            className="h-full bg-gradient-to-r from-green-500 to-blue-400 transition-all duration-100 ease-linear"
+            style={{ width: `${((currentIndex + 1) / displaySlides.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Slides Container */}
+      <div className="relative w-full min-h-[85vh] h-full">
         {displaySlides.map((slide, index) => {
           const isActive = currentIndex === index;
+          const isPrev = currentIndex === index - 1 || (currentIndex === 0 && index === displaySlides.length - 1);
+          const isNext = currentIndex === index + 1 || (currentIndex === displaySlides.length - 1 && index === 0);
           
-          // Enhanced visibility and positioning styles
           return (
             <div 
               key={slide.id}
-              className={`carousel-slide ${
-                isActive ? 'active-slide' : 'inactive-slide'
+              className={`absolute inset-0 w-full min-h-[85vh] h-full transition-all duration-1000 ease-out ${
+                isActive 
+                  ? 'opacity-100 scale-100 z-20' 
+                  : isPrev 
+                    ? 'opacity-0 scale-105 -translate-x-full z-10'
+                    : isNext
+                      ? 'opacity-0 scale-105 translate-x-full z-10'
+                      : 'opacity-0 scale-110 z-0'
               }`}
-              style={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                width: '100%',
-                height: '100%',
-                opacity: isActive ? 1 : 0,
-                zIndex: isActive ? 10 : 0,
-                transition: 'opacity 500ms ease-in-out, visibility 500ms ease-in-out',
-                visibility: isActive ? 'visible' : 'hidden',
-                pointerEvents: isActive ? 'auto' : 'none',
-              }}
-              aria-hidden={!isActive}
               data-testid={`carousel-slide-${index}`}
-              data-slide={`slide-${index}`}
-              data-active={isActive ? "true" : "false"}
             >
               <CarouselSlide
-                id={slide.id}
-                title={slide.title}
-                subtitle={slide.subtitle}
-                imageUrl={slide.imageUrl}
-                ctaText={slide.ctaText}
-                ctaLink={slide.ctaLink}
+                {...slide}
+                isActive={isActive}
+                slideIndex={index}
               />
             </div>
           );
         })}
       </div>
 
-      {/* Carousel Controls - These are positioned on top with higher z-index */}
+      {/* Navigation Controls */}
       {displaySlides.length > 1 && (
         <>
           <CarouselControls 
             onPrevious={goToPrevious} 
             onNext={goToNext} 
             isPlaying={isPlaying} 
-            togglePlayPause={togglePlayPause} 
+            togglePlayPause={togglePlayPause}
           />
           <CarouselIndicators 
             slideCount={displaySlides.length} 
             currentIndex={currentIndex} 
-            goToSlide={goToSlide} 
+            goToSlide={goToSlide}
           />
         </>
       )}
+
+      {/* Scroll Indicator - Positioned to avoid button conflicts */}
+      <div className="absolute bottom-2 right-4 md:right-8 z-20 hidden md:block">
+        <div className="flex flex-col items-center space-y-1 text-white/50">
+          <span className="text-xs font-medium tracking-wide">SCROLL</span>
+          <svg 
+            className="w-4 h-4 animate-bounce" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </div>
     </section>
   );
 }
