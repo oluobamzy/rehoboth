@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { StripePaymentForm } from '@/components/payments/StripePaymentForm';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,17 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
 
 export default function EventPaymentPage({ 
-  params 
+  params,
+  searchParams
 }: { 
-  params: { id: string } 
+  params: Promise<{ id: string }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const eventId = params.id;
-  const registrationId = searchParams.get('registration');
+  const { id: eventId } = use(params);
+  const registrationId = Array.isArray(searchParams.registration) 
+    ? searchParams.registration[0] 
+    : searchParams.registration;
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

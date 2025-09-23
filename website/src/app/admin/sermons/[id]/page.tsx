@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AdminSermonForm from '@/components/sermons/admin/AdminSermonForm';
 
-export default function EditSermonPage({ params }: { params: { id: string } }) {
+export default function EditSermonPage({ params }: { params: Promise<{ id: string }> }) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { id } = params;
+  const { id } = use(params);
   
   const isNewSermon = id === 'new';
 

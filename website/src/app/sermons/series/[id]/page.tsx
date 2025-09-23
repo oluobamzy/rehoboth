@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { fetchSermonSeriesById } from '@/services/sermonService';
 import SermonSeries from '@/components/sermons/SermonSeries';
 import { notFound, useParams } from 'next/navigation';
@@ -9,15 +9,34 @@ import Card from '@/components/common/Card';
 import Image from 'next/image';
 import Link from 'next/link'; // Ensure Link is imported
 
+// Types
+interface SermonSeriesType {
+  id: string;
+  title: string;
+  description?: string;
+  image?: string;
+  start_date?: string;
+  end_date?: string;
+  sermons?: SermonType[];
+}
+
+interface SermonType {
+  id: string;
+  title: string;
+  speaker?: string;
+  date: string;
+  series_id?: string;
+}
+
 // Metadata is now handled dynamically in the component using Head
 
-export default function SermonSeriesPage() {
-  const params = useParams();
-  const seriesId = params.id as string;
-  
-  const [series, setSeries] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default function SeriesDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [series, setSeries] = useState<SermonSeriesType | null>(null);
+  const [sermons, setSermons] = useState<SermonType[]>([]);
+  const { id: seriesId } = use(params);
   
   // Check if we're using default Supabase credentials
   const usingDefaults = 
@@ -28,12 +47,12 @@ export default function SermonSeriesPage() {
   
   useEffect(() => {
     async function loadSeriesData() {
-      setIsLoading(true);
+      setLoading(true);
       
       // Check if we're using default credentials
       if (usingDefaults) {
         setConnectionError('Database credentials not properly configured');
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
       
@@ -53,7 +72,7 @@ export default function SermonSeriesPage() {
         console.error('Error fetching series data:', error);
         setConnectionError('Failed to connect to the database');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     }
 
@@ -68,7 +87,7 @@ export default function SermonSeriesPage() {
   }
   
   // Show loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto py-12 px-4">
         <div className="animate-pulse">
@@ -104,7 +123,7 @@ export default function SermonSeriesPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {series.sermons.map((sermon: any) => (
+            {series.sermons?.map((sermon: any) => (
               <Card key={sermon.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="relative h-48">
                   <Image 

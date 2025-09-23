@@ -79,21 +79,53 @@ const donationSchemaSql = `
   CREATE POLICY "Public can view active donation designations" ON donation_designations
     FOR SELECT USING (is_active = true);
   
-  -- Admin policy for full access to all tables
-  CREATE POLICY "Admins have full access to donations" ON donations
-    FOR ALL TO authenticated
-    USING (auth.uid() IN (SELECT user_id FROM admin_users))
-    WITH CHECK (auth.uid() IN (SELECT user_id FROM admin_users));
-  
-  CREATE POLICY "Admins have full access to designations" ON donation_designations
-    FOR ALL TO authenticated
-    USING (auth.uid() IN (SELECT user_id FROM admin_users))
-    WITH CHECK (auth.uid() IN (SELECT user_id FROM admin_users));
-  
-  CREATE POLICY "Admins have full access to recurring donations" ON recurring_donations
-    FOR ALL TO authenticated
-    USING (auth.uid() IN (SELECT user_id FROM admin_users))
-    WITH CHECK (auth.uid() IN (SELECT user_id FROM admin_users));
+    -- Admin can manage all donations
+  CREATE POLICY "Admin can manage all donations" ON donations
+    FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    )
+    WITH CHECK (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    );
+
+  -- Admin can manage donation designations
+  CREATE POLICY "Admin can manage donation designations" ON donation_designations
+    FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    )
+    WITH CHECK (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    );
+
+  -- Admin can view recurring donations
+  CREATE POLICY "Admin can view recurring donations" ON recurring_donations
+    FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    )
+    WITH CHECK (
+      EXISTS (
+        SELECT 1 FROM user_roles 
+        WHERE user_id = auth.uid() AND role = 'admin'
+      )
+    );
   
   -- Donors can view their own donations
   CREATE POLICY "Users can view their own donations" ON donations
@@ -118,7 +150,7 @@ async function setupDonationsSchema() {
     console.log('Setting up donation database schema...');
     
     // Execute the SQL to create tables and policies
-    const { error } = await supabase.rpc('exec', { sql: donationSchemaSql });
+    const { error } = await supabase.rpc('exec', { query: donationSchemaSql });
     
     if (error) throw error;
     

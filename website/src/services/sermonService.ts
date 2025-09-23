@@ -56,6 +56,17 @@ export interface PaginatedSermons {
   };
 }
 
+// Helper function to transform sermon data from database response
+function transformSermonData(rawSermon: any): Sermon {
+  // Map sermon_series to series for backward compatibility
+  const sermon = { ...rawSermon };
+  if (sermon.sermon_series) {
+    sermon.series = sermon.sermon_series;
+    delete sermon.sermon_series;
+  }
+  return sermon as Sermon;
+}
+
 // Helper function to check if tables exist
 async function checkTablesExist() {
   try {
@@ -207,7 +218,7 @@ export async function fetchSermons({
       .from('sermons')
       .select(`
         *,
-        series:sermon_series(id, title, description, image_url)
+        sermon_series!series_id(id, title, description, image_url)
       `);
     
     // Only filter by published status if we're not including unpublished sermons
@@ -293,7 +304,7 @@ export async function fetchSermons({
       result_count: sermons?.length || 0,
     });
 
-    return { sermons, count };
+    return { sermons: sermons?.map(transformSermonData) || [], count };
   } catch (error) {
     console.error('Failed to fetch sermons:', error);
     return { 
@@ -318,7 +329,7 @@ export async function fetchSermonById(id: string) {
       .from('sermons')
       .select(`
         *,
-        series:sermon_series(id, title, description, image_url)
+        sermon_series!series_id(id, title, description, image_url)
       `)
       .eq('id', id)
       .single();
@@ -328,18 +339,20 @@ export async function fetchSermonById(id: string) {
       throw error;
     }
 
+    const transformedSermon = transformSermonData(sermon);
+
     // Increment view count
     await incrementSermonViewCount(id);
 
     // Track view in PostHog
     posthog.capture('sermon_viewed', {
       sermon_id: id,
-      sermon_title: sermon.title,
-      speaker: sermon.speaker_name,
-      series: sermon.series?.title,
+      sermon_title: transformedSermon.title,
+      speaker: transformedSermon.speaker_name,
+      series: transformedSermon.series?.title,
     });
 
-    return sermon;
+    return transformedSermon;
   } catch (error) {
     console.error('Failed to fetch sermon:', error);
     return null;
@@ -456,7 +469,7 @@ export async function fetchSermonSeriesById(id: string) {
       };
     }
 
-    return { ...series, sermons };
+    return { ...series, sermons: sermons?.map(transformSermonData) || [] };
   } catch (error) {
     console.error('Failed to fetch sermon series with sermons:', error);
     return { 
@@ -605,6 +618,12 @@ export async function saveSermon(
   videoFile?: File | null,
   thumbnailFile?: File | null
 ): Promise<Sermon> {
+  console.log('saveSermon called with:');
+  console.log('- Sermon data:', JSON.stringify(sermon, null, 2));
+  console.log('- Audio file:', audioFile?.name || 'none');
+  console.log('- Video file:', videoFile?.name || 'none');
+  console.log('- Thumbnail file:', thumbnailFile?.name || 'none');
+  
   const sermonData: Partial<Sermon> = { ...sermon };
   let newSermonId = sermon.id; // This could be undefined if it's a new sermon
 
@@ -622,7 +641,10 @@ export async function saveSermon(
           view_count: 0,
           // Add other required fields with defaults if necessary
         }])
-        .select()
+        .select(`
+          *,
+          sermon_series!series_id(id, title, description, image_url)
+        `)
         .single();
 
       if (createError) {
@@ -661,21 +683,41 @@ export async function saveSermon(
     // Update sermon with all data (including file URLs if any were uploaded or changed)
     // For new sermons, this updates the record created earlier.
     // For existing sermons, this updates with any new file URLs or other changed data.
+    console.log('Updating sermon with data:', JSON.stringify(sermonData, null, 2));
+    console.log('Sermon ID:', newSermonId);
+    
     const { data: finalSermon, error: updateError } = await supabase
       .from('sermons')
       .update(sermonData) // sermonData now contains all fields to be updated/set
       .eq('id', newSermonId)
-      .select()
+      .select(`
+        *,
+        sermon_series!series_id(id, title, description, image_url)
+      `)
       .single();
 
     if (updateError) {
-      console.error('Error updating sermon details:', updateError);
+      console.error('Error updating sermon details:');
+      console.error('- Error object:', updateError);
+      console.error('- Error message:', updateError?.message);
+      console.error('- Error details:', updateError?.details);
+      console.error('- Error hint:', updateError?.hint);
+      console.error('- Error code:', updateError?.code);
+      console.error('- Full error JSON:', JSON.stringify(updateError, null, 2));
       throw updateError;
     }
-    return finalSermon as Sermon;
+    return transformSermonData(finalSermon);
 
-  } catch (error) {
-    console.error('Failed to save sermon:', error);
+  } catch (error: any) {
+    console.error('Failed to save sermon:');
+    console.error('- Error object:', error);
+    console.error('- Error message:', error?.message);
+    console.error('- Error name:', error?.name);
+    console.error('- Error stack:', error?.stack);
+    console.error('- Error details:', error?.details);
+    console.error('- Error hint:', error?.hint);
+    console.error('- Error code:', error?.code);
+    console.error('- Full error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     throw error;
   }
 }

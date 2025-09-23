@@ -1,0 +1,482 @@
+// src/app/admin/carousel/page.tsx
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
+import Button from '@/components/common/Button';
+import { HeroCarousels } from '@/data/heroCarouselData';
+import FallbackImage from '@/components/common/FallbackImage';
+
+export default function AdminCarouselPage() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Carousel Management</h1>
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div className="flex items-center mb-3">
+            <svg className="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-blue-900">Static Data Mode</h3>
+          </div>
+          <p className="text-blue-800 mb-4">
+            The carousel is currently using static data from the codebase. 
+            To edit carousel slides, modify the data in <code className="bg-blue-100 px-2 py-1 rounded">src/data/heroCarouselData.ts</code>
+          </p>
+          <p className="text-blue-700 text-sm">
+            This provides faster loading times and eliminates database dependencies for the homepage carousel.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Current Carousel Slides</h2>
+          <p className="text-gray-600 mt-1">Displaying {HeroCarousels.length} active slides</p>
+        </div>
+
+        <div className="divide-y divide-gray-200">
+          {HeroCarousels.map((slide, index) => (
+            <div key={slide.id} className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-16 rounded-lg overflow-hidden bg-gray-100">
+                    {slide.image ? (
+                      <FallbackImage
+                        src={slide.image}
+                        alt={slide.title}
+                        width={96}
+                        height={64}
+                        className="w-full h-full object-cover"
+                        fallbackSrc="/assets/images/church-hero.jpg"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-grow">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">{slide.title}</h3>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Slide {index + 1}
+                    </span>
+                  </div>
+                  
+                  {slide.subtitle && (
+                    <p className="text-gray-600 mt-1">{slide.subtitle}</p>
+                  )}
+                  
+                  <p className="text-gray-700 mt-2">{slide.description}</p>
+                  
+                  {slide.ctas?.primary && (
+                    <div className="mt-3">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        CTA: {slide.ctas.primary.text} → {slide.ctas.primary.link}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">How to Edit Carousel Slides</h3>
+        <div className="space-y-2 text-gray-700">
+          <p>1. Open the file: <code className="bg-gray-200 px-2 py-1 rounded font-mono text-sm">src/data/heroCarouselData.ts</code></p>
+          <p>2. Edit the <code className="bg-gray-200 px-2 py-1 rounded font-mono text-sm">HeroCarousels</code> array</p>
+          <p>3. Save the file and the changes will be reflected immediately</p>
+          <p>4. Deploy the changes to production using your deployment process</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || 'Failed to create carousel slide');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: { id: string } & Partial<Omit<CarouselSlideProps, 'id'>> & {
+      displayOrder?: number;
+      isActive?: boolean;
+      startDate?: string;
+      endDate?: string;
+    }) => updateCarouselSlide(data.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['carouselSlides'] });
+      resetForm();
+      setEditingSlideId(null);
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || 'Failed to update carousel slide');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteCarouselSlide,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['carouselSlides'] });
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || 'Failed to delete carousel slide');
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.imageUrl) {
+      setErrorMessage('Please upload an image');
+      return;
+    }
+
+    try {
+      if (editingSlideId) {
+        await updateMutation.mutateAsync({
+          id: editingSlideId,
+          ...formData,
+        });
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
+    } catch (error) {
+      // Error is handled in mutation onError
+      console.error('Error submitting form:', error);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setErrorMessage(null);
+
+    try {
+      const filePath = generateUniqueFilePath(file, 'carousel');
+      
+      const onProgress = (progress: number) => {
+        setUploadProgress(Math.round(progress * 100));
+      };
+      
+      const url = await uploadImage(file, filePath);
+      
+      setFormData({
+        ...formData,
+        imageUrl: url,
+      });
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Error uploading image');
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+    
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    });
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    
+    setFormData({
+      ...formData,
+      [name]: checked,
+    });
+  };
+
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setEditingSlideId(null);
+    setErrorMessage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const selectSlideForEditing = (slide: CarouselSlideProps & { displayOrder: number, isActive: boolean }) => {
+    setEditingSlideId(slide.id);
+    setFormData({
+      title: slide.title || '',
+      subtitle: slide.subtitle || '',
+      imageUrl: slide.imageUrl || '',
+      ctaText: slide.ctaText || '',
+      ctaLink: slide.ctaLink || '',
+      displayOrder: slide.displayOrder,
+      isActive: slide.isActive,
+      startDate: '',
+      endDate: '',
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this slide?')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="container mx-auto px-4 py-8">Error loading carousel slides</div>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-4">Carousel Slide Management</h1>
+        <p className="text-gray-600">
+          Create and manage carousel slides that appear on the homepage.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* Form Panel */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">{editingSlideId ? 'Edit Slide' : 'Create New Slide'}</h2>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Slide Title"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subtitle">
+                  Subtitle
+                </label>
+                <input
+                  type="text"
+                  id="subtitle"
+                  name="subtitle"
+                  value={formData.subtitle}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Slide Subtitle"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
+                  Image
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+                {isUploading && (
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                      <div className="bg-orange-500 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">Uploading: {uploadProgress}%</p>
+                  </div>
+                )}
+                {formData.imageUrl && (
+                  <div className="mt-2">
+                    <div className="relative h-32 w-full overflow-hidden rounded border">
+                      <FallbackImage
+                        src={formData.imageUrl}
+                        alt="Carousel slide preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="ctaText">
+                  CTA Text
+                </label>
+                <input
+                  type="text"
+                  id="ctaText"
+                  name="ctaText"
+                  value={formData.ctaText}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Call to Action Text"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="ctaLink">
+                  CTA Link
+                </label>
+                <input
+                  type="text"
+                  id="ctaLink"
+                  name="ctaLink"
+                  value={formData.ctaLink}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="/page-url or https://example.com"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="displayOrder">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  id="displayOrder"
+                  name="displayOrder"
+                  value={formData.displayOrder}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="0"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={handleCheckboxChange}
+                    className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                  />
+                  <span className="text-gray-700 text-sm font-bold">Active</span>
+                </label>
+              </div>
+              
+              {errorMessage && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded relative" role="alert">
+                  <span className="block sm:inline">{errorMessage}</span>
+                  <button 
+                    type="button"
+                    className="absolute top-0 right-0 p-2"
+                    onClick={() => setErrorMessage(null)}
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" onClick={resetForm} variant="outline">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending || isUploading}>
+                  {editingSlideId ? 'Update Slide' : 'Create Slide'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        {/* Slides List Panel */}
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Existing Slides</h2>
+            
+            {slides && slides.length > 0 ? (
+              <div className="space-y-6">
+                {slides.map((slide: any) => (
+                  <div key={slide.id} className="flex flex-col md:flex-row border rounded-lg overflow-hidden">
+                    <div className="relative h-48 w-full md:w-1/3">
+                      <FallbackImage
+                        src={slide.imageUrl}
+                        alt={slide.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-bold">{slide.title}</h3>
+                            <p className="text-gray-600">{slide.subtitle}</p>
+                          </div>
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${slide.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {slide.isActive ? 'Active' : 'Inactive'}
+                          </div>
+                        </div>
+                        
+                        {slide.ctaText && (
+                          <div className="mt-2">
+                            <span className="text-sm font-medium">CTA: </span>
+                            <span className="text-sm text-orange-600">{slide.ctaText}</span>
+                          </div>
+                        )}
+                        
+                        <div className="mt-1">
+                          <span className="text-sm font-medium">Order: </span>
+                          <span className="text-sm">{slide.displayOrder}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-2 mt-4">
+                        <Button
+                          onClick={() => selectSlideForEditing(slide)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(slide.id)}
+                          variant="error"
+                          size="sm"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">No carousel slides found. Create your first slide!</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

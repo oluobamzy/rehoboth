@@ -1,176 +1,21 @@
 // src/services/carouselService.ts
-import { supabase } from './supabase';
-import { CarouselSlideProps } from '@/components/hero/CarouselSlide';
-import { posthog } from './posthog';
+import { HeroCarousels, HeroCarouselItem } from '@/data/heroCarouselData';
 
-// Fetch active carousel slides
-export async function fetchCarouselSlides(): Promise<CarouselSlideProps[]> {
-  try {
-    const now = new Date().toISOString();
-
-    const { data, error } = await supabase
-      .from('carousel_slides')
-      .select('*')
-      .eq('is_active', true)
-      .or(
-        `and(start_date.is.null,end_date.is.null),` +
-        `and(start_date.lte.${now},end_date.is.null),` +
-        `and(start_date.is.null,end_date.gte.${now}),` +
-        `and(start_date.lte.${now},end_date.gte.${now})`
-      )
-      .order('display_order', { ascending: true });
-
-    if (error) {
-      if (error.message?.includes('does not exist') || error.code === '42P01') {
-        console.log('Carousel slides table does not exist or cannot be queried. Using placeholder slides.');
-        return [];
-      }
-      console.error('Error fetching carousel slides:', error);
-      return [];
-    }
-
-    if (data && data.length > 0) {
-      posthog.capture('carousel_slides_loaded', {
-        slide_count: data.length,
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    return data.map(slide => ({
-      id: slide.id,
-      title: slide.title,
-      subtitle: slide.subtitle || undefined,
-      imageUrl: slide.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
-      ctaText: slide.cta_text || undefined,
-      ctaLink: slide.cta_link || undefined,
-    })) as CarouselSlideProps[]; // Type assertion to satisfy TS
-  } catch (error) {
-    console.error('Failed to fetch carousel slides:', error);
-    return [];
-  }
+// Return static carousel slides (no database fetching)
+export async function fetchCarouselSlides(): Promise<HeroCarouselItem[]> {
+  // Return static data directly - simulating async operation for compatibility
+  return Promise.resolve(HeroCarousels);
 }
 
-
-// Create a new carousel slide (for admin use)
-function toValidTimestamp(dateString?: string): string | null {
-  if (!dateString || dateString.trim() === '') return null;
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return null;
-
-  return date.toISOString();
+// For backward compatibility - these functions now return static data or no-ops
+export async function createCarouselSlide(): Promise<HeroCarouselItem> {
+  throw new Error('Creating carousel slides is disabled - using static data only');
 }
 
-export async function createCarouselSlide(
-  slideData: Omit<CarouselSlideProps, 'id'> & {
-    displayOrder: number;
-    isActive?: boolean;
-    startDate?: string;
-    endDate?: string;
-  }
-) {
-  try {
-    const { data, error } = await supabase
-      .from('carousel_slides')
-      .insert([{
-        title: slideData.title,
-        subtitle: slideData.subtitle,
-        image_url: slideData.imageUrl, // Store the direct URL in the database
-        cta_text: slideData.ctaText,
-        cta_link: slideData.ctaLink,
-        display_order: slideData.displayOrder,
-        is_active: slideData.isActive ?? true,
-        start_date: slideData.startDate
-          ? toValidTimestamp(slideData.startDate)
-          : new Date().toISOString(),
-        end_date: toValidTimestamp(slideData.endDate),
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('Duplicate entry: slide already exists');
-      } else if (error.code === '42501') {
-        throw new Error('Permission denied: ensure RLS allows authenticated inserts');
-      } else {
-        throw error;
-      }
-    }
-
-    return {
-      id: data.id,
-      title: data.title,
-      subtitle: data.subtitle || undefined,
-      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
-      ctaText: data.cta_text || undefined,
-      ctaLink: data.cta_link || undefined,
-    } as CarouselSlideProps;
-  } catch (error) {
-    console.error('Failed to create carousel slide:', error);
-    throw error;
-  }
+export async function updateCarouselSlide(): Promise<HeroCarouselItem> {
+  throw new Error('Updating carousel slides is disabled - using static data only');
 }
 
-// Update an existing carousel slide
-export async function updateCarouselSlide(
-  id: string,
-  slideData: Partial<Omit<CarouselSlideProps, 'id'>> & {
-    displayOrder?: number;
-    isActive?: boolean;
-    startDate?: string;
-    endDate?: string;
-  }
-) {
-  try {
-    const { data, error } = await supabase
-      .from('carousel_slides')
-      .update({
-        title: slideData.title,
-        subtitle: slideData.subtitle,
-        image_url: slideData.imageUrl, // Store the direct URL in the database
-        cta_text: slideData.ctaText,
-        cta_link: slideData.ctaLink,
-        display_order: slideData.displayOrder,
-        is_active: slideData.isActive,
-        start_date: slideData.startDate ? toValidTimestamp(slideData.startDate) : undefined,
-        end_date: slideData.endDate ? toValidTimestamp(slideData.endDate) : undefined,
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return {
-      id: data.id,
-      title: data.title,
-      subtitle: data.subtitle || undefined,
-      imageUrl: data.image_url || '/assets/images/church-hero.jpg', // Use direct URL and provide fallback
-      ctaText: data.cta_text || undefined,
-      ctaLink: data.cta_link || undefined,
-    } as CarouselSlideProps;
-  } catch (error) {
-    console.error(`Failed to update carousel slide with ID ${id}:`, error);
-    throw error;
-  }
-}
-
-// Delete a carousel slide
-export async function deleteCarouselSlide(id: string): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from('carousel_slides')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      throw error;
-    }
-  } catch (error) {
-    console.error(`Failed to delete carousel slide with ID ${id}:`, error);
-    throw error;
-  }
+export async function deleteCarouselSlide(): Promise<void> {
+  throw new Error('Deleting carousel slides is disabled - using static data only');
 }

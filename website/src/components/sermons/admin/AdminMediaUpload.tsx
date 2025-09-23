@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image'; // Added import for next/image
 import { uploadSermonMedia, UploadResult } from '@/services/sermonService'; // Added UploadResult import
+import { getProxiedStorageUrl } from '@/utils/storageProxy';
 import { 
   initFFmpeg, 
   processMediaFile, 
@@ -280,10 +281,10 @@ export default function AdminMediaUpload({
           <div className="mb-4">
             <p className="text-sm font-medium text-gray-700 mb-2">Current {title}:</p>
             {type === 'audio' && (
-              <audio src={currentUrl} controls className="w-full mb-2" />
+              <audio src={getProxiedStorageUrl(currentUrl)} controls className="w-full mb-2" />
             )}
             {type === 'video' && (
-              <video src={currentUrl} controls className="w-full mb-2" />
+              <video src={getProxiedStorageUrl(currentUrl)} controls className="w-full mb-2" />
             )}
             {type === 'thumbnail' && (
               <div className="relative aspect-video bg-gray-100 mb-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/services/auth';
 import ErrorMessage from '@/components/common/ErrorMessage';
@@ -8,13 +8,13 @@ import { fetchEventById, fetchEventRegistrations, Event, EventRegistration } fro
 import Link from 'next/link';
 
 interface RegistrationsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EventRegistrationsPage({ params }: RegistrationsPageProps) {
-  const eventId = params.id;
+  const { id: eventId } = use(params);
   const router = useRouter();
   const { user } = useAuth();
   

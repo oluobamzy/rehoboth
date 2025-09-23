@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,15 +9,20 @@ import { Spinner } from '@/components/ui/spinner';
 import { CheckCircleIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 export default function RegistrationSuccessPage({
-  params
+  params,
+  searchParams
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const eventId = params.id;
-  const registrationId = searchParams.get('registration');
-  const paymentStatus = searchParams.get('payment');
+  const { id: eventId } = use(params);
+  const registrationId = Array.isArray(searchParams.registration) 
+    ? searchParams.registration[0] 
+    : searchParams.registration;
+  const paymentStatus = Array.isArray(searchParams.payment) 
+    ? searchParams.payment[0] 
+    : searchParams.payment;
   
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<any>(null);

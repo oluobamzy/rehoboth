@@ -1,167 +1,177 @@
-// src/components/hero/__tests__/HeroCarousel.test.tsx
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import HeroCarousel from '../HeroCarousel'; 
-import type { CarouselSlideProps as CarouselSlideData } from '../CarouselSlide'; // Import CarouselSlideProps as CarouselSlideData
+// src/components/hero/__tests__/HeroCarousel.test.tsx// src/components/hero/__tests__/HeroCarousel.test.tsx
 
-jest.mock('@/hooks/useCarousel');
+import React from 'react';import React from 'react';
 
-// Mock the carousel service
-jest.mock('@/services/carouselService', () => ({
-  fetchCarouselSlides: jest.fn(),
-}));
+import { render, screen, fireEvent } from '@testing-library/react';import { render, screen, fireEvent } from '@testing-library/react';
 
-// Create a wrapper with QueryClientProvider
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-  
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+import HeroCarousel from '../HeroCarousel'; import HeroCarousel from '../HeroCarousel'; 
 
-const MockSlideComponent = ({ slide }: { slide: CarouselSlideData }) => (
-  <div data-testid={`slide-${slide.id}`}>{slide.title}</div>
-);
-MockSlideComponent.displayName = 'MockSlideComponent'; // Add display name
+import { HeroCarouselItem } from '@/data/heroCarouselData';import { HeroCarouselItem } from '@/data/heroCarouselData';
 
-describe('HeroCarousel component', () => {
-  const mockSlides = [
-    {
-      id: '1',
-      title: 'Test Slide 1',
-      subtitle: 'Subtitle 1',
-      imageUrl: 'https://example.com/image1.jpg',
-      ctaText: 'Learn More',
-      ctaLink: '/test1',
-    },
-    {
-      id: '2',
-      title: 'Test Slide 2',
-      subtitle: 'Subtitle 2',
-      imageUrl: 'https://example.com/image2.jpg',
-      ctaText: 'Get Started',
-      ctaLink: '/test2',
-    },
-  ];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
-  test('renders loading state when data is being fetched', () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockReturnValue(new Promise(() => {}));
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-  });
+jest.mock('@/hooks/useCarousel');jest.mock('@/hooks/useCarousel');
 
-  test('renders error state when there is an error fetching data', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    // It should fall back to placeholder slides, not show error
-    expect(screen.queryByText('Unable to load carousel content')).not.toBeInTheDocument();
-  });
 
-  test('renders carousel slides when data is loaded', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockResolvedValue(mockSlides);
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    expect(screen.getByText('Test Slide 1')).toBeInTheDocument();
-    expect(screen.getByText('Subtitle 1')).toBeInTheDocument();
-    expect(screen.getByText('Learn More')).toBeInTheDocument();
-  });
 
-  test('navigates to the next slide when next button is clicked', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockResolvedValue(mockSlides);
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    // Initially, the first slide should be visible
-    expect(screen.getByText('Test Slide 1')).toBeInTheDocument();
-    
-    // Click the next button
-    fireEvent.click(screen.getByLabelText('Next Slide'));
-    
-    // The second slide should now be visible
-    expect(screen.getByText('Test Slide 2')).toBeInTheDocument();
-  });
+// Mock CarouselSlide, CarouselControls, and CarouselIndicators// Mock CarouselSlide, CarouselControls, and CarouselIndicators
 
-  test('navigates to the previous slide when previous button is clicked', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockResolvedValue(mockSlides);
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    // Go to the second slide first
-    fireEvent.click(screen.getByLabelText('Next Slide'));
-    expect(screen.getByText('Test Slide 2')).toBeInTheDocument();
-    
-    // Now go back to the first slide
-    fireEvent.click(screen.getByLabelText('Previous Slide'));
-    expect(screen.getByText('Test Slide 1')).toBeInTheDocument();
-  });
+jest.mock('../CarouselSlide', () => {jest.mock('../CarouselSlide', () => {
 
-  test('navigates to a specific slide when indicator is clicked', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockResolvedValue(mockSlides);
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    // Click the second indicator
-    fireEvent.click(screen.getByLabelText('Go to slide 2'));
-    
-    // The second slide should be visible
-    expect(screen.getByText('Test Slide 2')).toBeInTheDocument();
-  });
+  return function MockCarouselSlide({ title, subtitle, description, id }: HeroCarouselItem) {  return function MockCarouselSlide({ title, subtitle, description, id }: HeroCarouselItem) {
 
-  test('toggles play/pause when play/pause button is clicked', async () => {
-    (carouselService.fetchCarouselSlides as jest.Mock).mockResolvedValue(mockSlides);
-    
-    render(<HeroCarousel />, { wrapper: createWrapper() });
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    });
-    
-    // Initially, the carousel should be playing (pause button visible)
-    expect(screen.getByLabelText('Pause Carousel')).toBeInTheDocument();
-    
-    // Click the pause button
-    fireEvent.click(screen.getByLabelText('Pause Carousel'));
-    
-    // Now the play button should be visible
-    expect(screen.getByLabelText('Play Carousel')).toBeInTheDocument();
-  });
-});
+    return (    return (
+
+      <div data-testid={`slide-${id}`}>      <div data-testid={`slide-${id}`}>
+
+        <h2>{title}</h2>        <h2>{title}</h2>
+
+        {subtitle && <p>{subtitle}</p>}        {subtitle && <p>{subtitle}</p>}
+
+        <p>{description}</p>        <p>{description}</p>
+
+      </div>      </div>
+
+    );    );
+
+  };  };
+
+});});
+
+
+
+jest.mock('../CarouselControls', () => {jest.mock('../CarouselControls', () => {
+
+  return function MockCarouselControls() {  return function MockCarouselControls() {
+
+    return <div data-testid="carousel-controls">Controls</div>;    return <div data-testid="carousel-controls">Controls</div>;
+
+  };  };
+
+});});
+
+
+
+jest.mock('../CarouselIndicators', () => {jest.mock('../CarouselIndicators', () => {
+
+  return function MockCarouselIndicators() {  return function MockCarouselIndicators() {
+
+    return <div data-testid="carousel-indicators">Indicators</div>;    return <div data-testid="carousel-indicators">Indicators</div>;
+
+  };  };
+
+});});
+
+
+
+describe('HeroCarousel', () => {describe('HeroCarousel', () => {
+
+  const mockUseCarousel = {  const mockUseCarousel = {
+
+    currentIndex: 0,    currentIndex: 0,
+
+    goToSlide: jest.fn(),    goToSlide: jest.fn(),
+
+    goToPrevious: jest.fn(),    goToPrevious: jest.fn(),
+
+    goToNext: jest.fn(),    goToNext: jest.fn(),
+
+    isPlaying: true,    isPlaying: true,
+
+    togglePlayPause: jest.fn(),    togglePlayPause: jest.fn(),
+
+    handleTouchStart: jest.fn(),    handleTouchStart: jest.fn(),
+
+    handleTouchEnd: jest.fn(),    handleTouchEnd: jest.fn(),
+
+  };  };
+
+
+
+  beforeEach(() => {  beforeEach(() => {
+
+    jest.clearAllMocks();    jest.clearAllMocks();
+
+    const useCarousel = require('@/hooks/useCarousel').default;    const useCarousel = require('@/hooks/useCarousel').default;
+
+    useCarousel.mockReturnValue(mockUseCarousel);    useCarousel.mockReturnValue(mockUseCarousel);
+
+  });  });
+
+
+
+  test('renders carousel with static data', () => {  test('renders carousel with static data', () => {
+
+    render(<HeroCarousel />);    render(<HeroCarousel />);
+
+        
+
+    // Since we're using static data, the carousel should render immediately    // Since we're using static data, the carousel should render immediately
+
+    expect(screen.getByTestId('hero-carousel')).toBeInTheDocument();    expect(screen.getByTestId('hero-carousel')).toBeInTheDocument();
+
+    expect(screen.getByTestId('carousel-controls')).toBeInTheDocument();    expect(screen.getByTestId('carousel-controls')).toBeInTheDocument();
+
+    expect(screen.getByTestId('carousel-indicators')).toBeInTheDocument();    expect(screen.getByTestId('carousel-indicators')).toBeInTheDocument();
+
+  });  });
+
+
+
+  test('handles keyboard navigation', () => {  test('handles keyboard navigation', () => {
+
+    render(<HeroCarousel />);    render(<HeroCarousel />);
+
+        
+
+    // Test arrow keys    // Test arrow keys
+
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+
+    expect(mockUseCarousel.goToPrevious).toHaveBeenCalled();    expect(mockUseCarousel.goToPrevious).toHaveBeenCalled();
+
+        
+
+    fireEvent.keyDown(window, { key: 'ArrowRight' });    fireEvent.keyDown(window, { key: 'ArrowRight' });
+
+    expect(mockUseCarousel.goToNext).toHaveBeenCalled();    expect(mockUseCarousel.goToNext).toHaveBeenCalled();
+
+        
+
+    // Test spacebar    // Test spacebar
+
+    fireEvent.keyDown(window, { key: ' ' });    fireEvent.keyDown(window, { key: ' ' });
+
+    expect(mockUseCarousel.togglePlayPause).toHaveBeenCalled();    expect(mockUseCarousel.togglePlayPause).toHaveBeenCalled();
+
+  });  });
+
+
+
+  test('handles touch events', () => {  test('handles touch events', () => {
+
+    render(<HeroCarousel />);    render(<HeroCarousel />);
+
+        
+
+    const carousel = screen.getByTestId('hero-carousel');    const carousel = screen.getByTestId('hero-carousel');
+
+        
+
+    // Test touch start    // Test touch start
+
+    fireEvent.touchStart(carousel);    fireEvent.touchStart(carousel);
+
+    expect(mockUseCarousel.handleTouchStart).toHaveBeenCalled();    expect(mockUseCarousel.handleTouchStart).toHaveBeenCalled();
+
+        
+
+    // Test touch end    // Test touch end
+
+    fireEvent.touchEnd(carousel);    fireEvent.touchEnd(carousel);
+
+    expect(mockUseCarousel.handleTouchEnd).toHaveBeenCalled();    expect(mockUseCarousel.handleTouchEnd).toHaveBeenCalled();
+
+  });  });
+
+});});

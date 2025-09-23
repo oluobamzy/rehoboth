@@ -59,7 +59,7 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       speaker_name: '',
       sermon_date: new Date().toISOString().split('T')[0],
       tags: [],
-      series_id: undefined,
+      series_id: '',
       is_featured: false,
       is_published: true,
     }
@@ -100,12 +100,17 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
         speaker_name: '',
         sermon_date: new Date().toISOString().split('T')[0],
         tags: [],
-        series_id: undefined,
+        series_id: '',
         is_featured: false,
         is_published: true,
       });
     } else if (sermonDataForEdit) {
-      reset(sermonDataForEdit as SermonFormData);
+      // Ensure series_id is never null to avoid React warnings
+      const formData = {
+        ...sermonDataForEdit,
+        series_id: sermonDataForEdit.series_id || ''
+      } as SermonFormData;
+      reset(formData);
     }
   }, [sermonId, isNewSermon, sermonDataForEdit, reset]);
   
@@ -183,7 +188,13 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       posthog.capture(isNewSermon ? 'sermon_created' : 'sermon_updated', { sermon_id: savedSermon.id });
     },
     onError: (error: Error /*, _variables?: Partial<SermonFormData>, _context?: unknown*/) => { // _variables and _context were defined but never used
-      console.error('Error saving sermon:', error);
+      console.error('Error saving sermon:');
+      console.error('- Error object:', error);
+      console.error('- Error message:', error?.message);
+      console.error('- Error name:', error?.name);
+      console.error('- Error stack:', error?.stack);
+      console.error('- Error cause:', error?.cause);
+      console.error('- Full error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
       const message = error.message || 'Failed to save sermon.';
       setError(message);
       onSaveError(error);
@@ -228,9 +239,7 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       // The uploadSermonMedia function is expected to return Promise<UploadResult>
       // It might not have an 'error' property directly on its result if it resolves successfully.
       // Errors from uploadSermonMedia should be caught by the catch block.
-      const result: UploadResult = await uploadSermonMedia(file, currentSermonId, type, undefined, (progress: number) => {
-        console.log(`Upload progress for ${type} on sermon ${currentSermonId}: ${progress}%`);
-      });
+      const result: UploadResult = await uploadSermonMedia(file, currentSermonId, type);
 
       setValue(`${type}_url` as keyof SermonFormData, result.url); 
       if (type === 'audio') setAudioFile(null);
@@ -376,6 +385,7 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
               render={({ field }) => (
                 <select
                   {...field}
+                  value={field.value || ''} // Ensure value is never null
                   id="series_id"
                   className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
                 >

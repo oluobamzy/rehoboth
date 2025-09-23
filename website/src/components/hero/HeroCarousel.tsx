@@ -2,24 +2,15 @@
 
 // src/components/hero/HeroCarousel.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import CarouselSlide from './CarouselSlide';
 import CarouselControls from './CarouselControls';
 import CarouselIndicators from './CarouselIndicators';
-import { fetchCarouselSlides } from '@/services/carouselService';
 import useCarousel from '@/hooks/useCarousel';
 import { HeroCarousels } from '@/data/heroCarouselData';
 
 export default function HeroCarousel() {
-  const { data: apiSlides, isLoading, error } = useQuery({
-    queryKey: ['carouselSlides'],
-    queryFn: fetchCarouselSlides,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1, // Only retry once for better UX
-  });
-
-  // Use curated slides as primary content, fallback to API if available
-  const displaySlides = HeroCarousels; // Always use our curated content for now
+  // Use static carousel data directly
+  const displaySlides = HeroCarousels;
   
   const carouselRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -87,20 +78,8 @@ export default function HeroCarousel() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToPrevious, goToNext, togglePlayPause, goToSlide, displaySlides.length]);
 
-  if (isLoading) {
-    return (
-      <section className="relative w-full h-[90vh] bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-            <p className="text-white/90 text-lg font-medium">Loading Experience...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error || displaySlides.length === 0) {
+  // Return early if no slides available
+  if (displaySlides.length === 0) {
     return (
       <section className="relative w-full h-[90vh] bg-gradient-to-br from-slate-800 to-slate-600 flex items-center justify-center">
         <div className="text-center text-white">

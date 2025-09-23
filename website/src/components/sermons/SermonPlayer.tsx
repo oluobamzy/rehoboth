@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import SermonAnalytics from '@/services/analyticsService';
+import { getProxiedStorageUrl } from '@/utils/storageProxy';
 import Hls from 'hls.js';
 
 interface SermonPlayerProps {
@@ -45,10 +46,10 @@ export default function SermonPlayer({
   const mediaType = videoUrl ? 'video' : audioUrl ? 'audio' : null;
   const mediaRef = videoUrl ? videoRef : audioUrl ? audioRef : null;
   
-  // Use direct URLs (no proxy)
-  const proxyVideoUrl = videoUrl;
-  const proxyAudioUrl = audioUrl;
-  const proxyThumbnailUrl = thumbnailUrl;
+  // Use proxy for Firebase Storage URLs to avoid authentication issues
+  const proxyVideoUrl = videoUrl ? getProxiedStorageUrl(videoUrl) : undefined;
+  const proxyAudioUrl = audioUrl ? getProxiedStorageUrl(audioUrl) : undefined;
+  const proxyThumbnailUrl = thumbnailUrl ? getProxiedStorageUrl(thumbnailUrl) : undefined;
   
   const mediaUrl = proxyVideoUrl || proxyAudioUrl;
   

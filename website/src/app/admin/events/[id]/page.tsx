@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/services/auth';
 import ErrorMessage from '@/components/common/ErrorMessage';
@@ -8,13 +8,13 @@ import { fetchEventById, updateEvent, deleteEvent, Event } from '@/services/even
 import Link from 'next/link';
 
 interface EventEditPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EventEditPage({ params }: EventEditPageProps) {
-  const eventId = params.id;
+  const { id: eventId } = use(params);
   const router = useRouter();
   const { user } = useAuth();
   
