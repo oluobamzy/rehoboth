@@ -78,23 +78,85 @@ export default function EventDetail() {
     );
   }
 
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 EventDetail Debug Info:', {
+      eventId: id,
+      event: event,
+      hasImageUrl: !!event.image_url,
+      imageUrl: event.image_url,
+      imageUrlType: typeof event.image_url,
+      imageUrlLength: event.image_url?.length || 0
+    });
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Event Header */}
       <div className="relative mb-6">
         {/* Event image */}
         <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
-          {event.image_url ? (
-            <Image 
-              src={event.image_url}
-              alt={event.title}
-              fill
-              className="object-cover"
-              priority
-            />
+          {event.image_url && event.image_url.trim() !== '' ? (
+            <>
+              {/* Debug info in development */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="absolute top-0 left-0 bg-black bg-opacity-75 text-white text-xs p-2 z-10">
+                  Image URL: {event.image_url}
+                </div>
+              )}
+              <Image 
+                src={event.image_url}
+                alt={event.title}
+                fill
+                className="object-cover"
+                priority
+                onError={(e) => {
+                  console.error('Error loading event image:', {
+                    url: event.image_url,
+                    event: event.title,
+                    eventId: event.id
+                  });
+                  // Hide the image element on error and show fallback
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
+                  if (fallback) {
+                    fallback.style.display = 'flex';
+                  }
+                }}
+                onLoad={() => {
+                  console.log('✅ Event image loaded successfully:', event.image_url);
+                }}
+              />
+              {/* Hidden fallback that shows on error */}
+              <div 
+                className="image-fallback w-full h-full bg-gray-200 items-center justify-center" 
+                style={{ display: 'none' }}
+              >
+                <div className="text-center">
+                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-4.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                  </svg>
+                  <span className="text-gray-400 text-xl">Image Failed to Load</span>
+                  {process.env.NODE_ENV === 'development' && (
+                    <p className="text-xs text-gray-500 mt-2">Check console for details</p>
+                  )}
+                </div>
+              </div>
+            </>
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-xl">No Image Available</span>
+              <div className="text-center">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-4.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                <span className="text-gray-400 text-xl">No Image Available</span>
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="text-xs text-gray-500 mt-2">
+                    Event ID: {event.id}<br/>
+                    Image URL: {event.image_url || 'null'}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           

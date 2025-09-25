@@ -157,7 +157,9 @@ export function useEvent(id: string): UseQueryResult<Event, Error> {
         throw new Error('Failed to fetch event');
       }
       
-      return response.json();
+      const data = await response.json();
+      // The API returns { event: {...} }, so we need to extract the event
+      return data.event;
     },
     enabled: !!id
   });

@@ -4,8 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/services/auth';
 import ErrorMessage from '@/components/common/ErrorMessage';
-import { fetchEventById, updateEvent, deleteEvent, Event } from '@/services/eventService';
+import { fetchEventById, updateEvent, deleteEvent, Event, uploadEventImage } from '@/services/eventService';
+import { supabase } from '@/services/supabase';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface EventEditPageProps {
   params: Promise<{
@@ -23,6 +25,10 @@ export default function EventEditPage({ params }: EventEditPageProps) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [event, setEvent] = useState<Event | null>(null);
+  
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -133,6 +139,67 @@ export default function EventEditPage({ params }: EventEditPageProps) {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    // Reset the file input
+    const fileInput = document.getElementById('image_file') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile || !event) return;
+
+    setUploadingImage(true);
+    try {
+      const { url } = await uploadEventImage(imageFile, event.id);
+      
+      // Update the event with the new image URL
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ image_url: url })
+        .eq('id', event.id);
+        
+      if (updateError) {
+        throw new Error('Failed to update event with image URL');
+      }
+
+      // Update local state
+      setFormData(prev => ({ ...prev, image_url: url }));
+      setEvent(prev => prev ? { ...prev, image_url: url } : null);
+      
+      // Clear the file input
+      setImageFile(null);
+      setImagePreview(null);
+      const fileInput = document.getElementById('image_file') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
+      setError('Image uploaded successfully!');
+      setTimeout(() => setError(null), 3000);
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -143,9 +210,15 @@ export default function EventEditPage({ params }: EventEditPageProps) {
         throw new Error('Event not found');
       }
 
+      // Prepare event data with proper timestamp handling
       const eventData = {
         ...formData,
-        id: event.id
+        id: event.id,
+        // Convert empty strings to undefined for optional timestamp fields
+        registration_deadline: formData.registration_deadline || undefined,
+        // Ensure required datetime fields are not empty
+        start_datetime: formData.start_datetime,
+        end_datetime: formData.end_datetime,
       };
 
       const { success, error: updateError } = await updateEvent(eventData);
@@ -231,6 +304,72 @@ export default function EventEditPage({ params }: EventEditPageProps) {
         </div>
       ) : (
         <>
+          {/* Event Preview Section */}
+          {event && (
+            <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Event Preview</h2>
+              
+              {/* Event Image Display */}
+              <div className="mb-4">
+                <div className="relative w-full h-48 md:h-64 rounded-lg overflow-hidden">
+                  {formData.image_url ? (
+                    <>
+                      <Image
+                        src={formData.image_url}
+                        alt={formData.title}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          console.error('Error loading admin event image:', formData.image_url);
+                        }}
+                        onLoad={() => {
+                          console.log('✅ Admin event image loaded successfully:', formData.image_url);
+                        }}
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        Current Image
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <div className="text-center">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-4.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                        <span className="text-gray-400 text-sm">No Image Available</span>
+                        <p className="text-xs text-gray-500 mt-1">Upload an image below</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Event Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-semibold text-gray-600">Title:</span>
+                  <p className="text-gray-800">{formData.title}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-600">Type:</span>
+                  <p className="text-gray-800 capitalize">{formData.event_type}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-600">Status:</span>
+                  <p className={`font-medium ${formData.is_published ? 'text-green-600' : 'text-orange-600'}`}>
+                    {formData.is_published ? 'Published' : 'Draft'}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-600">Featured:</span>
+                  <p className={`font-medium ${formData.is_featured ? 'text-blue-600' : 'text-gray-600'}`}>
+                    {formData.is_featured ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-2">
@@ -260,6 +399,76 @@ export default function EventEditPage({ params }: EventEditPageProps) {
                   rows={4}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Event Image
+                </label>
+                <div className="space-y-4">
+                  {/* Current Image Display */}
+                  {formData.image_url && !imagePreview && (
+                    <div className="relative">
+                      <p className="text-sm text-gray-600 mb-2">Current image:</p>
+                      <Image
+                        src={formData.image_url}
+                        alt="Current event image"
+                        width={400}
+                        height={200}
+                        className="w-full max-w-md h-48 object-cover rounded-lg border"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Image Upload */}
+                  <input
+                    id="image_file"
+                    name="image_file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                  
+                  {/* Image Preview */}
+                  {imagePreview && (
+                    <div className="relative">
+                      <p className="text-sm text-gray-600 mb-2">New image preview:</p>
+                      <img
+                        src={imagePreview}
+                        alt="Event preview"
+                        className="w-full max-w-md h-48 object-cover rounded-lg border"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute top-8 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* Upload Button */}
+                  {imageFile && (
+                    <button
+                      type="button"
+                      onClick={handleImageUpload}
+                      disabled={uploadingImage}
+                      className={`px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors ${
+                        uploadingImage ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {uploadingImage ? 'Uploading...' : 'Upload New Image'}
+                    </button>
+                  )}
+                  
+                  <p className="text-sm text-gray-500">
+                    Upload an image to represent your event. Recommended size: 800x400px or similar aspect ratio.
+                  </p>
+                </div>
               </div>
 
               <div>

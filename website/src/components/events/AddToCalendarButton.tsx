@@ -18,14 +18,30 @@ export default function AddToCalendarButton({ event }: { event: CalendarEvent })
   
   if (!event) return null;
   
+  // Validate dates first
+  if (!event.start_datetime || !event.end_datetime) {
+    console.warn('Event missing required datetime fields:', event);
+    return null;
+  }
+  
+  // Create Date objects with validation
+  const startDate = new Date(event.start_datetime);
+  const endDate = new Date(event.end_datetime);
+  
+  // Check if dates are valid
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    console.warn('Invalid date format in event:', {
+      start_datetime: event.start_datetime,
+      end_datetime: event.end_datetime,
+      event: event
+    });
+    return null;
+  }
+  
   // Format event details for calendar links
   const title = encodeURIComponent(event.title);
   const description = encodeURIComponent(event.description || '');
   const location = encodeURIComponent(event.location_name || event.location_address || '');
-  
-  // Format dates for different calendar services
-  const startDate = new Date(event.start_datetime);
-  const endDate = new Date(event.end_datetime);
   
   // Format for Google Calendar
   const googleStart = formatGoogleDate(startDate);
@@ -107,9 +123,25 @@ export default function AddToCalendarButton({ event }: { event: CalendarEvent })
 
 // Helper functions for date formatting
 function formatGoogleDate(date: Date): string {
-  return date.toISOString().replace(/-|:|\.\d+/g, '');
+  try {
+    if (!date || isNaN(date.getTime())) {
+      throw new Error('Invalid date provided to formatGoogleDate');
+    }
+    return date.toISOString().replace(/-|:|\.\d+/g, '');
+  } catch (error) {
+    console.error('Error formatting Google date:', error, date);
+    return '';
+  }
 }
 
 function formatOutlookDate(date: Date): string {
-  return date.toISOString().replace(/[-:]/g, '').split('.')[0];
+  try {
+    if (!date || isNaN(date.getTime())) {
+      throw new Error('Invalid date provided to formatOutlookDate');
+    }
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0];
+  } catch (error) {
+    console.error('Error formatting Outlook date:', error, date);
+    return '';
+  }
 }

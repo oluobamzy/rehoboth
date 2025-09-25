@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        pre {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        input, button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .image-test {
+            max-width: 300px;
+            height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-test img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event API & Image Display Test</h1>
+        
+        <div>
+            <label>Event ID:</label>
+            <input type="text" id="eventId" placeholder="Enter event ID" value="">
+            <button onclick="testEventAPI()">Test API</button>
+        </div>
+        
+        <div id="results"></div>
+        
+        <div class="container">
+            <h3>Test Results</h3>
+            <div id="test-log"></div>
+        </div>
+    </div>
+
+    <script>
+        let testLog = [];
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push({ message, type, timestamp });
+            updateLog();
+        }
+        
+        function updateLog() {
+            const container = document.getElementById('test-log');
+            container.innerHTML = testLog.map(log => 
+                `<p class="${log.type}">⏱️ ${log.timestamp} - ${log.message}</p>`
+            ).join('');
+        }
+        
+        async function testEventAPI() {
+            const eventId = document.getElementById('eventId').value.trim();
+            
+            if (!eventId) {
+                addLog('❌ Please enter an event ID', 'error');
+                return;
+            }
+            
+            addLog(`🔍 Testing API for event ID: ${eventId}`, 'info');
+            
+            try {
+                // Test the API endpoint
+                const response = await fetch(`/api/events/${eventId}`);
+                
+                addLog(`📡 API Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    addLog(`❌ API Error: ${errorText}`, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                addLog('✅ API Response received', 'success');
+                
+                // Display raw response
+                document.getElementById('results').innerHTML = `
+                    <div class="container">
+                        <h3>Raw API Response</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+                // Check for event object
+                if (data.event) {
+                    addLog('✅ Event object found in response', 'success');
+                    const event = data.event;
+                    
+                    // Check image_url
+                    if (event.image_url && event.image_url.trim() !== '') {
+                        addLog(`📸 Image URL found: ${event.image_url}`, 'success');
+                        
+                        // Test image loading
+                        await testImageLoading(event.image_url, event.title);
+                    } else {
+                        addLog('⚠️ No image_url found or empty', 'warning');
+                    }
+                } else {
+                    addLog('❌ No event object in API response', 'error');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error testing API: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testImageLoading(imageUrl, eventTitle) {
+            addLog('🖼️ Testing image loading...', 'info');
+            
+            try {
+                // Test if image URL is accessible
+                const imageResponse = await fetch(imageUrl, { method: 'HEAD' });
+                addLog(`📡 Image URL Status: ${imageResponse.status}`, imageResponse.ok ? 'success' : 'error');
+                
+                if (imageResponse.ok) {
+                    // Create image element to test actual loading
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        addLog('✅ Image loaded successfully in browser', 'success');
+                        
+                        // Display the image
+                        const imageContainer = document.createElement('div');
+                        imageContainer.className = 'container';
+                        imageContainer.innerHTML = `
+                            <h3>Image Preview</h3>
+                            <div class="image-test">
+                                <img src="${imageUrl}" alt="${eventTitle}" />
+                            </div>
+                            <p><strong>URL:</strong> ${imageUrl}</p>
+                        `;
+                        document.getElementById('results').appendChild(imageContainer);
+                    };
+                    
+                    img.onerror = () => {
+                        addLog('❌ Image failed to load in browser', 'error');
+                    };
+                    
+                    img.src = imageUrl;
+                } else {
+                    addLog('❌ Image URL not accessible', 'error');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error testing image: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            addLog('🚀 Event API test ready', 'info');
+            addLog('💡 Enter an event ID and click "Test API" to debug', 'info');
+        });
+    </script>
+</body>
+</html>

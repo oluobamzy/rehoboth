@@ -618,10 +618,28 @@ export async function uploadSermonMedia(
   type: 'audio' | 'video' | 'thumbnail'
 ): Promise<UploadResult> {
   try {
-    // Check if user is authenticated
+    // Check if user is authenticated and has admin role
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('You must be logged in to upload files');
+    }
+
+    // Check if user has admin role
+    const userRole = session.user.app_metadata?.role;
+    const isAdmin = userRole === 'admin';
+    
+    if (!isAdmin) {
+      // Also check user_roles table as fallback
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .single();
+      
+      if (!userRoles) {
+        throw new Error('You must be an admin to upload sermon files');
+      }
     }
 
     console.log('Uploading file:', {
@@ -630,7 +648,9 @@ export async function uploadSermonMedia(
       fileType: file.type,
       sermonId,
       type,
-      userId: session.user.id
+      userId: session.user.id,
+      userRole: userRole,
+      isAdmin: isAdmin
     });
 
     const filePath = `${sermonId}/${type}/${file.name}`;
@@ -649,7 +669,17 @@ export async function uploadSermonMedia(
         message: error.message,
         name: error.name || 'StorageError'
       });
-      throw new Error(`Upload failed: ${error.message}`);
+      
+      // Provide more specific error messages
+      if (error.message.includes('new row violates row-level security policy')) {
+        throw new Error('Upload failed: new row violates row-level security policy');
+      } else if (error.message.includes('403') || error.message.includes('forbidden')) {
+        throw new Error('Upload failed: You do not have permission to upload files to this bucket');
+      } else if (error.message.includes('400') || error.message.includes('bad request')) {
+        throw new Error('Upload failed: Invalid request or file format');
+      } else {
+        throw new Error(`Upload failed: ${error.message}`);
+      }
     }
 
     console.log('Upload successful:', data);

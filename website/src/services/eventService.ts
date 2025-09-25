@@ -464,8 +464,21 @@ export async function cancelRegistration(registrationId: string): Promise<boolea
 
 // Generate iCal format for a single event
 export function generateEventIcal(event: Event): string {
-  const startDate = new Date(event.start_datetime).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
-  const endDate = new Date(event.end_datetime).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
+  // Validate dates first
+  if (!event.start_datetime || !event.end_datetime) {
+    throw new Error('Event missing required datetime fields');
+  }
+  
+  const startDateObj = new Date(event.start_datetime);
+  const endDateObj = new Date(event.end_datetime);
+  
+  // Check if dates are valid
+  if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+    throw new Error(`Invalid date format in event: start=${event.start_datetime}, end=${event.end_datetime}`);
+  }
+  
+  const startDate = startDateObj.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
+  const endDate = endDateObj.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
   
   return `BEGIN:VCALENDAR
 VERSION:2.0
@@ -492,8 +505,23 @@ PRODID:-//Rehoboth Church//Event Calendar//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 ${events.map(event => {
-  const startDate = new Date(event.start_datetime).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
-  const endDate = new Date(event.end_datetime).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
+  // Validate dates first
+  if (!event.start_datetime || !event.end_datetime) {
+    console.warn(`Skipping event ${event.id} due to missing datetime fields`);
+    return '';
+  }
+  
+  const startDateObj = new Date(event.start_datetime);
+  const endDateObj = new Date(event.end_datetime);
+  
+  // Check if dates are valid
+  if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+    console.warn(`Skipping event ${event.id} due to invalid dates: start=${event.start_datetime}, end=${event.end_datetime}`);
+    return '';
+  }
+  
+  const startDate = startDateObj.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
+  const endDate = endDateObj.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '');
   
   return `BEGIN:VEVENT
 UID:${event.id}@rehoboth-church.org
@@ -755,5 +783,95 @@ export async function getEventCapacity(eventId: string): Promise<{
   } catch (error) {
     console.error('Error in getEventCapacity:', error);
     return { total: 0, registered: 0, available: 0, isWaitlist: false };
+  }
+}
+
+// Upload event image using Supabase Storage
+export async function uploadEventImage(
+  file: File,
+  eventId: string
+): Promise<{ url: string; path: string }> {
+  try {
+    // Check if user is authenticated and has admin role
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('You must be logged in to upload files');
+    }
+
+    // Check if user has admin role
+    const userRole = session.user.app_metadata?.role;
+    const isAdmin = userRole === 'admin';
+    
+    if (!isAdmin) {
+      // Also check user_roles table as fallback
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .single();
+      
+      if (!userRoles) {
+        throw new Error('You must be an admin to upload event images');
+      }
+    }
+
+    console.log('Uploading event image:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      eventId,
+      userId: session.user.id,
+      userRole: userRole,
+      isAdmin: isAdmin
+    });
+
+    const filePath = `events/${eventId}/image/${file.name}`;
+    
+    // Upload file to Supabase Storage (use same bucket as sermons or create new one)
+    const { data, error } = await supabase.storage
+      .from('sermon-media') // Using existing bucket for now
+      .upload(filePath, file, {
+        cacheControl: '3600', // Cache for 1 hour
+        upsert: true // Allow overwriting existing files
+      });
+
+    if (error) {
+      console.error('Supabase image upload error:', error);
+      console.error('Upload error details:', {
+        message: error.message,
+        name: error.name || 'StorageError'
+      });
+      
+      // Provide more specific error messages
+      if (error.message.includes('new row violates row-level security policy')) {
+        throw new Error('Upload failed: new row violates row-level security policy');
+      } else if (error.message.includes('403') || error.message.includes('forbidden')) {
+        throw new Error('Upload failed: You do not have permission to upload files to this bucket');
+      } else if (error.message.includes('400') || error.message.includes('bad request')) {
+        throw new Error('Upload failed: Invalid request or file format');
+      } else {
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+    }
+
+    console.log('Image upload successful:', data);
+
+    // Get the public URL for the uploaded file
+    const { data: publicData } = supabase.storage
+      .from('sermon-media')
+      .getPublicUrl(filePath);
+
+    return {
+      url: publicData.publicUrl,
+      path: filePath
+    };
+
+  } catch (error) {
+    console.error('Failed to upload event image:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Unknown error occurred during image upload');
   }
 }

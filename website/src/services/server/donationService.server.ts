@@ -62,8 +62,6 @@ export async function createDonationPaymentIntent({
       automatic_payment_methods: {
         enabled: true,
       },
-      // Use an idempotency key to prevent duplicate processing
-      idempotency_key: `donation-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
     });
 
     return {
@@ -151,20 +149,17 @@ export async function createDonationSubscription({
       items: [{
         price_data: {
           currency,
-          product_data: {
-            name: fundDesignation ? 
-              `Recurring ${frequency} donation to ${fundDesignation}` : 
-              `Recurring ${frequency} donation`,
-            metadata: {
-              fundDesignation: fundDesignation || 'General Fund'
-            }
-          },
           unit_amount: amount,
           recurring: {
             interval,
             interval_count: intervalCount
+          },
+          product_data: {
+            name: fundDesignation ? 
+              `Recurring ${frequency} donation to ${fundDesignation}` : 
+              `Recurring ${frequency} donation`
           }
-        }
+        } as any
       }],
       metadata: {
         donorEmail,
@@ -260,7 +255,7 @@ export async function updateDonationSubscription({
       }];
 
       // Update the metadata
-      const metadata = {
+      const metadata: Record<string, string> = {
         ...subscription.metadata,
         frequency
       };
@@ -459,11 +454,10 @@ export async function getDonationStatistics(
     const { designations } = await getDonationDesignations(false);
     
     // Get recurring donors count
-    const { data: recurringCount, error: recurringError } = await serverSupabase
+    const { count: recurringCount, error: recurringError } = await serverSupabase
       .from('recurring_donations')
-      .select('id')
-      .eq('status', 'active')
-      .count();
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active');
       
     if (recurringError) throw recurringError;
 
@@ -515,7 +509,7 @@ export async function getDonationStatistics(
       totalAmount,
       averageAmount,
       donationCount: donations.length,
-      recurringDonorCount: recurringCount?.count || 0,
+      recurringDonorCount: recurringCount || 0,
       designationTotals,
       recentDonations,
       monthlyTotals
