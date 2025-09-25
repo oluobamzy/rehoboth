@@ -109,6 +109,7 @@ export default function EventDetail() {
                 alt={event.title}
                 fill
                 className="object-cover"
+                sizes="100vw"
                 priority
                 onError={(e) => {
                   console.error('Error loading event image:', {

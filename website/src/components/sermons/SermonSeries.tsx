@@ -84,6 +84,7 @@ export default function SermonSeries({ seriesId, initialData }: SermonSeriesProp
             alt={series.title}
             fill
             className="object-cover"
+            sizes="100vw"
             priority
           />
         ) : (

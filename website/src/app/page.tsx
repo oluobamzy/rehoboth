@@ -85,6 +85,10 @@ export default function Home() {
                   width={220} 
                   height={132}
                   className="rounded-lg shadow-lg relative z-10"
+                  style={{
+                    width: 'auto',
+                    height: 'auto'
+                  }}
                   priority
                 />
               </div>

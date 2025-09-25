@@ -45,6 +45,12 @@ export default function PaymentMethodForm({
     setPaymentError(undefined);
     
     try {
+      // First, submit the form to validate elements
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        throw new Error(submitError.message || 'Form validation failed');
+      }
+      
       if (formData.isRecurring && onSetupRecurring) {
         // For recurring donations, create a SetupIntent
         const result = await stripe.createPaymentMethod({

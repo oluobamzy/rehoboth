@@ -57,7 +57,7 @@ export const HeroCarousels: HeroCarouselItem[] = [
     title: 'Sunday Worship Experience',
     subtitle: 'Every Sunday at 10:00 AM',
     description: 'Join our vibrant worship service featuring contemporary music, inspiring messages, and a warm, welcoming atmosphere for the whole family.',
-    video: 'https://videos.pexels.com/video-files/6894387/6894387-uhd_2560_1440_25fps.mp4',
+    image: '/pastoral_care.jpeg',
     ctas: {
       primary: {
         text: 'Watch Live Stream',

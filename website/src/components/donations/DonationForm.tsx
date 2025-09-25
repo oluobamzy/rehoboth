@@ -54,23 +54,45 @@ export default function DonationForm() {
   
   // Handle donor information submission
   const handleDonorStep = async (data: Partial<DonationFormData>) => {
-    setFormData(prev => ({ ...prev, ...data }));
+    const updatedFormData = { ...formData, ...data };
+    setFormData(updatedFormData);
     setStep(DonationStep.PAYMENT);
     
     // For one-time donations, create a payment intent
     if (!data.isRecurring) {
-      await createPaymentIntent();
+      await createPaymentIntent(updatedFormData);
     }
   };
   
   // Create a Stripe Payment Intent for one-time donations
-  const createPaymentIntent = async () => {
+  const createPaymentIntent = async (formDataToUse = formData) => {
     setPaymentStatus('processing');
     
     try {
-      const amount = formData.customAmount 
-        ? parseFloat(formData.customAmount) 
-        : formData.amount;
+      // Calculate amount, ensuring it's a valid number
+      let amount = formDataToUse.amount;
+      
+      if (formDataToUse.customAmount && formDataToUse.customAmount.trim() !== '') {
+        const customAmountValue = parseFloat(formDataToUse.customAmount);
+        if (!isNaN(customAmountValue) && customAmountValue > 0) {
+          amount = customAmountValue;
+        }
+      }
+      
+      // Validate amount before sending
+      if (!amount || amount <= 0 || isNaN(amount)) {
+        throw new Error('Please enter a valid donation amount');
+      }
+      
+      // Debug logging in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Creating payment intent with:', {
+          amount,
+          donorEmail: formDataToUse.donorEmail,
+          donorName: formDataToUse.donorName,
+          fundDesignation: formDataToUse.designationId,
+        });
+      }
         
       const response = await fetch('/api/donations', {
         method: 'POST',
@@ -79,16 +101,17 @@ export default function DonationForm() {
         },
         body: JSON.stringify({
           amount,
-          donorEmail: formData.donorEmail,
-          donorName: formData.donorName,
-          fundDesignation: formData.designationId,
+          donorEmail: formDataToUse.donorEmail,
+          donorName: formDataToUse.donorName,
+          fundDesignation: formDataToUse.designationId,
         }),
       });
       
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment intent');
+        console.error('Server error response:', data);
+        throw new Error(data.error || `Server error: ${response.status}`);
       }
       
       setClientSecret(data.clientSecret);
