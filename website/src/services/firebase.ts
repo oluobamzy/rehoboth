@@ -1,6 +1,5 @@
 // src/services/firebase.ts
 import { initializeApp } from 'firebase/app';
-import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -15,7 +14,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase services
-export const storage = getStorage(app);
+// Initialize Firebase services (Storage removed - now using Supabase Storage)
 export const auth = getAuth(app);
 export default app;

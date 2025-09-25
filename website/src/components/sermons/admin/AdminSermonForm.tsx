@@ -59,7 +59,7 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       speaker_name: '',
       sermon_date: new Date().toISOString().split('T')[0],
       tags: [],
-      series_id: '',
+      series_id: undefined,
       is_featured: false,
       is_published: true,
     }
@@ -100,15 +100,15 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
         speaker_name: '',
         sermon_date: new Date().toISOString().split('T')[0],
         tags: [],
-        series_id: '',
+        series_id: undefined,
         is_featured: false,
         is_published: true,
       });
     } else if (sermonDataForEdit) {
-      // Ensure series_id is never null to avoid React warnings
+      // Ensure series_id is defined to avoid React warnings
       const formData = {
         ...sermonDataForEdit,
-        series_id: sermonDataForEdit.series_id || ''
+        series_id: sermonDataForEdit.series_id || undefined
       } as SermonFormData;
       reset(formData);
     }
@@ -134,6 +134,12 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
     } else {
         delete payload.id; 
     }
+    
+    // Convert empty string or null series_id to undefined to avoid database constraint errors
+    if (payload.series_id === '' || payload.series_id === null) {
+      payload.series_id = undefined;
+    }
+    
     return saveSermon(payload as Sermon);
   };
 
@@ -149,14 +155,37 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       let firstFileUploadError: Error | null = null;
 
       try {
+        const uploadedUrls: Partial<SermonFormData> = {};
+        
         if (audioFile && currentSermonIdForFiles) {
-          await handleFileUpload(audioFile, 'audio', currentSermonIdForFiles);
+          const audioUrl = await handleFileUpload(audioFile, 'audio', currentSermonIdForFiles);
+          if (audioUrl) uploadedUrls.audio_url = audioUrl;
         }
         if (videoFile && currentSermonIdForFiles) {
-          await handleFileUpload(videoFile, 'video', currentSermonIdForFiles);
+          const videoUrl = await handleFileUpload(videoFile, 'video', currentSermonIdForFiles);
+          if (videoUrl) uploadedUrls.video_url = videoUrl;
         }
         if (thumbnailFile && currentSermonIdForFiles) {
-          await handleFileUpload(thumbnailFile, 'thumbnail', currentSermonIdForFiles);
+          const thumbnailUrl = await handleFileUpload(thumbnailFile, 'thumbnail', currentSermonIdForFiles);
+          if (thumbnailUrl) uploadedUrls.thumbnail_url = thumbnailUrl;
+        }
+        
+        // If we uploaded any files, update the sermon in the database with the new URLs
+        if (Object.keys(uploadedUrls).length > 0) {
+          const updatedSermonData = {
+            ...savedSermon,
+            ...uploadedUrls
+          };
+          
+          // Save the sermon again with the uploaded URLs
+          const updatedSermon = await saveSermon(updatedSermonData as Sermon);
+          
+          // Update the query cache with the complete sermon data
+          queryClient.setQueryData(['sermon', currentSermonIdForFiles], updatedSermon);
+          reset(updatedSermon as SermonFormData);
+          onSaveSuccess(updatedSermon);
+        } else {
+          onSaveSuccess(savedSermon);
         }
       } catch (fileUploadError) {
         filesUploadedSuccessfully = false;
@@ -168,21 +197,6 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       if (!filesUploadedSuccessfully && firstFileUploadError) {
         onSaveError(firstFileUploadError);
         return; 
-      }
-
-      if (audioFile || videoFile || thumbnailFile) {
-        const freshSermonData = await queryClient.fetchQuery<Sermon, Error, Sermon, [string, string]>({
-          queryKey: ['sermon', currentSermonIdForFiles],
-          queryFn: () => fetchSermonById(currentSermonIdForFiles),
-        });
-        if (freshSermonData) {
-          reset(freshSermonData as SermonFormData);
-          onSaveSuccess(freshSermonData);
-        } else {
-          onSaveSuccess(savedSermon); 
-        }
-      } else {
-        onSaveSuccess(savedSermon); 
       }
 
       posthog.capture(isNewSermon ? 'sermon_created' : 'sermon_updated', { sermon_id: savedSermon.id });
@@ -250,9 +264,25 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
       return result.url;
     } catch (uploadError) {
       console.error(`Error uploading ${type} for sermon ${currentSermonId}:`, uploadError);
-      const message = uploadError instanceof Error ? uploadError.message : 'Upload failed';
-      setError(`Failed to upload ${type}: ${message}`); 
-      throw uploadError; 
+      
+      // Provide specific error messages based on the error type
+      let errorMessage: string;
+      if (uploadError instanceof Error) {
+        if (uploadError.message.includes('row-level security policy')) {
+          errorMessage = `Upload failed: You don't have permission to upload files. Please ensure you're logged in as an admin.`;
+        } else if (uploadError.message.includes('not authenticated')) {
+          errorMessage = `Upload failed: Please log in to upload files.`;
+        } else if (uploadError.message.includes('file too large')) {
+          errorMessage = `Upload failed: File is too large. Maximum size is 50MB.`;
+        } else {
+          errorMessage = `Failed to upload ${type}: ${uploadError.message}`;
+        }
+      } else {
+        errorMessage = `Failed to upload ${type}: Unknown error occurred`;
+      }
+      
+      setError(errorMessage); 
+      throw new Error(errorMessage); 
     } finally {
       setIsUploadingState(false);
     }
@@ -385,7 +415,7 @@ export default function AdminSermonForm({ sermonId, onSaveSuccess, onSaveError }
               render={({ field }) => (
                 <select
                   {...field}
-                  value={field.value || ''} // Ensure value is never null
+                  value={field.value || ''} // Ensure value is never undefined for select display
                   id="series_id"
                   className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700"
                 >

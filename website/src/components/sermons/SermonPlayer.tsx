@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import SermonAnalytics from '@/services/analyticsService';
-import { getProxiedStorageUrl } from '@/utils/storageProxy';
+import { getSupabaseStorageUrl } from '@/utils/supabaseStorage';
 import Hls from 'hls.js';
 
 interface SermonPlayerProps {
@@ -46,15 +46,15 @@ export default function SermonPlayer({
   const mediaType = videoUrl ? 'video' : audioUrl ? 'audio' : null;
   const mediaRef = videoUrl ? videoRef : audioUrl ? audioRef : null;
   
-  // Use proxy for Firebase Storage URLs to avoid authentication issues
-  const proxyVideoUrl = videoUrl ? getProxiedStorageUrl(videoUrl) : undefined;
-  const proxyAudioUrl = audioUrl ? getProxiedStorageUrl(audioUrl) : undefined;
-  const proxyThumbnailUrl = thumbnailUrl ? getProxiedStorageUrl(thumbnailUrl) : undefined;
+  // Use Supabase Storage URLs (no proxy needed as they're public)
+  const storageVideoUrl = videoUrl ? getSupabaseStorageUrl(videoUrl) : undefined;
+  const storageAudioUrl = audioUrl ? getSupabaseStorageUrl(audioUrl) : undefined;
+  const storageThumbnailUrl = thumbnailUrl ? getSupabaseStorageUrl(thumbnailUrl) : undefined;
   
-  const mediaUrl = proxyVideoUrl || proxyAudioUrl;
+  const mediaUrl = storageVideoUrl || storageAudioUrl;
   
   // Check if the video URL is an HLS stream (.m3u8 extension)
-  const isHlsVideo = proxyVideoUrl && (proxyVideoUrl.includes('.m3u8') || videoUrl?.includes('.m3u8'));
+  const isHlsVideo = storageVideoUrl && (storageVideoUrl.includes('.m3u8') || videoUrl?.includes('.m3u8'));
 
   // Load saved progress if any
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function SermonPlayer({
 
   // Setup HLS.js for streaming
   useEffect(() => {
-    if (!proxyVideoUrl || !videoRef.current || !isHlsVideo) return;
+    if (!storageVideoUrl || !videoRef.current || !isHlsVideo) return;
     
     const video = videoRef.current;
     
@@ -83,8 +83,8 @@ export default function SermonPlayer({
         startLevel: -1 // Auto select quality
       });
       
-      console.log("Loading HLS source:", proxyVideoUrl);
-      hls.loadSource(proxyVideoUrl);
+      console.log("Loading HLS source:", storageVideoUrl);
+      hls.loadSource(storageVideoUrl);
       hls.attachMedia(video);
       
       // Handle HLS events
@@ -144,18 +144,18 @@ export default function SermonPlayer({
       };
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // For browsers that support HLS natively (Safari)
-      if (proxyVideoUrl) {
-        video.src = proxyVideoUrl;
+      if (storageVideoUrl) {
+        video.src = storageVideoUrl;
         console.log('Using native HLS support with proxy URL');
       }
     } else {
       console.error('HLS is not supported in this browser and no fallback is available');
       // Fallback to regular video if available
-      if (proxyVideoUrl) {
-        video.src = proxyVideoUrl.replace('master.m3u8', '../video.mp4');
+      if (storageVideoUrl) {
+        video.src = storageVideoUrl.replace('master.m3u8', '../video.mp4');
       }
     }
-  }, [proxyVideoUrl, isHlsVideo, sermonId, isPlaying]);
+  }, [storageVideoUrl, isHlsVideo, sermonId, isPlaying]);
 
   // Handle quality change
   const handleQualityChange = (level: number) => {
@@ -331,8 +331,8 @@ export default function SermonPlayer({
       {videoUrl && (
         <video
           ref={videoRef}
-          src={!isHlsVideo ? proxyVideoUrl : undefined}
-          poster={proxyThumbnailUrl}
+          src={!isHlsVideo ? storageVideoUrl : undefined}
+          poster={storageThumbnailUrl}
           className="w-full"
           playsInline
           data-testid="sermon-video-player"
@@ -342,13 +342,13 @@ export default function SermonPlayer({
       {/* Audio Player */}
       {audioUrl && !videoUrl && (
         <>
-          <audio ref={audioRef} src={proxyAudioUrl} className="hidden" data-testid="sermon-audio-player" />
+          <audio ref={audioRef} src={storageAudioUrl} className="hidden" data-testid="sermon-audio-player" />
           <div className="aspect-video bg-gray-800 flex items-center justify-center">
-            {proxyThumbnailUrl ? (
+            {storageThumbnailUrl ? (
               <div className="w-full h-full relative">
                 <div 
                   className="absolute inset-0 bg-cover bg-center" 
-                  style={{ backgroundImage: `url(${proxyThumbnailUrl})` }}
+                  style={{ backgroundImage: `url(${storageThumbnailUrl})` }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40" />
               </div>

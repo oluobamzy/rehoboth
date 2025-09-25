@@ -1,12 +1,13 @@
 // src/utils/imageUpload.ts
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import  firebaseApp  from '@/services/firebase';
+import { createClient } from '@supabase/supabase-js';
 import { posthog } from '@/services/posthog';
 
-const storage = getStorage(firebaseApp);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Upload an image to Firebase Storage
+ * Upload an image to Supabase Storage
  * @param file The file to upload
  * @param path The storage path (e.g., 'carousel/image1.jpg')
  * @param useProxy Whether to return a proxied URL (deprecated, kept for backward compatibility)
@@ -14,15 +15,24 @@ const storage = getStorage(firebaseApp);
  */
 export async function uploadImage(file: File, path: string, useProxy: boolean = false): Promise<string> {
   try {
-    // Create a storage reference
-    const storageRef = ref(storage, path);
-    
-    // Upload the file
-    const snapshot = await uploadBytes(storageRef, file);
-    
-    // Get the download URL
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    
+    // Upload the file to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('sermon-media')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Error uploading to Supabase Storage:', error);
+      throw error;
+    }
+
+    // Get the public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('sermon-media')
+      .getPublicUrl(path);
+
     // Track the event
     posthog.capture('image_upload_success', {
       fileSize: file.size,
@@ -31,7 +41,7 @@ export async function uploadImage(file: File, path: string, useProxy: boolean = 
     });
     
     // Always return the direct URL now
-    return downloadURL;
+    return publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
     
@@ -67,15 +77,13 @@ export function generateUniqueFilePath(file: File, directory: string): string {
  * @deprecated - No longer needed as we use direct URLs
  */
 export function getProxiedImageUrl(path: string): string {
-  // For backward compatibility, now just returns the path or constructs a direct URL
+  // For backward compatibility, now just returns the path as-is
   if (path.startsWith('http')) {
     return path;
   }
   
-  // If this is a relative path without http, assume it's a Firebase Storage path
-  // and construct the direct URL
-  const encodedPath = encodeURIComponent(path);
-  return `https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o/${encodedPath}?alt=media`;
+  // For relative paths, assume they're already Supabase Storage URLs or return as-is
+  return path;
 }
 
 /**

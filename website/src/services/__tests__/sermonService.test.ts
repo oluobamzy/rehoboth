@@ -11,8 +11,6 @@ import {
 } from '../sermonService';
 import * as supabase from '../supabase';
 import * as posthog from '../posthog';
-import * as firebase from '../firebase';
-import * as firebaseStorage from 'firebase/storage';
 
 // Mock response data
 const mockSupabaseResponse = {
@@ -77,13 +75,19 @@ describe('sermonService', () => {
       }),
       update: jest.fn().mockReturnValue({
         eq: jest.fn().mockResolvedValue({ error: null })
-      })
+      }),
+      storage: {
+        from: jest.fn(() => ({
+          upload: jest.fn().mockResolvedValue({ 
+            data: { path: 'test-path/audio.mp3' }, 
+            error: null 
+          }),
+          getPublicUrl: jest.fn().mockReturnValue({
+            data: { publicUrl: 'https://storage.supabase.co/sermon-media/test-path/audio.mp3' }
+          })
+        }))
+      }
     });
-
-    // Set up Firebase Storage mocks
-    Object.assign(firebaseStorage, mockStorageFunctions);
-    (firebase as any).storage = mockStorageFunctions;
-    (firebase as any).auth = { currentUser: { uid: 'test-user-id' } };
   });
 
   describe('fetchSermons', () => {

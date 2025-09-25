@@ -6,8 +6,7 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import Button from '@/components/common/Button';
 import Image from 'next/image'; // Import next/image
 import { fetchSermonSeriesById, saveSermonSeries, SermonSeries } from '@/services/sermonService';
-import { storage } from '@/services/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '@/services/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface AdminSeriesFormProps {
@@ -97,7 +96,7 @@ export default function AdminSeriesForm({ seriesId, onSave, isSaving = false }: 
     }
   };
   
-  // Handle image upload to Firebase Storage
+  // Handle image upload to Supabase Storage
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return null;
     
@@ -107,17 +106,27 @@ export default function AdminSeriesForm({ seriesId, onSave, isSaving = false }: 
       // Create a unique file name
       const fileExtension = imageFile.name.split('.').pop();
       const fileName = `series_${Date.now()}.${fileExtension}`;
+      const filePath = `series/${fileName}`;
       
-      // Reference to storage location
-      const storageRef = ref(storage, `sermons/series/${fileName}`);
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('sermon-media')
+        .upload(filePath, imageFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
       
-      // Upload the file
-      await uploadBytes(storageRef, imageFile);
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
       
-      // Get the download URL
-      const downloadURL = await getDownloadURL(storageRef);
+      // Get the public URL
+      const { data: publicData } = supabase.storage
+        .from('sermon-media')
+        .getPublicUrl(filePath);
       
-      return downloadURL;
+      return publicData.publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
       return null;

@@ -1,9 +1,11 @@
 // File: src/app/api/proxy/[...path]/route.ts
+// DEPRECATED: This proxy was used for Firebase Storage CORS issues.
+// Now that we use Supabase Storage, this proxy is no longer needed.
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * This proxy endpoint fetches resources from Firebase storage
- * and adds the necessary CORS headers
+ * DEPRECATED: This proxy endpoint was used to fetch resources from Firebase storage
+ * and add the necessary CORS headers. Now that we use Supabase Storage, this is no longer needed.
  */
 export async function GET(
   request: NextRequest, 

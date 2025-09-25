@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image'; // Added import for next/image
 import { uploadSermonMedia, UploadResult } from '@/services/sermonService'; // Added UploadResult import
-import { getProxiedStorageUrl } from '@/utils/storageProxy';
+import { getSupabaseStorageUrl } from '@/utils/supabaseStorage';
 import { 
   initFFmpeg, 
   processMediaFile, 
@@ -151,25 +151,27 @@ export default function AdminMediaUpload({
       if (isFFmpegLoaded && (type === 'audio' || type === 'video')) {
         setIsProcessing(true);
         
-        // Process the media file with FFmpeg
-        // The return type of processMediaFile now includes path, aligning better with UploadResult
+        // Process the media file with simplified processing
+        // Note: Advanced FFmpeg processing is temporarily disabled
         const processingResult = await processMediaFile(
           file,
-          sermonId,
-          type,
+          `sermons/${sermonId}`,
           processingOptions
         );
         
-        // Upload the processed file or use direct upload if processing failed
-        if (processingResult.mediaUrl && processingResult.path) {
-          uploadResult = { url: processingResult.mediaUrl, path: processingResult.path }; 
+        // Use the processed file result
+        if (processingResult.originalFile?.url) {
+          uploadResult = { 
+            url: processingResult.originalFile.url, 
+            path: `sermons/${sermonId}/${file.name}`
+          }; 
           
           // If thumbnail was generated, pass it to parent
-          if (processingResult.thumbnailUrl && onThumbnailGenerated) {
-            onThumbnailGenerated(processingResult.thumbnailUrl);
+          if (processingResult.thumbnail?.url && onThumbnailGenerated) {
+            onThumbnailGenerated(processingResult.thumbnail.url);
           }
         } else {
-          // Fall back to direct upload if processing didn't yield a mediaUrl and path
+          // Fall back to direct upload if processing failed
           uploadResult = await uploadSermonMedia(file, sermonId, type);
         }
         
@@ -281,10 +283,10 @@ export default function AdminMediaUpload({
           <div className="mb-4">
             <p className="text-sm font-medium text-gray-700 mb-2">Current {title}:</p>
             {type === 'audio' && (
-              <audio src={getProxiedStorageUrl(currentUrl)} controls className="w-full mb-2" />
+              <audio src={getSupabaseStorageUrl(currentUrl)} controls className="w-full mb-2" />
             )}
             {type === 'video' && (
-              <video src={getProxiedStorageUrl(currentUrl)} controls className="w-full mb-2" />
+              <video src={getSupabaseStorageUrl(currentUrl)} controls className="w-full mb-2" />
             )}
             {type === 'thumbnail' && (
               <div className="relative aspect-video bg-gray-100 mb-2">

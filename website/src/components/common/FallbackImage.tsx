@@ -55,17 +55,16 @@ export default function FallbackImage({
       return srcStr;
     }
     
-    // Use Firebase Storage URLs directly
-    if (srcStr.includes('firebasestorage.googleapis.com')) {
+    // Use Supabase Storage URLs directly
+    if (srcStr.includes('supabase.co/storage')) {
       return srcStr;
     }
     
-    // Handle direct paths that might be Firebase storage paths
+    // Handle direct paths that might be storage paths - assume they're already proper URLs
     if (srcStr.startsWith('carousel/') || srcStr.startsWith('sermons/') || 
         srcStr.startsWith('events/') || srcStr.startsWith('sermon_series/')) {
-      // Construct direct Firebase URL instead of going through proxy
-      const encodedPath = encodeURIComponent(srcStr);
-      return `https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o/${encodedPath}?alt=media`;
+      // Return path as-is, assuming it's already properly formatted
+      return srcStr;
     }
     
     return srcStr;
@@ -114,15 +113,12 @@ export default function FallbackImage({
     // If this is the first attempt and we're using a proxied URL, try direct URL
     if (attempts === 1 && typeof imgSrc === 'string' && imgSrc.startsWith('/api/proxy/')) {
       try {
-        // Try direct Firebase URL as fallback
-        const storageBaseUrl = 'https://firebasestorage.googleapis.com/v0/b/rehoboth-church-63d6e.appspot.com/o';
-        const path = imgSrc.replace('/api/proxy/', '');
-        const directUrl = `${storageBaseUrl}/${encodeURIComponent(path)}?alt=media`;
-        console.log('Attempting direct Firebase URL:', directUrl);
-        setImgSrc(directUrl);
+        // For now, just use the fallback since Firebase Storage is disabled
+        console.log('Proxied URL detected, using fallback:', fallbackSrc);
+        setImgSrc(fallbackSrc);
         return;
       } catch (error) {
-        console.warn('Error converting proxy URL to direct URL:', error);
+        console.warn('Error handling proxy URL:', error);
         // Continue to fallback
       }
     }

@@ -18,6 +18,16 @@ const nextConfig: NextConfig = {
         hostname: 'example.com',
         pathname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'videos.pexels.com',
+        pathname: '**',
+      },
     ],
   },
   typescript: {
@@ -40,10 +50,12 @@ const nextConfig: NextConfig = {
     return config;
   },
   // Add headers for Cross-Origin Isolation (needed for SharedArrayBuffer in FFmpeg)
+  // Make it more permissive for external resources while maintaining security
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // Only apply strict COEP to admin pages that need FFmpeg
+        source: '/admin/(.*)',
         headers: [
           {
             key: 'Cross-Origin-Embedder-Policy',
@@ -52,6 +64,20 @@ const nextConfig: NextConfig = {
           {
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin',
+          },
+        ],
+      },
+      {
+        // More permissive for other pages
+        source: '/((?!admin).)*',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'unsafe-none',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
           },
         ],
       },

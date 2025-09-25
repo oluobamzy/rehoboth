@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import SermonAnalytics from '@/services/analyticsService';
-import { getProxiedStorageUrl } from '@/utils/storageProxy';
+import { getSupabaseStorageUrl } from '@/utils/supabaseStorage';
 import Hls from 'hls.js';
 
 interface SermonPlayerProps {
@@ -46,14 +46,14 @@ export default function SermonPlayer({
   const mediaType = videoUrl ? 'video' : audioUrl ? 'audio' : null;
   const mediaRef = videoUrl ? videoRef : audioUrl ? audioRef : null;
   
-  // Use proxy for Firebase Storage URLs to avoid authentication issues
-  const proxyVideoUrl = videoUrl ? getProxiedStorageUrl(videoUrl) : undefined;
-  const proxyAudioUrl = audioUrl ? getProxiedStorageUrl(audioUrl) : undefined;
-  const proxyThumbnailUrl = thumbnailUrl ? getProxiedStorageUrl(thumbnailUrl) : undefined;
-  const mediaUrl = proxyVideoUrl || proxyAudioUrl;
+  // Use Supabase Storage URLs (no proxy needed as they're public)
+  const storageVideoUrl = videoUrl ? getSupabaseStorageUrl(videoUrl) : undefined;
+  const storageAudioUrl = audioUrl ? getSupabaseStorageUrl(audioUrl) : undefined;
+  const storageThumbnailUrl = thumbnailUrl ? getSupabaseStorageUrl(thumbnailUrl) : undefined;
+  const mediaUrl = storageVideoUrl || storageAudioUrl;
   
   // Check if the video URL is an HLS stream (.m3u8 extension)
-  const isHlsVideo = proxyVideoUrl && proxyVideoUrl.includes('.m3u8');
+  const isHlsVideo = storageVideoUrl && storageVideoUrl.includes('.m3u8');
 
   // Load saved progress if any
   useEffect(() => {
@@ -336,7 +336,7 @@ export default function SermonPlayer({
       {/* Audio Player */}
       {audioUrl && !videoUrl && (
         <>
-          <audio ref={audioRef} src={proxyAudioUrl} className="hidden" data-testid="sermon-audio-player" />
+          <audio ref={audioRef} src={storageAudioUrl} className="hidden" data-testid="sermon-audio-player" />
           <div className="aspect-video bg-gray-800 flex items-center justify-center">
             {thumbnailUrl ? (
               <div className="w-full h-full relative">

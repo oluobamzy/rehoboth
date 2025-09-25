@@ -1,8 +1,6 @@
 "use client";
 
 import { supabase } from './supabase';
-import { storage as firebaseStorage } from './firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { posthog } from './posthog';
 
 // Define types based on the schema
@@ -216,10 +214,7 @@ export async function fetchSermons({
     // Start with base query
     let sermonsQuery = supabase
       .from('sermons')
-      .select(`
-        *,
-        sermon_series!series_id(id, title, description, image_url)
-      `);
+      .select('*');
     
     // Only filter by published status if we're not including unpublished sermons
     if (!includeUnpublished) {
@@ -291,6 +286,35 @@ export async function fetchSermons({
       };
     }
 
+    // Fetch series data for sermons that have a series_id
+    if (sermons && sermons.length > 0) {
+      const sermonIds = sermons.filter(s => s.series_id).map(s => s.series_id);
+      const uniqueSeriesIds = [...new Set(sermonIds)];
+      
+      if (uniqueSeriesIds.length > 0) {
+        try {
+          const { data: seriesData, error: seriesError } = await supabase
+            .from('sermon_series')
+            .select('id, title, description, image_url')
+            .in('id', uniqueSeriesIds);
+          
+          if (!seriesError && seriesData) {
+            // Map series data to sermons
+            sermons.forEach(sermon => {
+              if (sermon.series_id) {
+                const series = seriesData.find(s => s.id === sermon.series_id);
+                if (series) {
+                  sermon.sermon_series = series;
+                }
+              }
+            });
+          }
+        } catch (seriesErr) {
+          console.warn('Could not fetch series data for sermons:', seriesErr);
+        }
+      }
+    }
+
     // Track event in PostHog
     posthog.capture('sermons_viewed', {
       filters: {
@@ -327,16 +351,30 @@ export async function fetchSermonById(id: string) {
   try {
     const { data: sermon, error } = await supabase
       .from('sermons')
-      .select(`
-        *,
-        sermon_series!series_id(id, title, description, image_url)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
       console.error('Error fetching sermon:', error);
       throw error;
+    }
+
+    // Fetch series data if the sermon has a series_id
+    if (sermon.series_id) {
+      try {
+        const { data: seriesData, error: seriesError } = await supabase
+          .from('sermon_series')
+          .select('id, title, description, image_url')
+          .eq('id', sermon.series_id)
+          .single();
+        
+        if (!seriesError && seriesData) {
+          sermon.sermon_series = seriesData;
+        }
+      } catch (seriesErr) {
+        console.warn('Could not fetch series data for sermon:', seriesErr);
+      }
     }
 
     const transformedSermon = transformSermonData(sermon);
@@ -573,40 +611,66 @@ export async function fetchTags() {
   }
 }
 
-// Upload sermon media (audio, video, thumbnail)
+// Upload sermon media (audio, video, thumbnail) using Supabase Storage
 export async function uploadSermonMedia(
   file: File,
   sermonId: string,
   type: 'audio' | 'video' | 'thumbnail'
-): Promise<UploadResult> { // Return UploadResult
-  const filePath = `sermons/${sermonId}/${type}/${file.name}`;
-  const storageRef = ref(firebaseStorage, filePath);
+): Promise<UploadResult> {
+  try {
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('You must be logged in to upload files');
+    }
 
-  return new Promise((resolve, reject) => {
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    console.log('Uploading file:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      sermonId,
+      type,
+      userId: session.user.id
+    });
 
-    uploadTask.on(
-      'state_changed',
-      (_snapshot) => { // 'snapshot' is defined but never used.
-        const progress = (_snapshot.bytesTransferred / _snapshot.totalBytes) * 100;
-        // Optional: Handle progress updates here
-        // console.log('Upload is ' + progress + '% done');
-      },
-      (error) => {
-        console.error('Upload failed:', error);
-        reject(error); // Reject with the error object
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve({ url: downloadURL, path: filePath }); // Resolve with UploadResult
-        } catch (error) {
-          console.error('Failed to get download URL:', error);
-          reject(error); // Reject with the error object
-        }
-      }
-    );
-  });
+    const filePath = `${sermonId}/${type}/${file.name}`;
+    
+    // Upload file to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('sermon-media')
+      .upload(filePath, file, {
+        cacheControl: '3600', // Cache for 1 hour
+        upsert: true // Allow overwriting existing files
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      console.error('Upload error details:', {
+        message: error.message,
+        name: error.name || 'StorageError'
+      });
+      throw new Error(`Upload failed: ${error.message}`);
+    }
+
+    console.log('Upload successful:', data);
+
+    // Get the public URL for the uploaded file
+    const { data: publicData } = supabase.storage
+      .from('sermon-media')
+      .getPublicUrl(filePath);
+
+    return {
+      url: publicData.publicUrl,
+      path: filePath
+    };
+
+  } catch (error) {
+    console.error('Failed to upload sermon media:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Upload failed with unknown error');
+  }
 }
 
 // ADMIN FUNCTIONS
@@ -625,6 +689,12 @@ export async function saveSermon(
   console.log('- Thumbnail file:', thumbnailFile?.name || 'none');
   
   const sermonData: Partial<Sermon> = { ...sermon };
+  
+  // Sanitize series_id: convert empty string or null to undefined to avoid database constraint errors
+  if (sermonData.series_id === '' || sermonData.series_id === null) {
+    sermonData.series_id = undefined;
+  }
+  
   let newSermonId = sermon.id; // This could be undefined if it's a new sermon
 
   try {
@@ -636,15 +706,16 @@ export async function saveSermon(
           title: sermonData.title || 'Untitled Sermon',
           speaker_name: sermonData.speaker_name || 'Unknown Speaker',
           sermon_date: sermonData.sermon_date || new Date().toISOString(),
+          series_id: sermonData.series_id || null, // Explicitly handle series_id
+          description: sermonData.description || null,
+          scripture_reference: sermonData.scripture_reference || null,
+          duration_seconds: sermonData.duration_seconds || null,
+          tags: sermonData.tags || [],
           is_published: sermonData.is_published || false,
           is_featured: sermonData.is_featured || false,
           view_count: 0,
-          // Add other required fields with defaults if necessary
         }])
-        .select(`
-          *,
-          sermon_series!series_id(id, title, description, image_url)
-        `)
+        .select('*')
         .single();
 
       if (createError) {
@@ -655,6 +726,25 @@ export async function saveSermon(
         console.error('Failed to create sermon or get new sermon ID');
         throw new Error('Failed to create sermon or get new sermon ID');
       }
+      
+      // If the new sermon has a series_id, fetch the series data separately
+      if (newSermon.series_id) {
+        try {
+          const { data: seriesData, error: seriesError } = await supabase
+            .from('sermon_series')
+            .select('id, title, description, image_url')
+            .eq('id', newSermon.series_id)
+            .single();
+          
+          if (!seriesError && seriesData) {
+            newSermon.sermon_series = seriesData;
+          }
+        } catch (seriesErr) {
+          // Don't fail the entire operation if series fetch fails
+          console.warn('Could not fetch series data for new sermon:', seriesErr);
+        }
+      }
+      
       newSermonId = newSermon.id;
       sermonData.id = newSermonId; // Set the ID for subsequent operations
     }
@@ -686,14 +776,38 @@ export async function saveSermon(
     console.log('Updating sermon with data:', JSON.stringify(sermonData, null, 2));
     console.log('Sermon ID:', newSermonId);
     
+    // Filter out fields that shouldn't be updated (generated columns, database-managed fields)
+    const updateData = {
+      title: sermonData.title,
+      description: sermonData.description,
+      scripture_reference: sermonData.scripture_reference,
+      speaker_name: sermonData.speaker_name,
+      sermon_date: sermonData.sermon_date,
+      duration_seconds: sermonData.duration_seconds,
+      audio_url: sermonData.audio_url,
+      video_url: sermonData.video_url,
+      thumbnail_url: sermonData.thumbnail_url,
+      transcript: sermonData.transcript,
+      tags: sermonData.tags,
+      series_id: sermonData.series_id,
+      view_count: sermonData.view_count,
+      is_featured: sermonData.is_featured,
+      is_published: sermonData.is_published,
+      updated_at: new Date().toISOString(), // Explicitly set updated_at
+    };
+    
+    // Remove undefined values to avoid unnecessary updates
+    Object.keys(updateData).forEach(key => {
+      if ((updateData as any)[key] === undefined) {
+        delete (updateData as any)[key];
+      }
+    });
+    
     const { data: finalSermon, error: updateError } = await supabase
       .from('sermons')
-      .update(sermonData) // sermonData now contains all fields to be updated/set
+      .update(updateData) // Use filtered data instead of sermonData
       .eq('id', newSermonId)
-      .select(`
-        *,
-        sermon_series!series_id(id, title, description, image_url)
-      `)
+      .select('*')
       .single();
 
     if (updateError) {
@@ -706,6 +820,25 @@ export async function saveSermon(
       console.error('- Full error JSON:', JSON.stringify(updateError, null, 2));
       throw updateError;
     }
+    
+    // If the sermon has a series_id, fetch the series data separately
+    if (finalSermon.series_id) {
+      try {
+        const { data: seriesData, error: seriesError } = await supabase
+          .from('sermon_series')
+          .select('id, title, description, image_url')
+          .eq('id', finalSermon.series_id)
+          .single();
+        
+        if (!seriesError && seriesData) {
+          finalSermon.sermon_series = seriesData;
+        }
+      } catch (seriesErr) {
+        // Don't fail the entire operation if series fetch fails
+        console.warn('Could not fetch series data for sermon:', seriesErr);
+      }
+    }
+    
     return transformSermonData(finalSermon);
 
   } catch (error: any) {
