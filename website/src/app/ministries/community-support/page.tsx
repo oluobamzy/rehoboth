@@ -4,82 +4,12 @@
 import React from 'react';
 
 export default function CommunitySupportMinistryPage() {
-  const programs = [
-    {
-      title: "Food Bank",
-      description: "Providing nutritious food assistance to families and individuals in need within our community.",
-      schedule: "Monthly distribution",
-      beneficiaries: "Families in need",
-      icon: "🍞"
-    },
-    {
-      title: "Clothing Drives",
-      description: "Collecting and distributing clothing for all ages, especially during seasonal transitions.",
-      schedule: "Quarterly events",
-      beneficiaries: "All community members",
-      icon: "👕"
-    },
-    {
-      title: "Emergency Assistance",
-      description: "Providing immediate help for urgent needs such as utilities, rent, or medical expenses.",
-      schedule: "As needed",
-      beneficiaries: "Emergency situations",
-      icon: "🆘"
-    },
-    {
-      title: "Senior Support",
-      description: "Offering companionship, transportation, and practical assistance to elderly community members.",
-      schedule: "Weekly visits",
-      beneficiaries: "Seniors in community",
-      icon: "👴"
-    },
-    {
-      title: "Single Parent Support",
-      description: "Providing childcare, mentorship, and practical resources for single parents.",
-      schedule: "Bi-weekly meetings",
-      beneficiaries: "Single parent families",
-      icon: "👨‍👧‍👦"
-    },
-    {
-      title: "Job Training & Skills",
-      description: "Offering workshops and training programs to help community members develop employment skills.",
-      schedule: "Monthly workshops",
-      beneficiaries: "Job seekers",
-      icon: "💼"
-    }
-  ];
-
-  const volunteerRoles = [
-    {
-      role: "Food Bank Coordinator",
-      description: "Organize food collection, sorting, and distribution events",
-      commitment: "4-6 hours monthly"
-    },
-    {
-      role: "Visitation Team",
-      description: "Visit elderly or homebound community members",
-      commitment: "2-3 hours weekly"
-    },
-    {
-      role: "Transportation Assistant",
-      description: "Provide rides to appointments or grocery shopping",
-      commitment: "Flexible schedule"
-    },
-    {
-      role: "Event Organizer",
-      description: "Plan and coordinate community support events",
-      commitment: "Project-based"
-    },
-    {
-      role: "Resource Coordinator",
-      description: "Connect people with needed services and resources",
-      commitment: "5-10 hours weekly"
-    },
-    {
-      role: "Administrative Support",
-      description: "Help with paperwork, scheduling, and organization",
-      commitment: "2-4 hours weekly"
-    }
+  const activities = [
+    "Food assistance and distribution programs",
+    "Clothing and household item donations",
+    "Financial assistance for emergency needs", 
+    "Community outreach and volunteer coordination",
+    "Support for vulnerable families and individuals"
   ];
 
   return (
@@ -102,9 +32,7 @@ export default function CommunitySupportMinistryPage() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              To be the hands and feet of Jesus in our community by providing practical support, resources, 
-              and care to those facing various challenges. We believe that meeting physical needs opens doors 
-              to share spiritual hope and demonstrate God's love in tangible ways.
+              Serving our community through practical support, resources, and Christian compassion for those in need.
             </p>
             <div className="bg-green-50 rounded-lg p-6 border-l-4 border-green-500">
               <blockquote className="text-xl italic text-gray-700">
@@ -117,31 +45,23 @@ export default function CommunitySupportMinistryPage() {
         </div>
       </div>
 
-      {/* Support Programs */}
+      {/* Activities Section */}
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Support Programs</h2>
-            <div className="grid lg:grid-cols-2 gap-8">
-              {programs.map((program, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="flex items-center mb-4">
-                    <span className="text-3xl mr-4">{program.icon}</span>
-                    <h3 className="text-xl font-bold text-gray-900">{program.title}</h3>
-                  </div>
-                  <p className="text-gray-600 leading-relaxed mb-4">{program.description}</p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-green-600">Schedule:</span>
-                      <p className="text-gray-500">{program.schedule}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-green-600">Serves:</span>
-                      <p className="text-gray-500">{program.beneficiaries}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Ministry Focus</h2>
+            <div className="grid lg:grid-cols-1 gap-8 max-w-3xl mx-auto">
+              <div className="bg-gray-50 rounded-lg p-8 shadow-lg">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">What We Do</h3>
+                <ul className="space-y-4">
+                  {activities.map((activity, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-green-500 mr-3 mt-1">•</span>
+                      <span className="text-gray-600 leading-relaxed">{activity}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -202,23 +122,7 @@ export default function CommunitySupportMinistryPage() {
         </div>
       </div>
 
-      {/* Volunteer Opportunities */}
-      <div className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Volunteer Opportunities</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {volunteerRoles.map((role, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6 shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{role.role}</h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{role.description}</p>
-                  <p className="text-green-600 font-medium text-sm">{role.commitment}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Get Involved */}
 
       {/* Impact Section */}
       <div className="bg-green-50 py-16">

@@ -26,9 +26,6 @@ export default function Header() {
       dropdownItems: [
         { name: 'Vision', href: '/about?tab=vision' },
         { name: 'Mission', href: '/about?tab=mission' },
-        { name: 'Core Values', href: '/about/core-values' },
-        { name: 'Our Motto', href: '/about/motto' },
-        { name: 'Our Commitment', href: '/about/commitment' },
         { name: 'Our Leadership', href: '/about/leadership' },
       ]
     },

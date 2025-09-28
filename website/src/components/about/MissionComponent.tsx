@@ -9,6 +9,14 @@ export default function MissionComponent() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Mission Statement */}
+        <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 mb-8">
+          <h2 className="text-2xl font-bold mb-4 text-green-700">Our Mission</h2>
+          <p className="text-xl font-semibold text-green-800">
+            To proclaim Christ, disciple believers, and demonstrate God's compassion through love and service.
+          </p>
+        </div>
+        
         <p className="text-lg">
           We are dedicated to sharing God&apos;s unconditional love and boundless mercy, inviting everyone into a transformative 
           relationship with Jesus Christ.

@@ -29,7 +29,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-3 text-blue-900">Sunday Services</h3>
-              <p className="mb-5 text-gray-600">Join us every Sunday at 10:00 AM for worship, prayer, and fellowship.</p>
+              <p className="mb-5 text-gray-600">Join us every Sunday at 3:00 PM - 6:00 PM for worship, prayer, and fellowship.</p>
               <Link href="/events" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 View Schedule <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
@@ -85,10 +85,6 @@ export default function Home() {
                   width={220} 
                   height={132}
                   className="rounded-lg shadow-lg relative z-10"
-                  style={{
-                    width: 'auto',
-                    height: 'auto'
-                  }}
                   priority
                 />
               </div>
@@ -99,7 +95,10 @@ export default function Home() {
             </div>
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-lg md:text-xl mb-8 text-gray-700 leading-relaxed">
-                Join us for worship and fellowship as we grow together in faith. We are a community committed to following Jesus Christ and serving our neighbors with compassion and love.
+                A community of believers committed to loving God and serving
+                people. No matter who you are, where you come from, or your
+                background, you belong here. God's love is for everyone—and we
+                warmly invite you to be part of our church family.
               </p>
               <div className="flex justify-center">
                 <Link href="/about" className="inline-block">
@@ -112,7 +111,7 @@ export default function Home() {
           </section>
           
           {/* Additional content section */}
-          <section className="grid md:grid-cols-2 gap-12 items-center mb-20">
+          {/* <section className="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
               <h3 className="text-3xl font-bold mb-5 text-blue-900">Our <span className="text-green-600">Mission</span></h3>
               <p className="text-gray-600 mb-4">
@@ -139,7 +138,7 @@ export default function Home() {
                 className="w-full h-full object-cover"
               />
             </div>
-          </section>
+          </section> */}
         </div>
       </div>
       
@@ -203,7 +202,7 @@ export default function Home() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  10:00 AM - 11:30 AM
+                  3:00 PM - 6:00 PM
                 </div>
                 <div className="flex items-center mb-4 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,12 +226,12 @@ export default function Home() {
                 WEDNESDAY, JUNE 26, 2025
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Midweek Bible Study</h3>
+                <h3 className="text-xl font-semibold mb-2">Prayer Service</h3>
                 <div className="flex items-center mb-3 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  7:00 PM - 8:30 PM
+                  7:00 PM - 9:00 PM
                 </div>
                 <div className="flex items-center mb-4 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,7 +240,7 @@ export default function Home() {
                   </svg>
                   Fellowship Hall
                 </div>
-                <p className="text-gray-600 mb-4">Dive deeper into God&apos;s Word with our interactive Bible study and discussion group.</p>
+                <p className="text-gray-600 mb-4">Join us for our midweek prayer service where we come together to pray and seek God&apos;s guidance.</p>
                 <Link href="/events/bible-study">
                   <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 rounded-md font-medium transition-colors">
                     Event Details
@@ -325,7 +324,7 @@ export default function Home() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-blue-800">Address</h4>
-                    <p className="text-gray-600">123 Faith Avenue, Rehoboth, MA 02769</p>
+                    <p className="text-gray-600">414 Pleasant Park Road, Rehoboth, MA 02769</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -334,7 +333,7 @@ export default function Home() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-blue-800">Service Times</h4>
-                    <p className="text-gray-600">Sunday: 10:00 AM<br />Wednesday: 7:00 PM</p>
+                    <p className="text-gray-600">Sunday: 3:00 PM - 6:00 PM<br />Wednesday: 7:00 PM - 9:00 PM (Prayer Service)<br />Friday: Women Overnight Service<br />Saturday: 7:00 PM - 9:00 PM (Youth Prayer & Choir)</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -344,6 +343,15 @@ export default function Home() {
                   <div>
                     <h4 className="font-semibold text-blue-800">Contact</h4>
                     <p className="text-gray-600">info@rehobothchurch.org<br />+1 (555) 123-4567</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mt-1 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <div>
+                    <h4 className="font-semibold text-blue-800">Office Hours</h4>
+                    <p className="text-gray-600">Wednesday & Friday: 11:00 AM - 5:00 PM</p>
                   </div>
                 </div>
               </div>

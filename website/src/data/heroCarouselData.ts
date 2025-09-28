@@ -36,7 +36,7 @@ export const HeroCarousels: HeroCarouselItem[] = [
     ctas: {
       primary: {
         text: 'Visit This Sunday',
-        link: '/visit',
+        link: '/about',
         variant: 'primary'
       },
       secondary: {
@@ -75,31 +75,6 @@ export const HeroCarousels: HeroCarouselItem[] = [
       opacity: 0.85
     },
     textPosition: 'center',
-    theme: 'dark'
-  },
-  {
-    id: 'community-outreach',
-    title: 'Serving Our Community',
-    subtitle: 'Making a Difference Together',
-    description: 'Be part of something bigger. Our community outreach programs touch lives through food banks, youth mentorship, and neighborhood transformation initiatives.',
-    image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-    ctas: {
-      primary: {
-        text: 'Get Involved',
-        link: '/get-involved/volunteering',
-        variant: 'primary'
-      },
-      secondary: {
-        text: 'View Programs',
-        link: '/ministries',
-        variant: 'outline'
-      }
-    },
-    overlay: {
-      gradient: 'linear-gradient(225deg, rgba(16, 185, 129, 0.85) 0%, rgba(34, 197, 94, 0.75) 100%)',
-      opacity: 0.8
-    },
-    textPosition: 'right',
     theme: 'dark'
   },
   {

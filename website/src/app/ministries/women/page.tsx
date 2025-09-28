@@ -1,26 +1,11 @@
 // src/app/ministries/women/page.tsx
 export default function WomensMinistryPage() {
   const activities = [
-    {
-      title: "Prayer and Discipleship",
-      description: "Weekly prayer meetings and Bible study sessions focused on spiritual growth and development.",
-      schedule: "Fridays - Women Overnight Service"
-    },
-    {
-      title: "Support Programs",
-      description: "Special care and support for widows, single mothers, and vulnerable women in our community.",
-      schedule: "Ongoing support as needed"
-    },
-    {
-      title: "Financial Empowerment",
-      description: "Microfinance programs and financial literacy training to help women become financially independent.",
-      schedule: "Monthly workshops"
-    },
-    {
-      title: "Skill Development",
-      description: "Vocational training programs to equip women with practical skills for employment and entrepreneurship.",
-      schedule: "Quarterly training sessions"
-    }
+    "Spiritual Growth through prayer and discipleship.",
+    "Support and care for widows, single mothers, and vulnerable women.",
+    "Empowerment through microfinance and financial literacy.",
+    "Skill development and vocational training.",
+    "Fellowship and service in the church and community."
   ];
 
   return (
@@ -53,17 +38,16 @@ export default function WomensMinistryPage() {
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
-            What We Do
+            Our Ministry Focus
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
             {activities.map((activity, index) => (
-              <div key={index} className="bg-blue-50 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{activity.title}</h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">{activity.description}</p>
-                <div className="bg-blue-100 rounded-md p-3">
-                  <p className="text-blue-700 font-medium">
-                    <span className="font-bold">Schedule:</span> {activity.schedule}
-                  </p>
+              <div key={index} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4">
+                    {index + 1}
+                  </div>
+                  <p className="text-lg text-gray-700 leading-relaxed">{activity}</p>
                 </div>
               </div>
             ))}

@@ -1,154 +1,117 @@
 // src/app/ministries/intercession/page.tsx
-'use client';
-
-import React from 'react';
-
 export default function IntercessionMinistryPage() {
-  const prayerFocusAreas = [
-    {
-      title: "Church & Leadership",
-      description: "Praying for our pastoral team, church leadership, and the overall direction of our congregation.",
-      icon: "⛪"
-    },
-    {
-      title: "Community & Nation",
-      description: "Interceding for our local community, city, province, and nation for God's will to be done.",
-      icon: "🏛️"
-    },
-    {
-      title: "Missions & Evangelism",
-      description: "Supporting missionaries and evangelism efforts through dedicated prayer and spiritual warfare.",
-      icon: "🌍"
-    },
-    {
-      title: "Healing & Restoration",
-      description: "Praying for physical, emotional, and spiritual healing for individuals and families.",
-      icon: "🙏"
-    },
-    {
-      title: "Revival & Awakening",
-      description: "Seeking God for spiritual revival in our church, community, and around the world.",
-      icon: "🔥"
-    },
-    {
-      title: "Personal Requests",
-      description: "Lifting up individual prayer requests from our congregation and community.",
-      icon: "💝"
-    }
-  ];
-
-  const prayerMeetings = [
-    {
-      title: "Corporate Prayer",
-      time: "Wednesday 7:00 PM - 8:00 PM",
-      description: "Weekly church-wide prayer meeting focusing on various ministry needs and community concerns."
-    },
-    {
-      title: "Early Morning Prayer",
-      time: "Saturday 6:00 AM - 7:00 AM",
-      description: "Start your weekend with passionate prayer and seeking God's face for the day ahead."
-    },
-    {
-      title: "Intercessors Circle",
-      time: "Monthly - First Friday 7:00 PM",
-      description: "Dedicated prayer warriors gathering for intensive intercession and spiritual warfare."
-    },
-    {
-      title: "Youth Prayer",
-      time: "Sunday 2:00 PM - 3:00 PM",
-      description: "Young people coming together to pray for their generation and youth-related concerns."
-    }
+  const activities = [
+    "Prayer meetings and intercession sessions",
+    "Prayer chain coordination and support",
+    "Prayer request collection and distribution",
+    "Training in prayer and spiritual warfare",
+    "Special prayer events and vigils"
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-20">
-        <div className="container mx-auto px-4">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-emerald-500 text-white">
+        <div className="container mx-auto px-4 py-20">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Intercession Ministry</h1>
-            <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-              Standing in the gap through powerful prayer, seeking God's will and intervention in every situation
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">Intercession Ministry</h1>
+            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+              Standing in the gap through prayer and intercession for our church and community
             </p>
           </div>
         </div>
       </div>
 
       {/* Mission Statement */}
-      <div className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
-            <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              To create a house of prayer where believers come together to intercede for our church, community, 
-              and world. We believe in the power of prayer to change circumstances, transform lives, and advance God's kingdom.
-            </p>
-            <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
-              <blockquote className="text-xl italic text-gray-700">
-                "If my people, who are called by my name, will humble themselves and pray and seek my face 
-                and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land."
-              </blockquote>
-              <cite className="text-blue-600 font-semibold mt-2 block">- 2 Chronicles 7:14</cite>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">Our Mission</h2>
+          <p className="text-xl text-gray-600 leading-relaxed mb-8">
+            Strengthening the spiritual foundation of our church through dedicated prayer, intercession, and spiritual warfare.
+          </p>
         </div>
       </div>
 
-      {/* Prayer Focus Areas */}
+      {/* Activities */}
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Prayer Focus Areas</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {prayerFocusAreas.map((area, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6 text-center shadow hover:shadow-lg transition-shadow">
-                  <div className="text-4xl mb-4">{area.icon}</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{area.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{area.description}</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
+            Our Ministry Focus
+          </h2>
+          <div className="space-y-6">
+            {activities.map((activity, index) => (
+              <div key={index} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4">
+                    {index + 1}
+                  </div>
+                  <p className="text-lg text-gray-700 leading-relaxed">{activity}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Prayer Meetings */}
-      <div className="bg-blue-50 py-16">
+      {/* Special Focus */}
+      <div className="bg-gradient-to-r from-blue-100 to-emerald-100 py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Prayer Meetings</h2>
-            <div className="grid lg:grid-cols-2 gap-8">
-              {prayerMeetings.map((meeting, index) => (
-                <div key={index} className="bg-white rounded-lg p-6 shadow">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{meeting.title}</h3>
-                  <p className="text-blue-600 font-medium mb-3">{meeting.time}</p>
-                  <p className="text-gray-600 leading-relaxed">{meeting.description}</p>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
+              Special Focus Areas
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
                 </div>
-              ))}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Widow Support</h3>
+                <p className="text-gray-600">Providing care and support for widows in our community</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-emerald-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Single Mothers</h3>
+                <p className="text-gray-600">Supporting single mothers with practical and spiritual care</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Empowerment</h3>
+                <p className="text-gray-600">Financial literacy and vocational training programs</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Call to Action */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
+      {/* Join Us */}
+      <div className="bg-gray-900 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Join Our Prayer Ministry</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Whether you're a seasoned prayer warrior or just beginning your prayer journey, there's a place for you in our intercession ministry.
+          <h2 className="text-3xl font-bold mb-4">Join Our Women's Ministry</h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Be part of a supportive community of women who are growing in faith and making a difference.
           </p>
-          <div className="space-x-4">
-            <a 
-              href="/contact" 
-              className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
+            <a
+              href="/get-involved/volunteering"
+              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
             >
-              Join Us
+              Get Involved
             </a>
-            <a 
-              href="/get-involved/prayer-request" 
-              className="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+            <a
+              href="/contact"
+              className="inline-block border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-lg transition-colors"
             >
-              Submit Prayer Request
+              Contact Us
             </a>
           </div>
         </div>

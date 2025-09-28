@@ -2,6 +2,7 @@
 
 // src/components/hero/HeroCarousel.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import CarouselSlide from './CarouselSlide';
 import CarouselControls from './CarouselControls';
 import CarouselIndicators from './CarouselIndicators';
@@ -85,9 +86,11 @@ export default function HeroCarousel() {
         <div className="text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Welcome to Rehoboth Christian Church</h2>
           <p className="text-xl mb-8">Experience faith, community, and transformation</p>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
-            Learn More
-          </button>
+          <Link href="/about">
+            <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+              Learn More
+            </button>
+          </Link>
         </div>
       </section>
     );
@@ -106,14 +109,14 @@ export default function HeroCarousel() {
       }}
     >
       {/* Progress Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50">
+      {/* <div className="absolute top-0 left-0 right-0 z-50">
         <div className="h-1 bg-white/20">
           <div 
             className="h-full bg-gradient-to-r from-green-500 to-blue-400 transition-all duration-100 ease-linear"
             style={{ width: `${((currentIndex + 1) / displaySlides.length) * 100}%` }}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Slides Container */}
       <div className="relative w-full min-h-[85vh] h-full">
@@ -164,7 +167,7 @@ export default function HeroCarousel() {
       )}
 
       {/* Scroll Indicator - Positioned to avoid button conflicts */}
-      <div className="absolute bottom-2 right-4 md:right-8 z-20 hidden md:block">
+      {/* <div className="absolute bottom-2 right-4 md:right-8 z-20 hidden md:block">
         <div className="flex flex-col items-center space-y-1 text-white/50">
           <span className="text-xs font-medium tracking-wide">SCROLL</span>
           <svg 
@@ -176,7 +179,7 @@ export default function HeroCarousel() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }

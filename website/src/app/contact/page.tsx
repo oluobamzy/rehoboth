@@ -50,20 +50,22 @@ export default function ContactPage() {
         <div className="mt-12 grid md:grid-cols-3 gap-6">
           <div className="bg-blue-50 p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-medium mb-3 text-blue-700">Service Times</h3>
-            <p>Sunday Morning: 10:00 AM</p>
-            <p>Wednesday Bible Study: 7:00 PM</p>
+            <p>Sunday: 3:00 PM - 6:00 PM</p>
+            <p>Wednesday: 7:00 PM - 9:00 PM (Prayer Service)</p>
+            <p>Friday: Women Overnight Service</p>
+            <p>Saturday: 7:00 PM - 9:00 PM (Youth Prayer & Choir)</p>
           </div>
           
           <div className="bg-blue-50 p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-medium mb-3 text-blue-700">Location</h3>
-            <p>123 Faith Avenue</p>
-            <p>Ottawa, ON K1A 0A1</p>
+            <p>414 Pleasant Park Road</p>
+            <p>Rehoboth, MA 02769</p>
           </div>
           
           <div className="bg-blue-50 p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-medium mb-3 text-blue-700">Contact Information</h3>
-            <p>Email: info@rehobothcchurch.org</p>
-            <p>Phone: (613) 123-4567</p>
+            <p>Email: rehobothchrisitianchurch2022@gmail.com</p>
+            <p>Phone: (613) 400-4966</p>
           </div>
         </div>
       </div>

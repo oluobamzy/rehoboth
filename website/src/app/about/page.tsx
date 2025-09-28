@@ -6,12 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import AboutContent from '@/components/about/AboutContent';
 import MissionComponent from '@/components/about/MissionComponent';
 import VisionComponent from '@/components/about/VisionComponent';
+import StatementOfFaithComponent from '@/components/about/StatementOfFaithComponent';
 import TabButton from '@/components/ui/TabButton';
 
 function AboutPageContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<'about' | 'mission' | 'vision'>('about');
+  const [activeTab, setActiveTab] = useState<'about' | 'mission' | 'vision' | 'faith'>('about');
 
   // Set the active tab based on URL parameter
   useEffect(() => {
@@ -19,6 +20,8 @@ function AboutPageContent() {
       setActiveTab('mission');
     } else if (tabParam === 'vision') {
       setActiveTab('vision');
+    } else if (tabParam === 'faith') {
+      setActiveTab('faith');
     } else {
       setActiveTab('about');
     }
@@ -49,6 +52,12 @@ function AboutPageContent() {
           >
             Our Vision
           </TabButton>
+          <TabButton 
+            active={activeTab === 'faith'} 
+            onClick={() => setActiveTab('faith')}
+          >
+            Statement of Faith
+          </TabButton>
         </div>
         
         {/* Tab content */}
@@ -63,6 +72,7 @@ function AboutPageContent() {
           {activeTab === 'about' && <AboutContent />}
           {activeTab === 'mission' && <MissionComponent />}
           {activeTab === 'vision' && <VisionComponent />}
+          {activeTab === 'faith' && <StatementOfFaithComponent />}
         </motion.div>
       </div>
     </main>

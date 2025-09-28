@@ -10,39 +10,37 @@ export default function AboutContent() {
         transition={{ duration: 0.5 }}
       >
         <p className="text-lg">
-          Rehoboth Christian Church is a vibrant community of faith dedicated to sharing the life-transforming 
-          message of the gospel of Jesus Christ. Established in 2022 in Ottawa, our church is built upon 
-          the foundation of Ephesians 1:7: "In Him, we have redemption through His blood, the forgiveness 
-          of sins, according to the riches of His grace."
+          Rehoboth Christian Church is a vibrant community of believers committed to loving God and serving people. 
+          No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we 
+          warmly invite you to be part of our church family.
         </p>
 
         <p className="mt-4">
-          At Rehoboth Christian Church, we believe in the power of God&apos;s love to redeem, restore, and renew 
-          lives. Our mission is to proclaim His love by fostering a Christ-centered community where individuals 
-          grow in faith, experience His boundless grace, and extend that love to others. Through sound biblical 
-          teaching, heartfelt worship, and a strong commitment to discipleship, we strive to nurture spiritual 
-          growth and deepen our relationship with God.
+          We are a Christ-centered community that believes in the transformative power of God's love. Through worship, 
+          fellowship, biblical teaching, and compassionate service, we create an environment where everyone can grow 
+          in their faith and experience the abundant life that Jesus offers.
         </p>
 
-        <p className="mt-4">
-          We are dedicated to making a lasting impact for God&apos;s kingdom by bringing hope, healing, and restoration 
-          to all who seek Him. Whether you are new to the faith or have been walking with Christ for years, 
-          Rehoboth Christian Church is a place where you can belong, grow, and serve. We welcome you to join 
-          us on this journey of faith as we seek to glorify God and live out His purpose in our lives.
-        </p>
+        {/* Our Motto */}
+        <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 mb-8 mt-8">
+          <h2 className="text-2xl font-bold mb-4 text-green-700">Our Motto</h2>
+          <p className="text-xl font-semibold text-green-800">
+            Christ-Centered, Compassion-Driven, Community-Focused
+          </p>
+        </div>
 
-        <h2 className="mt-8 font-bold text-2xl">Our Core Values:</h2>
-        <ul className="mt-4 space-y-2">
-          <li><strong>Faith</strong> – Anchored in the Word of God, we grow in faith and trust in His promises.</li>
-          <li><strong>Grace</strong> – We embrace the unconditional love and mercy of Christ, sharing it with others.</li>
-          <li><strong>Community</strong> – A welcoming family of believers supporting one another in love and prayer.</li>
-          <li><strong>Discipleship</strong> – Committed to spiritual growth through biblical teaching and mentorship.</li>
-          <li><strong>Service</strong> – Living out our faith by serving God and our community with compassion.</li>
-        </ul>
+        {/* Our Commitment */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 text-blue-900">Our Commitment</h2>
+          <p className="text-lg text-gray-700">
+            We commit to follow Jesus, grow in His Word, and show His love through prayer, worship, and service to others.
+          </p>
+        </div>
 
-        <p className="mt-6 font-medium">
-          Join us at Rehoboth Christian Church, where faith flourishes, love abounds, and lives are transformed 
-          by the power of the gospel.
+        <p className="mt-6 text-lg font-medium text-gray-700">
+          Whether you are new to the faith or have been walking with Christ for years, Rehoboth Christian Church 
+          is a place where you can belong, grow, and serve. We invite you to join us on this journey of faith 
+          as we seek to glorify God and live out His purpose in our lives.
         </p>
 
         <div className="mt-10 flex justify-center">

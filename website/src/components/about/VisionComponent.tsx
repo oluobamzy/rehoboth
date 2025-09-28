@@ -10,17 +10,17 @@ export default function VisionComponent() {
         transition={{ duration: 0.5 }}
       >
         <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500 mb-8">
-          <p className="text-xl italic">
-            "In Him we have redemption through His blood, the forgiveness of sins, according to the riches of His grace which He made to abound toward us in all wisdom and prudence."
+          <h2 className="text-2xl font-bold mb-4 text-blue-700">Our Vision</h2>
+          <h3 className="text-xl font-semibold mb-3 text-green-600">Loving God, Serving People</h3>
+          <p className="text-lg text-gray-700">
+            A community transformed by God's love and inspired to show His compassion.
           </p>
-          <p className="font-bold text-right mt-2">- Ephesians 1:7-8</p>
         </div>
         
         <p className="text-lg">
-          At Rehoboth Christian Church, our vision is rooted in <strong>Ephesians 1:7-8</strong>, which speaks of 
-          God&apos;s abundant grace and the redemption found through Jesus Christ. We are called to share His boundless love 
-          and mercy with all people, creating an environment where individuals experience spiritual transformation 
-          and a deep connection with God.
+          At Rehoboth Christian Church, our vision is to be a community that loves God deeply and serves people 
+          wholeheartedly. We envision a church family transformed by God's amazing love, where every person 
+          experiences His grace and is inspired to extend that same compassion to others.
         </p>
 
         <h2 className="mt-8 font-bold text-2xl">Our Vision for the Future</h2>
