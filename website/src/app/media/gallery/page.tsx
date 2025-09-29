@@ -1,106 +1,38 @@
 // src/app/media/gallery/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { GalleryService, GalleryItem, GALLERY_CATEGORIES } from '@/services/galleryService';
 
 export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedImage, setSelectedImage] = useState<any>(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = [
-    { id: 'all', name: 'All Photos' },
-    { id: 'worship', name: 'Worship Services' },
-    { id: 'events', name: 'Church Events' },
-    { id: 'community', name: 'Community Outreach' },
-    { id: 'youth', name: 'Youth Ministry' },
-    { id: 'children', name: 'Children\'s Ministry' },
-    { id: 'baptisms', name: 'Baptisms' },
-    { id: 'fellowship', name: 'Fellowship' }
-  ];
+  // Load gallery items
+  useEffect(() => {
+    const loadGalleryItems = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const items = await GalleryService.getItemsByCategory(selectedCategory);
+        setGalleryItems(items);
+      } catch (err) {
+        console.error('Error loading gallery items:', err);
+        setError('Failed to load gallery images. Please try again later.');
+        setGalleryItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Sample gallery items - in a real app, these would come from a database or CMS
-  const galleryItems = [
-    {
-      id: 1,
-      title: "Sunday Worship Service",
-      category: "worship",
-      date: "2024-01-14",
-      image: "/api/placeholder/600/400",
-      description: "Our congregation gathered for powerful worship and fellowship."
-    },
-    {
-      id: 2,
-      title: "Youth Winter Retreat",
-      category: "youth",
-      date: "2024-01-07",
-      image: "/api/placeholder/600/400",
-      description: "Young people growing together in faith during our annual winter retreat."
-    },
-    {
-      id: 3,
-      title: "Community Food Drive",
-      category: "community",
-      date: "2023-12-20",
-      image: "/api/placeholder/600/400",
-      description: "Serving our community with love during the holiday season."
-    },
-    {
-      id: 4,
-      title: "Children's Christmas Program",
-      category: "children",
-      date: "2023-12-17",
-      image: "/api/placeholder/600/400",
-      description: "Children sharing the joy of Christmas through song and drama."
-    },
-    {
-      id: 5,
-      title: "Baptism Service",
-      category: "baptisms",
-      date: "2023-12-10",
-      image: "/api/placeholder/600/400",
-      description: "Celebrating new believers taking their next step in faith."
-    },
-    {
-      id: 6,
-      title: "Church Fellowship Dinner",
-      category: "fellowship",
-      date: "2023-11-26",
-      image: "/api/placeholder/600/400",
-      description: "Church family coming together for Thanksgiving fellowship."
-    },
-    {
-      id: 7,
-      title: "Harvest Festival",
-      category: "events",
-      date: "2023-10-31",
-      image: "/api/placeholder/600/400",
-      description: "Community celebration with games, food, and fun for all ages."
-    },
-    {
-      id: 8,
-      title: "Senior Saints Luncheon",
-      category: "fellowship",
-      date: "2023-10-15",
-      image: "/api/placeholder/600/400",
-      description: "Honoring and celebrating our senior church members."
-    },
-    {
-      id: 9,
-      title: "Worship Team Practice",
-      category: "worship",
-      date: "2023-10-05",
-      image: "/api/placeholder/600/400",
-      description: "Our worship team preparing hearts for Sunday service."
-    },
-    // Add more gallery items as needed
-  ];
+    loadGalleryItems();
+  }, [selectedCategory]);
 
-  const filteredItems = selectedCategory === 'all' 
-    ? galleryItems 
-    : galleryItems.filter(item => item.category === selectedCategory);
-
-  const openModal = (item: any) => {
+  const openModal = (item: GalleryItem) => {
     setSelectedImage(item);
   };
 
@@ -134,7 +66,7 @@ export default function GalleryPage() {
       <div className="bg-white py-8 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((category) => (
+            {GALLERY_CATEGORIES.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
@@ -154,25 +86,45 @@ export default function GalleryPage() {
       {/* Gallery Grid */}
       <div className="py-16">
         <div className="container mx-auto px-4">
-          {filteredItems.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading gallery images...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">😞</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : galleryItems.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">📷</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">No Photos Found</h3>
               <p className="text-gray-600">
-                No photos are available in this category yet. Check back soon for new additions!
+                {selectedCategory === 'all' 
+                  ? 'No photos have been uploaded yet. Check back soon for new additions!'
+                  : `No photos are available in the ${GALLERY_CATEGORIES.find(c => c.id === selectedCategory)?.name} category yet.`
+                }
               </p>
             </div>
           ) : (
             <>
               <div className="text-center mb-8">
                 <p className="text-gray-600">
-                  Showing {filteredItems.length} photo{filteredItems.length !== 1 ? 's' : ''} 
-                  {selectedCategory !== 'all' && ` in ${categories.find(c => c.id === selectedCategory)?.name}`}
+                  Showing {galleryItems.length} photo{galleryItems.length !== 1 ? 's' : ''} 
+                  {selectedCategory !== 'all' && ` in ${GALLERY_CATEGORIES.find(c => c.id === selectedCategory)?.name}`}
                 </p>
               </div>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredItems.map((item) => (
+                {galleryItems.map((item) => (
                   <div 
                     key={item.id} 
                     className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
@@ -180,21 +132,22 @@ export default function GalleryPage() {
                   >
                     <div className="relative h-64">
                       <Image
-                        src={item.image}
+                        src={item.image_url}
                         alt={item.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute top-4 left-4">
                         <span className="bg-teal-600 text-white text-xs px-2 py-1 rounded">
-                          {categories.find(c => c.id === item.category)?.name}
+                          {GALLERY_CATEGORIES.find(c => c.id === item.category)?.name}
                         </span>
                       </div>
                     </div>
                     <div className="p-4">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
                       <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.description}</p>
-                      <p className="text-teal-600 text-sm font-medium">{formatDate(item.date)}</p>
+                      <p className="text-teal-600 text-sm font-medium">{formatDate(item.created_at)}</p>
                     </div>
                   </div>
                 ))}
@@ -217,10 +170,11 @@ export default function GalleryPage() {
               </button>
               <div className="relative h-96 md:h-[500px]">
                 <Image
-                  src={selectedImage.image}
+                  src={selectedImage.image_url}
                   alt={selectedImage.title}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 />
               </div>
             </div>
@@ -228,11 +182,16 @@ export default function GalleryPage() {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-2xl font-bold text-gray-900">{selectedImage.title}</h2>
                 <span className="bg-teal-100 text-teal-800 text-sm px-3 py-1 rounded">
-                  {categories.find(c => c.id === selectedImage.category)?.name}
+                  {GALLERY_CATEGORIES.find(c => c.id === selectedImage.category)?.name}
                 </span>
               </div>
               <p className="text-gray-600 mb-3">{selectedImage.description}</p>
-              <p className="text-teal-600 font-medium">{formatDate(selectedImage.date)}</p>
+              <div className="flex items-center justify-between text-sm">
+                <p className="text-teal-600 font-medium">{formatDate(selectedImage.created_at)}</p>
+                {selectedImage.metadata?.photographer && (
+                  <p className="text-gray-500">Photo by: {selectedImage.metadata.photographer}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

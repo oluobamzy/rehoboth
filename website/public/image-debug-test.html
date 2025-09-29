@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Debug Test</title>
+    <style>
+        .test-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+        .image-test {
+            width: 300px;
+            height: 200px;
+            border: 2px solid #ccc;
+            position: relative;
+        }
+        .image-test img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+        }
+        .error {
+            background: red;
+        }
+        .success {
+            background: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Carousel Image Debug Test</h1>
+    
+    <div class="test-container">
+        <div class="image-test">
+            <img src="/pastoral_care.jpeg" alt="Pastoral Care" 
+                 onload="this.nextSibling.classList.add('success'); this.nextSibling.textContent = 'SUCCESS: /pastoral_care.jpeg loaded'"
+                 onerror="this.nextSibling.classList.add('error'); this.nextSibling.textContent = 'ERROR: /pastoral_care.jpeg failed to load'">
+            <div class="image-info">Loading...</div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/children's corner2.jpeg" alt="Children's Corner 2" 
+                 onload="this.nextSibling.classList.add('success'); this.nextSibling.textContent = 'SUCCESS: /children\\'s corner2.jpeg loaded'"
+                 onerror="this.nextSibling.classList.add('error'); this.nextSibling.textContent = 'ERROR: /children\\'s corner2.jpeg failed to load'">
+            <div class="image-info">Loading...</div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/PastorPatrick&wife.jpg" alt="Pastor Patrick & Wife" 
+                 onload="this.nextSibling.classList.add('success'); this.nextSibling.textContent = 'SUCCESS: /PastorPatrick&wife.jpg loaded'"
+                 onerror="this.nextSibling.classList.add('error'); this.nextSibling.textContent = 'ERROR: /PastorPatrick&wife.jpg failed to load'">
+            <div class="image-info">Loading...</div>
+        </div>
+        
+        <div class="image-test">
+            <img src="/children'scorner.jpg" alt="Children's Corner 1" 
+                 onload="this.nextSibling.classList.add('success'); this.nextSibling.textContent = 'SUCCESS: /children\\'scorner.jpg loaded'"
+                 onerror="this.nextSibling.classList.add('error'); this.nextSibling.textContent = 'ERROR: /children\\'scorner.jpg failed to load'">
+            <div class="image-info">Loading...</div>
+        </div>
+    </div>
+    
+    <h2>Background Image Tests</h2>
+    <div class="test-container">
+        <div style="width: 300px; height: 200px; background: url('/pastoral_care.jpeg') center/cover; border: 2px solid #ccc;">
+            <div style="background: rgba(0,0,0,0.5); color: white; padding: 10px;">
+                Background: /pastoral_care.jpeg
+            </div>
+        </div>
+        
+        <div style="width: 300px; height: 200px; background: url('/children\\'s corner2.jpeg') center/cover; border: 2px solid #ccc;">
+            <div style="background: rgba(0,0,0,0.5); color: white; padding: 10px;">
+                Background: /children's corner2.jpeg
+            </div>
+        </div>
+        
+        <div style="width: 300px; height: 200px; background: url('/PastorPatrick&wife.jpg') center/cover; border: 2px solid #ccc;">
+            <div style="background: rgba(0,0,0,0.5); color: white; padding: 10px;">
+                Background: /PastorPatrick&wife.jpg
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('Image debug test loaded');
+        
+        // Test if images exist
+        const testImages = [
+            '/pastoral_care.jpeg',
+            '/children\\'s corner2.jpeg', 
+            '/PastorPatrick&wife.jpg',
+            '/children\\'scorner.jpg'
+        ];
+        
+        testImages.forEach(src => {
+            fetch(src)
+                .then(response => {
+                    console.log(`${src}: ${response.status} ${response.statusText}`);
+                })
+                .catch(error => {
+                    console.error(`${src}: Failed to fetch`, error);
+                });
+        });
+    </script>
+</body>
+</html>

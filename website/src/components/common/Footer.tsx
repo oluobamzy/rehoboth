@@ -47,40 +47,36 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link href="/about" className="text-gray-300 hover:text-white">About Us</Link></li>
-              <li><Link href="/services" className="text-gray-300 hover:text-white">Services</Link></li>
               <li><Link href="/sermons" className="text-gray-300 hover:text-white">Sermons</Link></li>
               <li><Link href="/events" className="text-gray-300 hover:text-white">Events</Link></li>
               <li><Link href="/ministries" className="text-gray-300 hover:text-white">Ministries</Link></li>
+              <li><Link href="/media" className="text-gray-300 hover:text-white">Media</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-bold mb-4">Connect</h3>
+            <h3 className="text-lg font-bold mb-4">Get Involved</h3>
             <ul className="space-y-2">
               <li><Link href="/contact" className="text-gray-300 hover:text-white">Contact Us</Link></li>
-              <li><Link href="/prayer" className="text-gray-300 hover:text-white">Prayer Requests</Link></li>
-              <li><Link href="/newsletter" className="text-gray-300 hover:text-white">Newsletter</Link></li>
-              <li><Link href="/volunteer" className="text-gray-300 hover:text-white">Volunteer</Link></li>
+              <li><Link href="/get-involved/prayer-request" className="text-gray-300 hover:text-white">Prayer Requests</Link></li>
+              <li><Link href="/get-involved/volunteering" className="text-gray-300 hover:text-white">Volunteer</Link></li>
+              <li><Link href="/get-involved/membership" className="text-gray-300 hover:text-white">Membership</Link></li>
               <li><Link href="/donate" className="text-gray-300 hover:text-white">Donate</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-lg font-bold mb-4">Service Times</h3>
-            <p className="text-gray-300 mb-2">Sunday Worship: 10:00 AM</p>
-            <p className="text-gray-300 mb-2">Sunday School: 9:00 AM</p>
-            <p className="text-gray-300 mb-2">Wednesday Bible Study: 7:00 PM</p>
-            <p className="text-gray-300 mb-4">Youth Group: Friday 6:00 PM</p>
-            <p className="text-gray-300">123 Church Street<br />City, State 12345<br />Phone: (123) 456-7890</p>
+            <p className="text-gray-300 mb-2">Sunday: 3:00 PM - 6:00 PM</p>
+            <p className="text-gray-300 mb-2">Wednesday: 7:00 PM - 9:00 PM (Prayer Service)</p>
+            <p className="text-gray-300 mb-2">Friday: Women Overnight Service</p>
+            <p className="text-gray-300 mb-4">Saturday: 7:00 PM - 9:00 PM (Youth Prayer & Choir)</p>
+            <p className="text-gray-300">414 Pleasant Park Road<br />Rehoboth, MA 02769<br />Phone: (123) 456-7890</p>
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-800 mt-10 pt-6 text-center">
           <p className="text-gray-400">© {currentYear} Rehoboth Christian Church. All rights reserved.</p>
-          <div className="mt-4 md:mt-0 flex space-x-4">
-            <Link href="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link>
-            <Link href="/terms" className="text-gray-400 hover:text-white">Terms of Service</Link>
-          </div>
         </div>
       </div>
     </footer>

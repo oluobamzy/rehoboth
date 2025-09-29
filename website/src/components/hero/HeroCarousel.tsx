@@ -158,11 +158,11 @@ export default function HeroCarousel() {
             isPlaying={isPlaying} 
             togglePlayPause={togglePlayPause}
           />
-          <CarouselIndicators 
+          {/* <CarouselIndicators 
             slideCount={displaySlides.length} 
             currentIndex={currentIndex} 
             goToSlide={goToSlide}
-          />
+          /> */}
         </>
       )}
 

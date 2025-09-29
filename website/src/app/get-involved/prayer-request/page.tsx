@@ -17,6 +17,7 @@ export default function PrayerRequestPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
 
   const requestTypes = [
@@ -52,25 +53,43 @@ export default function PrayerRequestPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setSubmitMessage('');
     
     try {
-      // Here you would implement the actual form submission logic
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setSubmitMessage('Your prayer request has been submitted successfully. Our prayer team will be praying for you.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        requestType: '',
-        urgency: '',
-        prayerRequest: '',
-        anonymous: false,
-        publicShare: false,
-        followUp: false
+      const response = await fetch('/api/prayer-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage(data.message || 'Your prayer request has been submitted successfully.');
+        
+        // Reset form on success
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          requestType: '',
+          urgency: '',
+          prayerRequest: '',
+          anonymous: false,
+          publicShare: false,
+          followUp: false
+        });
+      } else {
+        setSubmitStatus('error');
+        setSubmitMessage(data.error || 'There was an error submitting your request. Please try again.');
+      }
     } catch (error) {
+      console.error('Prayer request submission error:', error);
+      setSubmitStatus('error');
       setSubmitMessage('There was an error submitting your request. Please try again or contact us directly.');
     } finally {
       setIsSubmitting(false);
@@ -161,8 +180,27 @@ export default function PrayerRequestPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Submit Your Prayer Request</h2>
             
             {submitMessage && (
-              <div className={`mb-8 p-4 rounded-lg ${submitMessage.includes('successfully') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-                {submitMessage}
+              <div className={`mb-8 p-4 rounded-lg ${
+                submitStatus === 'success' 
+                  ? 'bg-green-50 text-green-800 border border-green-200' 
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 mr-3">
+                    {submitStatus === 'success' ? (
+                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    {submitMessage}
+                  </div>
+                </div>
               </div>
             )}
 

@@ -1,4 +1,5 @@
 // src/data/heroCarouselData.ts
+
 export interface HeroCarouselItem {
   id: string;
   title: string;
@@ -32,7 +33,7 @@ export const HeroCarousels: HeroCarouselItem[] = [
     title: 'Welcome Home to Rehoboth',
     subtitle: 'A Place Where Faith Meets Family',
     description: 'Experience authentic worship, genuine community, and transformative faith in the heart of our vibrant church family. Join us every Sunday as we grow together in God\'s love.',
-    image: 'https://images.unsplash.com/photo-1438034884650-4fb4ad0c9b10?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    image: '/pastoral_care.jpeg',
     ctas: {
       primary: {
         text: 'Visit This Sunday',
@@ -46,8 +47,8 @@ export const HeroCarousels: HeroCarouselItem[] = [
       }
     },
     overlay: {
-      gradient: 'linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(16, 185, 129, 0.75) 100%)',
-      opacity: 0.9
+      gradient: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.5) 100%)',
+      opacity: 0.8
     },
     textPosition: 'left',
     theme: 'dark'
@@ -71,8 +72,8 @@ export const HeroCarousels: HeroCarouselItem[] = [
       }
     },
     overlay: {
-      gradient: 'linear-gradient(45deg, rgba(59, 130, 246, 0.8) 0%, rgba(16, 185, 129, 0.7) 100%)',
-      opacity: 0.85
+      gradient: 'linear-gradient(45deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.5) 100%)',
+      opacity: 0.8
     },
     textPosition: 'center',
     theme: 'dark'
@@ -82,7 +83,7 @@ export const HeroCarousels: HeroCarouselItem[] = [
     title: 'Next Generation Leaders',
     subtitle: 'Youth & Children\'s Ministry',
     description: 'Empowering young hearts and minds through dynamic programs, mentorship, and fun activities that build character and strengthen faith.',
-    image: 'https://images.unsplash.com/photo-1544717299-70d43ebe2d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    image: '/children%27s%20corner2.jpeg',
     ctas: {
       primary: {
         text: 'Youth Programs',
@@ -96,8 +97,8 @@ export const HeroCarousels: HeroCarouselItem[] = [
       }
     },
     overlay: {
-      gradient: 'linear-gradient(315deg, rgba(99, 102, 241, 0.8) 0%, rgba(16, 185, 129, 0.7) 100%)',
-      opacity: 0.85
+      gradient: 'linear-gradient(315deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.5) 100%)',
+      opacity: 0.8
     },
     textPosition: 'left',
     theme: 'dark'
@@ -107,11 +108,11 @@ export const HeroCarousels: HeroCarouselItem[] = [
     title: 'A Message of Hope',
     subtitle: 'From Pastor Patrick & Family',
     description: 'Discover God\'s purpose for your life through powerful biblical teaching, pastoral care, and a community that celebrates your journey of faith.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    image: '/PastorPatrick%26wife.jpg',
     ctas: {
       primary: {
         text: 'Meet Our Pastor',
-        link: '/about#pastor',
+        link: '/contact',
         variant: 'primary'
       },
       secondary: {
@@ -121,8 +122,8 @@ export const HeroCarousels: HeroCarouselItem[] = [
       }
     },
     overlay: {
-      gradient: 'linear-gradient(180deg, rgba(30, 58, 138, 0.9) 0%, rgba(59, 130, 246, 0.7) 100%)',
-      opacity: 0.85
+      gradient: 'linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.5) 100%)',
+      opacity: 0.8
     },
     textPosition: 'center',
     theme: 'dark'
