@@ -342,7 +342,7 @@ export default function Home() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-blue-800">Contact</h4>
-                    <p className="text-gray-600">info@rehobothchurch.org<br />+1 (555) 123-4567</p>
+                    <p className="text-gray-600">rehobothchrisitianchurch2022@gmail.com<br />(613) 400-4966</p>
                   </div>
                 </div>
                 <div className="flex items-start">
@@ -364,12 +364,29 @@ export default function Home() {
               </div>
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
-              <div className="bg-gray-300 h-[300px] w-full flex items-center justify-center">
-                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 flex items-center">
-                  <span className="mr-2">View on Google Maps</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              <div className="aspect-video w-full">
+                <iframe
+                  src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=414%20Pleasant%20Park%20Road,%20Rehoboth,%20MA%2002769&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=&amp;output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Rehoboth Christian Church Location"
+                ></iframe>
+              </div>
+              <div className="p-4 bg-white">
+                <a 
+                  href="https://www.google.com/maps/dir/?api=1&destination=414+Pleasant+Park+Road,+Rehoboth,+MA+02769"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 6-3v15l-6 3-6-3z" />
                   </svg>
+                  Get Directions
                 </a>
               </div>
             </div>

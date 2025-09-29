@@ -14,7 +14,12 @@ function LoginPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirectUrl') || '/';
+  
+  // Check if this is an admin-related login (either direct admin route or coming from admin area)
+  const redirectUrl = searchParams.get('redirectUrl') || searchParams.get('returnUrl') || '/';
+  const isAdminLogin = redirectUrl.includes('/admin') || redirectUrl === '/';
+  
+  console.log('Login page - Redirect URL:', redirectUrl, 'Is Admin Login:', isAdminLogin);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,34 +69,48 @@ function LoginPageContent() {
       }
 
       console.log(`Login successful, redirecting to: ${redirectUrl}`);
+      console.log('Available URL params:', {
+        redirectUrl: searchParams.get('redirectUrl'),
+        returnUrl: searchParams.get('returnUrl'),
+        finalRedirect: redirectUrl,
+        isAdminLogin
+      });
       
-      // Ensure the session is properly established and available to middleware
-      const storeSession = async () => {
-        try {
-          // Retrieve the session again to ensure it's stored properly
-          const { data: { session: confirmedSession } } = await supabase.auth.getSession();
-          
-          console.log('Session confirmed:', !!confirmedSession);
-          if (confirmedSession?.user) {
-            console.log(`Authenticated as: ${confirmedSession.user.email}`);
-            console.log('App metadata:', JSON.stringify(confirmedSession.user.app_metadata));
-            
-            // Force a full page reload to ensure middleware picks up the new session
-            window.location.href = redirectUrl;
-          } else {
-            console.warn('Session not properly established after login. Retrying...');
-            // Retry after a short delay if session is not confirmed
-            setTimeout(storeSession, 1000);
+      // Ensure the session is properly established and redirect immediately
+      const { data: { session: confirmedSession } } = await supabase.auth.getSession();
+      
+      if (confirmedSession?.user) {
+        console.log(`Authenticated as: ${confirmedSession.user.email}`);
+        console.log('App metadata:', JSON.stringify(confirmedSession.user.app_metadata));
+        
+        // If user is admin, always redirect to admin dashboard unless specifically requesting another admin page
+        const isAdmin = confirmedSession.user.app_metadata?.role === 'admin';
+        let finalRedirectUrl = redirectUrl;
+        
+        if (isAdmin) {
+          if (redirectUrl === '/' || !redirectUrl.includes('/admin')) {
+            finalRedirectUrl = '/admin/dashboard';
+            console.log('Admin user logging in, redirecting to admin dashboard');
+          } else if (redirectUrl.includes('/admin')) {
+            // Keep the specific admin page they were trying to access
+            finalRedirectUrl = redirectUrl;
+            console.log('Admin user returning to specific admin page:', finalRedirectUrl);
           }
-        } catch (err) {
-          console.error('Error confirming session:', err);
-          // Proceed with redirect anyway after one more second
-          setTimeout(() => { window.location.href = redirectUrl; }, 1000);
         }
-      };
-      
-      // Allow a bit more time to ensure session is properly established
-      setTimeout(storeSession, 2000);
+        
+        console.log(`Final redirect URL: ${finalRedirectUrl}`);
+        
+        // Use router.replace to prevent back button going to login page
+        router.replace(finalRedirectUrl);
+      } else {
+        console.warn('Login succeeded but session not immediately available, using fallback redirect');
+        // Fallback: redirect after a brief delay to allow session to be established
+        setTimeout(() => {
+          const fallbackUrl = isAdminLogin ? '/admin/dashboard' : redirectUrl;
+          console.log('Fallback redirect to:', fallbackUrl);
+          router.replace(fallbackUrl);
+        }, 500);
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message || 'An error occurred during login');

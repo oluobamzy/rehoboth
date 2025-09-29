@@ -68,6 +68,50 @@ export default function ContactPage() {
             <p>Phone: (613) 400-4966</p>
           </div>
         </div>
+        
+        {/* Map Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">Find Us</h2>
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="aspect-video w-full">
+              <iframe
+                src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=414%20Pleasant%20Park%20Road,%20Rehoboth,%20MA%2002769&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=&amp;output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Rehoboth Christian Church Location"
+              ></iframe>
+            </div>
+            <div className="p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">Our Address</h3>
+                  <p className="text-gray-600 mb-2">
+                    <strong>414 Pleasant Park Road</strong><br />
+                    Rehoboth, MA 02769
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">Directions</h3>
+                  <a 
+                    href="https://www.google.com/maps/dir/?api=1&destination=414+Pleasant+Park+Road,+Rehoboth,+MA+02769"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 6-3v15l-6 3-6-3z" />
+                    </svg>
+                    Get Directions
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );

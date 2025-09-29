@@ -5,14 +5,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/services/auth';
-import Button from './Button';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
   
   // Contact info for top bar
   const phoneNumber = "613-400-4966";
@@ -91,14 +88,7 @@ export default function Header() {
     };
   }, []);
   
-  const adminNavItems = [
-    { name: 'Dashboard', href: '/admin/dashboard' },
-    { name: 'Carousel', href: '/admin/carousel' },
-    { name: 'Sermons', href: '/admin/sermons' },
-    { name: 'Events', href: '/admin/events' },
-    { name: 'Donations', href: '/admin/donations' },
-    { name: 'Users', href: '/admin/users' },
-  ];
+
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -229,64 +219,9 @@ export default function Header() {
                 ))}
               </ul>
             </nav>
+          </div>
 
-            <div className="hidden md:block">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  {user.app_metadata?.role === 'admin' && (
-                    <div className="relative group">
-                      <button 
-                        className="text-sm font-medium text-gray-700 hover:text-blue-600 flex items-center gap-1"
-                      >
-                        Admin
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          width="16" 
-                          height="16" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                        >
-                          <path d="m6 9 6 6 6-6"/>
-                        </svg>
-                      </button>
-                      <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden group-hover:block">
-                        {adminNavItems.map((item) => (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className={`block px-4 py-2 text-sm ${
-                              isActive(item.href) ? 'bg-gray-100 text-blue-600' : 'text-gray-700'
-                            } hover:bg-gray-100`}
-                          >
-                            {item.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <span className="text-sm text-gray-600">{user.email}</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => signOut()}
-                  >
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-x-2">
-                  <Button href="/auth/login" variant="primary" size="sm">
-                    Log In
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile menu button */}
+          {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 type="button"
@@ -333,9 +268,8 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile menu, show/hide based on menu state */}
+        {/* Mobile menu, show/hide based on menu state */}
       {isMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
@@ -409,36 +343,6 @@ export default function Header() {
               </div>
             ))}
           </div>
-          {user && (
-            <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="px-4">
-                <div className="text-base font-medium text-gray-800">{user.email}</div>
-                {user.app_metadata?.role === 'admin' && (
-                  <div className="mt-3 space-y-1">
-                    {adminNavItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => signOut()}
-                    fullWidth
-                  >
-                    Sign Out
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </header>
