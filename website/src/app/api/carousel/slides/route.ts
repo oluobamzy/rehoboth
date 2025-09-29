@@ -2,6 +2,9 @@
 import { NextResponse } from 'next/server';
 import { HeroCarousels } from '@/data/heroCarouselData';
 
+// This route is excluded from static export
+export const dynamic = 'error';
+
 export async function GET() {
   try {
     // Return static carousel data instead of fetching from database
