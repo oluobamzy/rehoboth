@@ -53,6 +53,37 @@ export async function POST(
     console.log(`Invitation resent for ${invite.email} with new token: ${newInviteToken}`);
     console.log(`Invite link: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/invite?token=${newInviteToken}`);
 
+    // Send invitation email
+    try {
+      const { sendAdminInvitation } = await import('@/services/emailService');
+      
+      // Get inviter profile for name
+      const { data: inviterProfile } = await serverSupabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', invite.invited_by)
+        .single();
+      
+      // Get inviter user info
+      const { data: inviterUser } = await serverSupabase.auth.admin.getUserById(invite.invited_by);
+      
+      const emailSent = await sendAdminInvitation({
+        email: invite.email,
+        role: invite.role,
+        inviteToken: newInviteToken,
+        inviterName: inviterProfile?.full_name,
+        inviterEmail: inviterUser.user?.email || 'admin@rehoboth-church.org',
+        expiresAt: expiresAt.toISOString()
+      });
+      
+      if (!emailSent) {
+        console.warn('Failed to send invitation email, but invitation was updated');
+      }
+    } catch (emailError) {
+      console.error('Error sending invitation email:', emailError);
+      // Don't fail the API call if email fails
+    }
+
     return NextResponse.json({ 
       success: true, 
       message: 'Invitation resent successfully' 

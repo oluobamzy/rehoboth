@@ -115,6 +115,34 @@ export async function POST(req: NextRequest) {
     console.log(`Invitation created for ${email} with token: ${inviteToken}`);
     console.log(`Invite link: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/invite?token=${inviteToken}`);
 
+    // Send invitation email
+    try {
+      const { sendAdminInvitation } = await import('@/services/emailService');
+      
+      // Get inviter profile for name
+      const { data: inviterProfile } = await serverSupabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      const emailSent = await sendAdminInvitation({
+        email,
+        role,
+        inviteToken,
+        inviterName: inviterProfile?.full_name,
+        inviterEmail: user.email || '',
+        expiresAt: expiresAt.toISOString()
+      });
+      
+      if (!emailSent) {
+        console.warn('Failed to send invitation email, but invitation was created');
+      }
+    } catch (emailError) {
+      console.error('Error sending invitation email:', emailError);
+      // Don't fail the API call if email fails
+    }
+
     return NextResponse.json({ 
       success: true, 
       message: 'Invitation sent successfully',

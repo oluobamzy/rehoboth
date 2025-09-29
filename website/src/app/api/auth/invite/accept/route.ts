@@ -112,6 +112,24 @@ export async function POST(req: NextRequest) {
       // Don't fail the request if status update fails
     }
 
+    // Send welcome email
+    try {
+      const { sendAdminWelcomeEmail } = await import('@/services/emailService');
+      
+      const emailSent = await sendAdminWelcomeEmail(
+        invite.email,
+        fullName,
+        invite.role as 'admin' | 'moderator'
+      );
+      
+      if (!emailSent) {
+        console.warn('Failed to send welcome email, but account was created');
+      }
+    } catch (emailError) {
+      console.error('Error sending welcome email:', emailError);
+      // Don't fail the API call if email fails
+    }
+
     return NextResponse.json({ 
       success: true, 
       message: 'Account created successfully',
