@@ -219,9 +219,8 @@ export default function Header() {
                 ))}
               </ul>
             </nav>
-          </div>
 
-          {/* Mobile menu button */}
+            {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 type="button"
@@ -267,9 +266,7 @@ export default function Header() {
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Mobile menu, show/hide based on menu state */}
+        </div>        {/* Mobile menu, show/hide based on menu state */}
       {isMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
