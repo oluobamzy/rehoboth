@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null);
   const pathname = usePathname();
   
   // Contact info for top bar
@@ -70,11 +71,13 @@ export default function Header() {
   useEffect(() => {
     const handleClickOutside = () => {
       setActiveDropdown(null);
+      setMobileActiveDropdown(null);
     };
     
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setActiveDropdown(null);
+        setMobileActiveDropdown(null);
         setIsMenuOpen(false);
       }
     };
@@ -224,10 +227,14 @@ export default function Header() {
             <div className="md:hidden flex items-center">
               <button
                 type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-blue-600 hover:bg-gray-100 focus:outline-none"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                 aria-controls="mobile-menu"
                 aria-expanded={isMenuOpen}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(!isMenuOpen);
+                  setMobileActiveDropdown(null); // Close any open mobile dropdowns
+                }}
               >
                 <span className="sr-only">Open main menu</span>
                 {isMenuOpen ? (
@@ -269,8 +276,10 @@ export default function Header() {
         </div>
         
         {/* Mobile menu, show/hide based on menu state */}
-        {isMenuOpen && (
-        <div className="md:hidden" id="mobile-menu">
+        <div 
+          className={`md:hidden bg-white border-t border-gray-200 ${isMenuOpen ? 'block' : 'hidden'}`} 
+          id="mobile-menu"
+        >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navItems.map((item) => (
               <div key={item.name}>
@@ -282,7 +291,10 @@ export default function Header() {
                           ? 'bg-blue-50 text-blue-600'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
-                      onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMobileActiveDropdown(mobileActiveDropdown === item.name ? null : item.name);
+                      }}
                     >
                       {item.name}
                       <svg 
@@ -296,7 +308,7 @@ export default function Header() {
                         strokeLinecap="round" 
                         strokeLinejoin="round"
                         className={`transition-transform duration-200 ${
-                          activeDropdown === item.name ? 'rotate-180' : ''
+                          mobileActiveDropdown === item.name ? 'rotate-180' : ''
                         }`}
                       >
                         <path d="m6 9 6 6 6-6"/>
@@ -304,27 +316,27 @@ export default function Header() {
                     </button>
                     
                     {/* Mobile dropdown items */}
-                    {activeDropdown === item.name && (
-                      <div className="ml-4 mt-1 space-y-1">
-                        {item.dropdownItems?.map((dropItem) => (
-                          <Link
-                            key={dropItem.name}
-                            href={dropItem.href}
-                            className={`block px-3 py-2 rounded-md text-sm ${
-                              pathname === dropItem.href
-                                ? 'bg-blue-100 text-blue-600 font-medium'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-                            }`}
-                            onClick={() => {
-                              setIsMenuOpen(false);
-                              setActiveDropdown(null);
-                            }}
-                          >
-                            {dropItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
+                    <div className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${
+                      mobileActiveDropdown === item.name ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      {item.dropdownItems?.map((dropItem) => (
+                        <Link
+                          key={dropItem.name}
+                          href={dropItem.href}
+                          className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                            pathname === dropItem.href
+                              ? 'bg-blue-100 text-blue-600 font-medium'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+                          }`}
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setMobileActiveDropdown(null);
+                          }}
+                        >
+                          {dropItem.name}
+                        </Link>
+                      ))}
+                    </div>
                   </>
                 ) : (
                   <Link
@@ -343,7 +355,6 @@ export default function Header() {
             ))}
           </div>
         </div>
-        )}
       </div>
     </header>
   );
