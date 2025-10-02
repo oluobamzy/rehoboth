@@ -73,7 +73,11 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <QueryProvider>
           <AuthProvider>
-                        <div className="flex flex-col min-h-[100dvh] supports-[height:100vh]:min-h-screen">\n              <Header />\n              <main className="flex-grow">{children}</main>\n              <Footer />\n            </div>
+            <div className="flex flex-col min-h-[100dvh] supports-[height:100vh]:min-h-screen">
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
           </AuthProvider>
         </QueryProvider>
       </body>
