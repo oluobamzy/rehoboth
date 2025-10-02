@@ -1,0 +1,33 @@
+# Vercel ignore file
+# Don't deploy these files/directories
+
+# Development files
+*.log
+server.log
+.env.local
+.env.development
+
+# Test and script files
+test-admin-auth.js
+regenerate-invitation.js
+trigger-deployment.js
+
+# Cache and build artifacts
+.next/cache
+.turbo
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation that's not needed for build
+*.md
+!README.md
+
+# Temporary files
+*.tmp
+*.temp
