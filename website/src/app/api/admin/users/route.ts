@@ -1,8 +1,12 @@
 // src/app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/services/auth/apiAuth';
 
 export async function GET(req: NextRequest) {
   try {
+    // Require admin authentication first
+    await requireAdmin(req);
+
     // Get database connection
     const { serverSupabase } = await import('@/services/server/eventService.server');
     

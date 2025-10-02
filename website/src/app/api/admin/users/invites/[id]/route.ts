@@ -1,11 +1,15 @@
 // src/app/api/admin/users/invites/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/services/auth/apiAuth';
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Require admin authentication first
+    await requireAdmin(req);
+    
     const inviteId = params.id;
 
     // Get database connection

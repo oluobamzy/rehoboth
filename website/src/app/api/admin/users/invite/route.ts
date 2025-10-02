@@ -1,10 +1,16 @@
 // src/app/api/admin/users/invite/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/services/auth/apiAuth';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('📥 Admin invite request received');
+    
+    // Require admin authentication first
+    const currentUser = await requireAdmin(req);
+    console.log('✅ Admin authenticated, proceeding with invite...');
+
     const { email, role } = await req.json();
 
     if (!email || !role) {
@@ -18,18 +24,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid role' },
         { status: 400 }
-      );
-    }
-
-    // Get current user from auth
-    const cookieStore = await cookies();
-    const token = cookieStore.get('sb-access-token')?.value || 
-                  cookieStore.get('sb-refresh-token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
       );
     }
 
@@ -70,28 +64,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get current user for invited_by field
-    const { data: { user } } = await serverSupabase.auth.getUser(token);
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // Generate invitation token
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Expires in 7 days
 
-    // Create invitation record
+    // Create invitation record using current authenticated admin user
     const { data: invite, error: insertError } = await serverSupabase
       .from('admin_invites')
       .insert({
         email,
         role,
-        invited_by: user.id,
+        invited_by: currentUser.id,
         invite_token: inviteToken,
         expires_at: expiresAt.toISOString(),
         status: 'pending'
@@ -113,7 +97,9 @@ export async function POST(req: NextRequest) {
     // const inviteLink = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite?token=${inviteToken}`;
 
     console.log(`Invitation created for ${email} with token: ${inviteToken}`);
-    console.log(`Invite link: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/invite?token=${inviteToken}`);
+    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rehobothcc.ca';
+    console.log(`Invite link: ${siteUrl}/auth/invite?token=${inviteToken}`);
 
     // Send invitation email
     try {
@@ -123,7 +109,7 @@ export async function POST(req: NextRequest) {
       const { data: inviterProfile } = await serverSupabase
         .from('profiles')
         .select('full_name')
-        .eq('id', user.id)
+        .eq('id', currentUser.id)
         .single();
       
       const emailSent = await sendAdminInvitation({
@@ -131,7 +117,7 @@ export async function POST(req: NextRequest) {
         role,
         inviteToken,
         inviterName: inviterProfile?.full_name,
-        inviterEmail: user.email || '',
+        inviterEmail: currentUser.email || '',
         expiresAt: expiresAt.toISOString()
       });
       
@@ -149,7 +135,16 @@ export async function POST(req: NextRequest) {
       inviteId: invite.id
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('❌ Unexpected error in admin invite:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error && error.message.includes('required')) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

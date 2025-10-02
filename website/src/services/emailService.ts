@@ -257,7 +257,15 @@ export async function sendAdminInvitation(
 ): Promise<boolean> {
   const { email, role, inviteToken, inviterName, inviterEmail, expiresAt } = data;
   
-  const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rehobothnewwebsite-h8fe3klga-rehoboth-churchs-projects.vercel.app'}/auth/invite?token=${inviteToken}`;
+  // Debug environment variable
+  console.log('🔍 NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL);
+  console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+  
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rehobothcc.ca';
+  const inviteUrl = `${siteUrl}/auth/invite?token=${inviteToken}`;
+  
+  console.log('📧 Generated invite URL:', inviteUrl);
+  
   const roleDisplayName = role === 'admin' ? 'Administrator' : 'Moderator';
   
   const subject = `You're invited to join Rehoboth Church as ${roleDisplayName}`;

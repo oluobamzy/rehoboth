@@ -1,5 +1,6 @@
 // src/app/api/admin/users/invites/[id]/resend/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/services/auth/apiAuth';
 import crypto from 'crypto';
 
 export async function POST(
@@ -7,6 +8,9 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Require admin authentication first
+    await requireAdmin(req);
+    
     const inviteId = params.id;
 
     // Get database connection
