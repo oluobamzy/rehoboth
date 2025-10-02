@@ -63,10 +63,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Update user metadata with admin role
+    // Update user metadata with admin role and confirm email
     const { error: updateUserError } = await serverSupabase.auth.admin.updateUserById(
       user.id,
       {
+        email_confirm: true, // Auto-confirm email for invited users
         user_metadata: {
           ...user.user_metadata,
           role: invite.role,

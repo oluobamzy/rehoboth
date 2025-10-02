@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 
 interface InviteDetails {
@@ -16,6 +17,7 @@ interface InviteDetails {
 function InvitePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const token = searchParams.get('token');
 
   const [invite, setInvite] = useState<InviteDetails | null>(null);
@@ -70,7 +72,8 @@ function InvitePageContent() {
     setAcceptLoading(true);
 
     try {
-      const response = await fetch('/api/auth/invite/accept', {
+      // Step 1: Validate the invitation
+      const validateResponse = await fetch('/api/auth/invite/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,12 +85,55 @@ function InvitePageContent() {
         }),
       });
 
-      if (response.ok) {
-        alert('Account created successfully! You can now sign in.');
+      if (!validateResponse.ok) {
+        const errorData = await validateResponse.json();
+        alert(`Failed to validate invitation: ${errorData.error}`);
+        return;
+      }
+
+      const { invitation } = await validateResponse.json();
+
+      // Step 2: Sign up the user using Supabase client
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: invitation.email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      });
+
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        alert(`Failed to create account: ${signUpError.message}`);
+        return;
+      }
+
+      if (!signUpData.user) {
+        alert('Failed to create account. Please try again.');
+        return;
+      }
+
+      // Step 3: Complete the invitation (assign role)
+      const completeResponse = await fetch('/api/auth/invite/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          fullName,
+        }),
+      });
+
+      if (completeResponse.ok) {
+        alert('Account created successfully! Your admin role has been assigned. You can now sign in.');
         router.push('/auth/login');
       } else {
-        const errorData = await response.json();
-        alert(`Failed to create account: ${errorData.error}`);
+        const errorData = await completeResponse.json();
+        alert(`Account created but failed to assign role: ${errorData.error}. Please contact support.`);
+        router.push('/auth/login');
       }
     } catch (err) {
       console.error('Failed to accept invite:', err);
