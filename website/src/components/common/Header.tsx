@@ -266,8 +266,10 @@ export default function Header() {
               </button>
             </div>
           </div>
-        </div>        {/* Mobile menu, show/hide based on menu state */}
-      {isMenuOpen && (
+        </div>
+        
+        {/* Mobile menu, show/hide based on menu state */}
+        {isMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navItems.map((item) => (
@@ -341,7 +343,8 @@ export default function Header() {
             ))}
           </div>
         </div>
-      )}
+        )}
+      </div>
     </header>
   );
 }
