@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
       .select('*')
       .eq('invite_token', token)
       .eq('email', user.email)
-      .eq('status', 'in_progress')
+      .eq('status', 'pending')
       .single();
     
     if (inviteError || !invite) {
       return NextResponse.json(
-        { error: 'Invalid invitation or invitation not in progress' },
+        { error: 'Invalid invitation or invitation already processed' },
         { status: 404 }
       );
     }

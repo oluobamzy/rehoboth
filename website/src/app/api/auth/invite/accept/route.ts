@@ -62,23 +62,8 @@ export async function POST(req: NextRequest) {
     // return the invitation details so the frontend can handle signup
     // and then we'll update the role after successful signup
     
-    // Mark invitation as in-progress to prevent concurrent usage
-    const { error: markInProgressError } = await serverSupabase
-      .from('admin_invites')
-      .update({ 
-        status: 'in_progress',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', invite.id);
-
-    if (markInProgressError) {
-      console.error('Error marking invitation as in progress:', markInProgressError);
-      return NextResponse.json(
-        { error: 'Failed to process invitation' },
-        { status: 500 }
-      );
-    }
-
+    // Just return the invitation details for frontend processing
+    // We'll mark it as accepted only after the user completes signup
     return NextResponse.json({ 
       success: true, 
       message: 'Invitation validated. Please proceed with account creation.',
