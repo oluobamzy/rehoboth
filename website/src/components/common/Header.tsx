@@ -69,7 +69,14 @@ export default function Header() {
   
   // Close dropdown when clicking outside or pressing escape
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Don't close if clicking on dropdown buttons or dropdown content
+      if (target.closest('[data-dropdown-button]') || target.closest('[data-dropdown-content]')) {
+        return;
+      }
+      
       setActiveDropdown(null);
       setMobileActiveDropdown(null);
     };
@@ -157,15 +164,18 @@ export default function Header() {
                   <li key={item.name} className="relative group">
                     {item.hasDropdown ? (
                       <div
+                        data-dropdown-button
                         onMouseEnter={() => setActiveDropdown(item.name)}
                         onMouseLeave={() => setActiveDropdown(null)}
                       >
                         <button
+                          data-dropdown-button
                           className={`px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1 ${
                             pathname.startsWith(item.href) || item.dropdownItems?.some(dropItem => pathname === dropItem.href)
                               ? 'text-blue-600'
                               : 'text-gray-700 hover:text-blue-600'
                           }`}
+                          onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
                         >
                           {item.name}
                           <svg 
@@ -187,7 +197,9 @@ export default function Header() {
                         </button>
                         
                         {/* Dropdown menu */}
-                        <div className={`absolute top-full left-0 z-50 mt-1 w-56 origin-top-left rounded-md bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 transition-all duration-200 ${
+                        <div 
+                          data-dropdown-content
+                          className={`absolute top-full left-0 z-50 mt-1 w-56 origin-top-left rounded-md bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 transition-all duration-200 ${
                           activeDropdown === item.name ? 'opacity-100 visible transform scale-100' : 'opacity-0 invisible transform scale-95'
                         }`}>
                           {item.dropdownItems?.map((dropItem) => (
@@ -286,6 +298,7 @@ export default function Header() {
                 {item.hasDropdown ? (
                   <>
                     <button
+                      data-dropdown-button
                       className={`w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center justify-between ${
                         pathname.startsWith(item.href) || item.dropdownItems?.some(dropItem => pathname === dropItem.href)
                           ? 'bg-blue-50 text-blue-600'
@@ -316,8 +329,10 @@ export default function Header() {
                     </button>
                     
                     {/* Mobile dropdown items */}
-                    <div className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${
-                      mobileActiveDropdown === item.name ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    <div 
+                      data-dropdown-content
+                      className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out ${
+                      mobileActiveDropdown === item.name ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
                     }`}>
                       {item.dropdownItems?.map((dropItem) => (
                         <Link
