@@ -58,82 +58,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the user account
-    const { data: newUser, error: createError } = await serverSupabase.auth.admin.createUser({
-      email: invite.email,
-      password: password,
-      email_confirm: true, // Auto-confirm email since they were invited
-      user_metadata: {
-        role: invite.role,
-        full_name: fullName,
-        invited_by: invite.invited_by,
-        invitation_accepted_at: new Date().toISOString()
-      }
-    });
+    // Instead of creating the user server-side (which has database issues),
+    // return the invitation details so the frontend can handle signup
+    // and then we'll update the role after successful signup
+    
+    // Mark invitation as in-progress to prevent concurrent usage
+    const { error: markInProgressError } = await serverSupabase
+      .from('admin_invites')
+      .update({ 
+        status: 'in_progress',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invite.id);
 
-    if (createError || !newUser.user) {
-      console.error('Error creating user:', createError);
+    if (markInProgressError) {
+      console.error('Error marking invitation as in progress:', markInProgressError);
       return NextResponse.json(
-        { error: 'Failed to create user account' },
+        { error: 'Failed to process invitation' },
         { status: 500 }
       );
     }
 
-    // Create or update profile
-    const { error: profileError } = await serverSupabase
-      .from('profiles')
-      .upsert({
-        id: newUser.user.id,
-        email: invite.email,
-        full_name: fullName,
-        role: invite.role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      });
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      // Don't fail the request if profile creation fails
-    }
-
-    // Mark invitation as accepted
-    const { error: updateError } = await serverSupabase
-      .from('admin_invites')
-      .update({ 
-        status: 'accepted',
-        accepted_at: new Date().toISOString()
-      })
-      .eq('id', invite.id);
-
-    if (updateError) {
-      console.error('Error updating invitation status:', updateError);
-      // Don't fail the request if status update fails
-    }
-
-    // Send welcome email
-    try {
-      const { sendAdminWelcomeEmail } = await import('@/services/emailService');
-      
-      const emailSent = await sendAdminWelcomeEmail(
-        invite.email,
-        fullName,
-        invite.role as 'admin' | 'moderator'
-      );
-      
-      if (!emailSent) {
-        console.warn('Failed to send welcome email, but account was created');
-      }
-    } catch (emailError) {
-      console.error('Error sending welcome email:', emailError);
-      // Don't fail the API call if email fails
-    }
-
     return NextResponse.json({ 
       success: true, 
-      message: 'Account created successfully',
-      userId: newUser.user.id
+      message: 'Invitation validated. Please proceed with account creation.',
+      invitation: {
+        email: invite.email,
+        role: invite.role,
+        token: token
+      }
     });
   } catch (error) {
     console.error('Unexpected error:', error);
