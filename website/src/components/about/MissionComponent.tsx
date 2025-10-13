@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import EditableContent from '@/components/common/EditableContent';
 
 export default function MissionComponent() {
   return (
@@ -12,26 +13,18 @@ export default function MissionComponent() {
         {/* Mission Statement */}
         <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 mb-8">
           <h2 className="text-2xl font-bold mb-4 text-green-700">Our Mission</h2>
-          <p className="text-xl font-semibold text-green-800">
-            To proclaim Christ, disciple believers, and demonstrate God's compassion through love and service.
-          </p>
+          <EditableContent
+            pageKey="about"
+            sectionKey="mission_statement"
+            fallbackContent="<p class='text-xl font-semibold text-green-800'>To proclaim Christ, disciple believers, and demonstrate God's compassion through love and service.</p>"
+          />
         </div>
         
-        <p className="text-lg">
-          We are dedicated to sharing God&apos;s unconditional love and boundless mercy, inviting everyone into a transformative 
-          relationship with Jesus Christ.
-        </p>
-
-        <p className="mt-4">
-          No matter their background or circumstances, we provide opportunities for individuals to experience His grace 
-          and be renewed in faith. Through prayer, worship, biblical teaching, and compassionate service, we foster a 
-          vibrant faith community that reflects God&apos;s heart for the world.
-        </p>
-
-        <p className="mt-4">
-          Rehoboth Christian Church is a place where people encounter His love, deepen their faith, and walk as 
-          devoted followers of Christ.
-        </p>
+        <EditableContent
+          pageKey="about"
+          sectionKey="mission_description"
+          fallbackContent="<p>We are dedicated to sharing God's unconditional love and boundless mercy, inviting everyone into a transformative relationship with Jesus Christ.</p><p>No matter their background or circumstances, we provide opportunities for individuals to experience His grace and be renewed in faith. Through prayer, worship, biblical teaching, and compassionate service, we foster a vibrant faith community that reflects God's heart for the world.</p><p>Rehoboth Christian Church is a place where people encounter His love, deepen their faith, and walk as devoted followers of Christ.</p>"
+        />
 
         <h2 className="mt-8 font-bold text-2xl">Our Objectives:</h2>
         

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import EditableContent from '@/components/common/EditableContent';
 
 export default function VisionComponent() {
   return (
@@ -11,17 +12,18 @@ export default function VisionComponent() {
       >
         <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500 mb-8">
           <h2 className="text-2xl font-bold mb-4 text-blue-700">Our Vision</h2>
-          <h3 className="text-xl font-semibold mb-3 text-green-600">Loving God, Serving People</h3>
-          <p className="text-lg text-gray-700">
-            A community transformed by God's love and inspired to show His compassion.
-          </p>
+          <EditableContent
+            pageKey="about"
+            sectionKey="vision_statement"
+            fallbackContent="<h3 class='text-xl font-semibold mb-3 text-green-600'>Loving God, Serving People</h3><p class='text-lg text-gray-700'>A community transformed by God's love and inspired to show His compassion.</p>"
+          />
         </div>
         
-        <p className="text-lg">
-          At Rehoboth Christian Church, our vision is to be a community that loves God deeply and serves people 
-          wholeheartedly. We envision a church family transformed by God's amazing love, where every person 
-          experiences His grace and is inspired to extend that same compassion to others.
-        </p>
+        <EditableContent
+          pageKey="about"
+          sectionKey="vision_description"
+          fallbackContent="<p>At Rehoboth Christian Church, our vision is to be a community that loves God deeply and serves people wholeheartedly. We envision a church family transformed by God's amazing love, where every person experiences His grace and is inspired to extend that same compassion to others.</p>"
+        />
 
         <h2 className="mt-8 font-bold text-2xl">Our Vision for the Future</h2>
         

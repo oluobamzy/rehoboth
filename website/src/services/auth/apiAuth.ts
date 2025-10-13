@@ -7,8 +7,7 @@ import { getUserRole, hasRole, UserRole } from './roleGuard';
 export async function getCurrentUser(req?: NextRequest): Promise<any> {
   try {
     // Create Supabase client for API routes
-    const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies });
     
     // Get the current session
     const { data: { session }, error } = await supabase.auth.getSession();

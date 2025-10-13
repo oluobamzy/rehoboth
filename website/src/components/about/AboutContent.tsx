@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import EditableContent from '@/components/common/EditableContent';
 
 export default function AboutContent() {
   return (
@@ -9,32 +10,50 @@ export default function AboutContent() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <p className="text-lg">
-          Rehoboth Christian Church is a vibrant community of believers committed to loving God and serving people. 
-          No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we 
-          warmly invite you to be part of our church family.
-        </p>
+        <EditableContent
+          pageKey="about"
+          sectionKey="main_content"
+          fallbackContent={`
+            <p class="text-lg">
+              Rehoboth Christian Church is a vibrant community of believers committed to loving God and serving people. 
+              No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we 
+              warmly invite you to be part of our church family.
+            </p>
 
-        <p className="mt-4">
-          We are a Christ-centered community that believes in the transformative power of God's love. Through worship, 
-          fellowship, biblical teaching, and compassionate service, we create an environment where everyone can grow 
-          in their faith and experience the abundant life that Jesus offers.
-        </p>
+            <p class="mt-4">
+              We are a Christ-centered community that believes in the transformative power of God's love. Through worship, 
+              fellowship, biblical teaching, and compassionate service, we create an environment where everyone can grow 
+              in their faith and experience the abundant life that Jesus offers.
+            </p>
+          `}
+        />
 
         {/* Our Motto */}
         <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 mb-8 mt-8">
           <h2 className="text-2xl font-bold mb-4 text-green-700">Our Motto</h2>
-          <p className="text-xl font-semibold text-green-800">
-            Christ-Centered, Compassion-Driven, Community-Focused
-          </p>
+          <EditableContent
+            pageKey="about"
+            sectionKey="motto"
+            fallbackContent={`
+              <p class="text-xl font-semibold text-green-800">
+                Christ-Centered, Compassion-Driven, Community-Focused
+              </p>
+            `}
+          />
         </div>
 
         {/* Our Commitment */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-blue-900">Our Commitment</h2>
-          <p className="text-lg text-gray-700">
-            We commit to follow Jesus, grow in His Word, and show His love through prayer, worship, and service to others.
-          </p>
+          <EditableContent
+            pageKey="about"
+            sectionKey="commitment"
+            fallbackContent={`
+              <p class="text-lg text-gray-700">
+                We commit to follow Jesus, grow in His Word, and show His love through prayer, worship, and service to others.
+              </p>
+            `}
+          />
         </div>
 
         <p className="mt-6 text-lg font-medium text-gray-700">

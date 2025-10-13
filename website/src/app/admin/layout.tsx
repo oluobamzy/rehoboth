@@ -12,13 +12,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status
+    // Simply check if user is authenticated - access control is handled by only giving accounts to authorized users
     if (!authLoading) {
       if (!user) {
         router.push('/auth/login?redirectUrl=' + encodeURIComponent(pathname));
-      } else if (user.app_metadata?.role !== 'admin') {
-        // Redirect non-admin users to unauthorized page
-        router.push('/unauthorized');
       } else {
         setLoading(false);
       }

@@ -1,6 +1,7 @@
 import HeroCarousel from "@/components/hero/HeroCarousel";
 import Link from "next/link";
 import Image from "next/image";
+import EditableContent from "@/components/common/EditableContent";
 
 export default function Home() {
   return (
@@ -29,7 +30,11 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-3 text-blue-900">Sunday Services</h3>
-              <p className="mb-5 text-gray-600">Join us every Sunday at 3:00 PM - 6:00 PM for worship, prayer, and fellowship.</p>
+              <EditableContent
+                pageKey="home"
+                sectionKey="sunday_services_description"
+                fallbackContent="<p class='mb-5 text-gray-600'>Join us every Sunday at 3:00 PM - 6:00 PM for worship, prayer, and fellowship.</p>"
+              />
               <Link href="/events" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 View Schedule <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
@@ -42,7 +47,11 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-3 text-blue-900">Latest Sermons</h3>
-              <p className="mb-5 text-gray-600">Listen to our recent messages and grow in your understanding of God&apos;s Word.</p>
+              <EditableContent
+                pageKey="home"
+                sectionKey="latest_sermons_description"
+                fallbackContent="<p class='mb-5 text-gray-600'>Listen to our recent messages and grow in your understanding of God's Word.</p>"
+              />
               <Link href="/sermons" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 Listen Now <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
@@ -55,7 +64,11 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-3 text-blue-900">Giving Back</h3>
-              <p className="mb-5 text-gray-600">Discover opportunities to serve, connect, and make a difference in our community.</p>
+              <EditableContent
+                pageKey="home"
+                sectionKey="giving_back_description"
+                fallbackContent="<p class='mb-5 text-gray-600'>Discover opportunities to serve, connect, and make a difference in our community.</p>"
+              />
               <Link href="/donate" className="text-blue-600 font-medium hover:underline flex items-center justify-center gap-1 group">
                 Donate Now <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
@@ -94,12 +107,11 @@ export default function Home() {
               </h2>
             </div>
             <div className="max-w-3xl mx-auto text-center">
-              <p className="text-lg md:text-xl mb-8 text-gray-700 leading-relaxed">
-                A community of believers committed to loving God and serving
-                people. No matter who you are, where you come from, or your
-                background, you belong here. God's love is for everyone—and we
-                warmly invite you to be part of our church family.
-              </p>
+              <EditableContent
+                pageKey="home"
+                sectionKey="welcome_message"
+                fallbackContent="<p class='text-lg md:text-xl mb-8 text-gray-700 leading-relaxed'>A community of believers committed to loving God and serving people. No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we warmly invite you to be part of our church family.</p>"
+              />
               <div className="flex justify-center">
                 <Link href="/about" className="inline-block">
                   <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg">
@@ -148,12 +160,11 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
               <h3 className="text-3xl font-bold mb-5 text-blue-900">Meet Our <span className="text-green-600">Pastor</span></h3>
-              <p className="text-gray-600 mb-4">
-                Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God&apos;s love and transforming lives through the power of the gospel.
-              </p>
-              <p className="text-gray-600 mb-6">
-                We invite you to connect with us, join our services, and become part of our growing community of faith.
-              </p>
+              <EditableContent
+                pageKey="home"
+                sectionKey="pastor_introduction"
+                fallbackContent="<p class='text-gray-600 mb-4'>Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God's love and transforming lives through the power of the gospel.</p><p class='text-gray-600 mb-6'>We invite you to connect with us, join our services, and become part of our growing community of faith.</p>"
+              />
               <div className="flex flex-wrap gap-4">
                 <Link href="/about#pastor" className="inline-block">
                   <button className="bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
@@ -185,9 +196,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4 text-blue-900">Upcoming <span className="text-green-600">Events</span></h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">
-              Join us for these special events and activities at Rehoboth Christian Church. All are welcome!
-            </p>
+            <EditableContent
+              pageKey="home"
+              sectionKey="events_section_description"
+              fallbackContent="<p class='text-gray-600 max-w-3xl mx-auto'>Join us for these special events and activities at Rehoboth Christian Church. All are welcome!</p>"
+            />
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
