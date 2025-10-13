@@ -1,6 +1,5 @@
 'use client';
 
-{/* src/components/donations/DonorInfoForm.tsx */}
 import { useState } from 'react';
 
 interface DonorInfoFormProps {
@@ -42,7 +41,6 @@ export default function DonorInfoForm({
       [name]: type === 'checkbox' ? checked : value,
     }));
     
-    // Clear error when user types
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -87,13 +85,13 @@ export default function DonorInfoForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">
           Your Information
         </h2>
         
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6">
           <div>
-            <label htmlFor="donorName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="donorName" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
               Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -102,18 +100,23 @@ export default function DonorInfoForm({
               name="donorName"
               value={formData.donorName}
               onChange={handleChange}
-              className={`block w-full py-2 px-3 border ${
-                errors.donorName ? 'border-red-500' : 'border-gray-300'
-              } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm sm:text-base ${
+                errors.donorName
+                  ? 'border-red-500 ring-1 ring-red-500'
+                  : 'border-gray-300'
+              }`}
+              placeholder="Enter your full name"
               autoComplete="name"
             />
             {errors.donorName && (
-              <p className="mt-1 text-sm text-red-600">{errors.donorName}</p>
+              <p className="mt-2 text-xs sm:text-sm text-red-600">
+                {errors.donorName}
+              </p>
             )}
           </div>
           
           <div>
-            <label htmlFor="donorEmail" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="donorEmail" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
               Email Address <span className="text-red-500">*</span>
             </label>
             <input
@@ -122,60 +125,71 @@ export default function DonorInfoForm({
               name="donorEmail"
               value={formData.donorEmail}
               onChange={handleChange}
-              className={`block w-full py-2 px-3 border ${
-                errors.donorEmail ? 'border-red-500' : 'border-gray-300'
-              } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm sm:text-base ${
+                errors.donorEmail
+                  ? 'border-red-500 ring-1 ring-red-500'
+                  : 'border-gray-300'
+              }`}
+              placeholder="your.email@example.com"
               autoComplete="email"
             />
             {errors.donorEmail && (
-              <p className="mt-1 text-sm text-red-600">{errors.donorEmail}</p>
+              <p className="mt-2 text-xs sm:text-sm text-red-600">
+                {errors.donorEmail}
+              </p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
-              We&apos;ll use this to send your donation receipt.
-            </p>
           </div>
           
-          <div className="flex items-start">
-            <div className="flex items-center h-5">
-              <input
-                type="checkbox"
-                id="agreeToTerms"
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
-                className={`h-4 w-4 rounded border ${
-                  errors.agreeToTerms ? 'border-red-500' : 'border-gray-300'
-                } focus:ring-blue-500 text-blue-600`}
-              />
+          <div className="pt-2">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="agreeToTerms"
+                  name="agreeToTerms"
+                  type="checkbox"
+                  checked={formData.agreeToTerms}
+                  onChange={handleChange}
+                  className={`h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors ${
+                    errors.agreeToTerms ? 'border-red-500' : ''
+                  }`}
+                />
+              </div>
+              <div className="ml-3 text-sm sm:text-base">
+                <label htmlFor="agreeToTerms" className="text-gray-700">
+                  I agree to the{' '}
+                  <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                    Terms and Conditions
+                  </a>{' '}
+                  and{' '}
+                  <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                    Privacy Policy
+                  </a>
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+              </div>
             </div>
-            <div className="ml-3">
-              <label htmlFor="agreeToTerms" className={`text-sm ${
-                errors.agreeToTerms ? 'text-red-500' : 'text-gray-700'
-              }`}>
-                I agree that I am making this donation voluntarily and understand it is non-refundable.
-              </label>
-              {errors.agreeToTerms && (
-                <p className="mt-1 text-sm text-red-600">{errors.agreeToTerms}</p>
-              )}
-            </div>
+            {errors.agreeToTerms && (
+              <p className="mt-2 text-xs sm:text-sm text-red-600">
+                {errors.agreeToTerms}
+              </p>
+            )}
           </div>
         </div>
       </div>
-
-      <div className="flex justify-between pt-4">
+      
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2 bg-gray-100 text-gray-800 font-medium rounded hover:bg-gray-200"
+          className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm sm:text-base font-medium"
         >
           Back
         </button>
-        
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700"
+          className="w-full sm:flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 text-sm sm:text-base font-medium"
         >
-          Continue
+          Continue to Payment
         </button>
       </div>
     </form>

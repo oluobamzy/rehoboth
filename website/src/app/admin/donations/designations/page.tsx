@@ -72,31 +72,31 @@ export default function AdminDonationDesignationsPage() {
   };
 
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
+    <div className="px-4 py-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div className="flex-1">
           <Link 
             href="/admin/donations" 
-            className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-2 text-sm sm:text-base transition-colors"
           >
-            <FiChevronLeft className="mr-1" /> Back to donations
+            <FiChevronLeft className="mr-1 w-4 h-4" /> Back to donations
           </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Donation Designations</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Donation Designations</h1>
         </div>
         
-        <div className="mt-4 sm:mt-0">
+        <div className="flex-shrink-0">
           <button
             onClick={() => handleOpenForm()}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
           >
-            <FiPlus className="mr-1" /> Add Designation
+            <FiPlus className="mr-1 w-4 h-4" /> Add Designation
           </button>
         </div>
       </div>
       
       {isFormOpen ? (
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="bg-white shadow rounded-lg p-4 sm:p-6 mb-6">
+          <h2 className="text-lg sm:text-xl font-medium text-gray-900 mb-4">
             {selectedDesignation ? 'Edit' : 'Add'} Designation
           </h2>
           <AdminDesignationForm
@@ -116,71 +116,87 @@ export default function AdminDonationDesignationsPage() {
               <p className="text-gray-500">No designations found. Add your first one!</p>
             </div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Current Amount
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Target
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Display Order
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {designations.map((designation) => (
-                  <tr key={designation.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {designation.name}
-                      {designation.description && (
-                        <p className="text-xs text-gray-500 mt-1 whitespace-normal">
-                          {designation.description.length > 50 
-                            ? `${designation.description.substring(0, 47)}...` 
-                            : designation.description
-                          }
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatCurrency(designation.current_amount_cents)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {designation.target_amount_cents ? formatCurrency(designation.target_amount_cents) : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        designation.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {designation.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {designation.display_order}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button 
-                        onClick={() => handleOpenForm(designation)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <FiEdit2 />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Current Amount
+                    </th>
+                    <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Target
+                    </th>
+                    <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Display Order
+                    </th>
+                    <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {designations.map((designation) => (
+                    <tr key={designation.id}>
+                      <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
+                        <div className="truncate max-w-48 sm:max-w-none">
+                          {designation.name}
+                        </div>
+                        {designation.description && (
+                          <p className="text-xs text-gray-500 mt-1 truncate max-w-48 sm:max-w-none">
+                            {designation.description.length > 50 
+                              ? `${designation.description.substring(0, 47)}...` 
+                              : designation.description
+                            }
+                          </p>
+                        )}
+                        <div className="sm:hidden mt-2 space-y-1">
+                          <div className="text-xs text-gray-600">
+                            Current: {formatCurrency(designation.current_amount_cents)}
+                          </div>
+                          <div className="text-xs text-gray-600 md:hidden">
+                            Target: {designation.target_amount_cents ? formatCurrency(designation.target_amount_cents) : 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-600 lg:hidden">
+                            Order: {designation.display_order}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(designation.current_amount_cents)}
+                      </td>
+                      <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {designation.target_amount_cents ? formatCurrency(designation.target_amount_cents) : 'N/A'}
+                      </td>
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          designation.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {designation.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {designation.display_order}
+                      </td>
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button 
+                          onClick={() => handleOpenForm(designation)}
+                          className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors"
+                          title="Edit designation"
+                        >
+                          <FiEdit2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
