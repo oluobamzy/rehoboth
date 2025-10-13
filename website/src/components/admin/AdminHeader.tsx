@@ -22,6 +22,7 @@ export default function AdminHeader() {
     { name: 'Newsletter', href: '/admin/newsletter' },
     { name: 'Messages', href: '/admin/messages' },
     { name: 'Volunteers', href: '/admin/volunteers' },
+    { name: 'Settings', href: '/admin/settings' },
   ];
 
   // Close dropdown when clicking outside or pressing escape
