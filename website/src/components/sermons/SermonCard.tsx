@@ -35,8 +35,31 @@ export default function SermonCard({ sermon }: SermonCardProps) {
     return formatDistance(date, new Date(), { addSuffix: true });
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on a tag
+    if ((e.target as HTMLElement).closest('.tag-link')) {
+      e.preventDefault();
+      return;
+    }
+    // Navigate to sermon page
+    window.location.href = `/sermons/${sermon.id}`;
+  };
+
+  const handleTagClick = (tag: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.location.href = `/sermons?tag=${tag}`;
+  };
+
+  const handleSeriesClick = (seriesId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.location.href = `/sermons/series/${seriesId}`;
+  };
+
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div 
+      className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+      onClick={handleCardClick}
+    >
       {/* Thumbnail */}
       <div className="relative h-48 bg-gray-100">
         {sermon.thumbnail_url ? (
@@ -72,18 +95,19 @@ export default function SermonCard({ sermon }: SermonCardProps) {
       <div className="p-4 flex-grow flex flex-col">
         {/* Series tag if available */}
         {sermon.series && (
-          <Link href={`/sermons/series/${sermon.series.id}`} className="inline-block">
-            <span className="text-xs font-medium text-orange-500 bg-orange-50 py-1 px-2 rounded-full mb-2">
+          <span 
+            className="inline-block tag-link cursor-pointer"
+            onClick={(e) => handleSeriesClick(sermon.series!.id, e)}
+          >
+            <span className="text-xs font-medium text-orange-500 bg-orange-50 py-1 px-2 rounded-full mb-2 hover:bg-orange-100 transition-colors">
               {sermon.series.title}
             </span>
-          </Link>
+          </span>
         )}
         
         {/* Title */}
-        <h3 className="font-bold text-xl mb-1 line-clamp-2">
-          <Link href={`/sermons/${sermon.id}`} className="hover:text-orange-500 transition-colors">
-            {sermon.title}
-          </Link>
+        <h3 className="font-bold text-xl mb-1 line-clamp-2 group-hover:text-orange-500 transition-colors">
+          {sermon.title}
         </h3>
         
         {/* Speaker and date */}
@@ -110,11 +134,13 @@ export default function SermonCard({ sermon }: SermonCardProps) {
           <div className="mt-auto pt-3">
             <div className="flex flex-wrap gap-1">
               {sermon.tags.slice(0, 3).map((tag) => (
-                <Link key={tag} href={`/sermons?tag=${tag}`}>
-                  <span className="text-xs text-gray-600 hover:text-orange-500 bg-gray-100 px-2 py-1 rounded">
-                    #{tag}
-                  </span>
-                </Link>
+                <span 
+                  key={tag} 
+                  className="tag-link text-xs text-gray-600 hover:text-orange-500 bg-gray-100 px-2 py-1 rounded cursor-pointer transition-colors"
+                  onClick={(e) => handleTagClick(tag, e)}
+                >
+                  #{tag}
+                </span>
               ))}
               {sermon.tags.length > 3 && (
                 <span className="text-xs text-gray-600 px-2 py-1">

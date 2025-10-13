@@ -1,5 +1,5 @@
 // src/services/volunteerService.ts
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/services/supabase';
 
 export interface VolunteerApplication {
   id: string;
