@@ -1,14 +1,21 @@
-import HeroCarousel from "@/components/hero/HeroCarousel";
+"use client";
+
+import DatabaseHeroCarousel from "@/components/hero/DatabaseHeroCarousel";
 import Link from "next/link";
 import Image from "next/image";
 import EditableContent from "@/components/common/EditableContent";
+import EditableImage from "@/components/common/EditableImage";
+import DynamicEventCards from "@/components/common/DynamicEventCards";
+import ServiceTimes from "@/components/common/ServiceTimes";
+import ContactInfo from "@/components/common/ContactInfo";
+import FeatureCardTitle from "@/components/common/FeatureCardTitle";
 
 export default function Home() {
   return (
     <>
       {/* Hero Section with Wave Divider */}
       <div className="relative overflow-hidden">
-        <HeroCarousel />
+        <DatabaseHeroCarousel />
         
         {/* Decorative Wave Divider */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
@@ -20,16 +27,20 @@ export default function Home() {
       </div>
       
       {/* Feature cards section - enhanced for visual separation */}
-      <section className="relative z-20 bg-gradient-to-b from-white to-gray-50 pb-8 sm:pb-12 lg:pb-16">
-        <div className="container mx-auto px-4 -mt-16 sm:-mt-20 lg:-mt-24">
-          <div className="grid gap-6 sm:gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+      <section className="relative z-20 bg-gradient-to-b from-white to-gray-50 py-16 sm:py-20 lg:py-24">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 max-w-7xl -mt-16 sm:-mt-20 lg:-mt-24">
+          <div className="grid gap-8 sm:gap-10 lg:gap-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
             <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500">
               <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-blue-900">Sunday Services</h3>
+              <FeatureCardTitle
+                pageKey="home"
+                sectionKey="feature_cards_titles"
+                cardType="sunday_services"
+              />
               <EditableContent
                 pageKey="home"
                 sectionKey="sunday_services_description"
@@ -40,13 +51,17 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500">
-              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white rounded-xl shadow-xl p-8 sm:p-10 lg:p-12 text-center transform hover:-translate-y-3 transition-all duration-300 border-t-4 border-green-500 hover:shadow-2xl group">
+              <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 mb-6 sm:mb-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 sm:h-12 sm:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-blue-900">Latest Sermons</h3>
+              <FeatureCardTitle
+                pageKey="home"
+                sectionKey="feature_cards_titles"
+                cardType="latest_sermons"
+              />
               <EditableContent
                 pageKey="home"
                 sectionKey="latest_sermons_description"
@@ -57,13 +72,17 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 text-center transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-green-500 md:col-span-2 lg:col-span-1">
-              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white rounded-xl shadow-xl p-8 sm:p-10 lg:p-12 text-center transform hover:-translate-y-3 transition-all duration-300 border-t-4 border-green-500 hover:shadow-2xl group md:col-span-2 lg:col-span-1">
+              <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 mb-6 sm:mb-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 sm:h-12 sm:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-blue-900">Giving Back</h3>
+              <FeatureCardTitle
+                pageKey="home"
+                sectionKey="feature_cards_titles"
+                cardType="giving_back"
+              />
               <EditableContent
                 pageKey="home"
                 sectionKey="giving_back_description"
@@ -87,34 +106,40 @@ export default function Home() {
           </svg>
         </div>
         
-        <div className="container mx-auto px-4 py-12 sm:py-16 lg:py-24">
-          <section className="mb-12 sm:mb-16">
-            <div className="flex flex-col items-center justify-center mb-8 sm:mb-12">
-              <div className="relative mb-6 sm:mb-8">
-                <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-r from-blue-100 to-green-100 rounded-full opacity-70 blur-xl"></div>
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 max-w-6xl py-16 sm:py-20 lg:py-28">
+                    <section className="mb-16 sm:mb-20 lg:mb-24">
+            {/* Logo Section */}
+            <div className="flex justify-center mb-8 sm:mb-10 lg:mb-12">
+              <div className="relative">
                 <Image 
-                  src="/rehoboth_logo.jpg" 
+                  src="/rehoboth_logo_plain.png" 
                   alt="Rehoboth Christian Church Logo" 
-                  width={220} 
-                  height={132}
-                  className="rounded-lg shadow-lg relative z-10 w-40 h-24 sm:w-52 sm:h-32 lg:w-60 lg:h-36 object-cover"
+                  width={160} 
+                  height={160} 
+                  className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 object-contain drop-shadow-xl"
                   priority
                 />
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center relative text-blue-900">
-                Welcome to <span className="text-green-600">Rehoboth</span> Christian Church
-                <span className="absolute -bottom-1 sm:-bottom-2 left-1/2 w-16 sm:w-20 h-0.5 sm:h-1 bg-blue-600 transform -translate-x-1/2"></span>
-              </h2>
             </div>
-            <div className="max-w-3xl mx-auto text-center">
+            
+            {/* Welcome Heading */}
+            <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+              <EditableContent
+                pageKey="home"
+                sectionKey="welcome_heading"
+                fallbackContent="<h2 class='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 text-center relative text-blue-900 leading-tight'>Welcome to <span class='text-green-600'>Rehoboth</span> Christian Church<span class='absolute -bottom-2 sm:-bottom-3 left-1/2 w-20 sm:w-24 h-1 sm:h-1.5 bg-blue-600 transform -translate-x-1/2 rounded-full'></span></h2>"
+              />
+            </div>
+            
+            <div className="max-w-4xl mx-auto text-center px-4">
               <EditableContent
                 pageKey="home"
                 sectionKey="welcome_message"
-                fallbackContent="<p class='text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-gray-700 leading-relaxed'>A community of believers committed to loving God and serving people. No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we warmly invite you to be part of our church family.</p>"
+                fallbackContent="<p class='text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 lg:mb-12 text-gray-700 leading-relaxed font-light'>A community of believers committed to loving God and serving people. No matter who you are, where you come from, or your background, you belong here. God's love is for everyone—and we warmly invite you to be part of our church family.</p>"
               />
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-8">
                 <Link href="/about" className="inline-block">
-                  <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg text-sm sm:text-base">
+                  <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg lg:text-xl">
                     Learn More About Us
                   </button>
                 </Link>
@@ -155,34 +180,40 @@ export default function Home() {
       </div>
       
       {/* Pastor's section */}
-      <section className="bg-gray-50 py-8 sm:py-12 lg:py-16 mb-12 sm:mb-16 lg:mb-20 rounded-lg">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 sm:gap-12 md:grid-cols-2 items-center">
-            <div className="order-2 md:order-1">
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 text-blue-900">Meet Our <span className="text-green-600">Pastor</span></h3>
+      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-16 sm:py-20 lg:py-24 mb-16 sm:mb-20 lg:mb-24 rounded-2xl mx-6 sm:mx-8 lg:mx-12 shadow-lg">
+        <div className="container mx-auto px-8 sm:px-10 lg:px-16 max-w-6xl">
+          <div className="grid gap-12 sm:gap-16 lg:gap-20 md:grid-cols-2 items-center">
+            <div className="order-2 md:order-1 space-y-6">
+              <EditableContent
+                pageKey="home"
+                sectionKey="pastor_title"
+                fallbackContent="<h3 class='text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-blue-900 leading-tight'>Meet Our <span class='text-green-600'>Pastor</span></h3>"
+              />
               <EditableContent
                 pageKey="home"
                 sectionKey="pastor_introduction"
-                fallbackContent="<p class='text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base'>Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God's love and transforming lives through the power of the gospel.</p><p class='text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base'>We invite you to connect with us, join our services, and become part of our growing community of faith.</p>"
+                fallbackContent="<p class='text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg lg:text-xl leading-relaxed'>Pastor Patrick and his wife lead Rehoboth Christian Church with passion and dedication. They are committed to sharing God's love and transforming lives through the power of the gospel.</p><p class='text-gray-600 mb-8 sm:mb-10 text-base sm:text-lg lg:text-xl leading-relaxed'>We invite you to connect with us, join our services, and become part of our growing community of faith.</p>"
               />
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 pt-4">
                 <Link href="/about#pastor" className="inline-block">
-                  <button className="w-full sm:w-auto bg-green-600 text-white px-4 sm:px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors text-sm sm:text-base">
+                  <button className="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg">
                     Meet the Team
                   </button>
                 </Link>
                 <Link href="/contact" className="inline-block">
-                  <button className="w-full sm:w-auto border-2 border-blue-600 text-blue-600 px-4 sm:px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition-colors text-sm sm:text-base">
+                  <button className="w-full sm:w-auto border-2 border-blue-600 text-blue-600 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-semibold hover:bg-blue-50 hover:border-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 text-base sm:text-lg">
                     Contact Us
                   </button>
                 </Link>
               </div>
             </div>
             <div className="order-1 md:order-2 flex justify-center">
-              <Image 
-                src="/PastorPatrick&wife.jpg" 
-                alt="Pastor Patrick and his wife" 
-                width={400} 
+              <EditableImage
+                pageKey="home"
+                sectionKey="pastor_image"
+                fallbackSrc="/PastorPatrick&wife.jpg"
+                alt="Pastor Patrick and his wife"
+                width={400}
                 height={300}
                 className="rounded-lg shadow-lg w-full max-w-sm sm:max-w-md lg:max-w-lg h-auto object-cover"
               />
@@ -192,109 +223,27 @@ export default function Home() {
       </section>
       
       {/* Upcoming Events Section */}
-      <section className="mb-12 sm:mb-16 lg:mb-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-blue-900">Upcoming <span className="text-green-600">Events</span></h2>
+      <section className="mb-16 sm:mb-20 lg:mb-24 px-6 sm:px-8 lg:px-12">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-blue-900 leading-tight">Upcoming <span className="text-green-600">Events</span></h2>
             <EditableContent
               pageKey="home"
               sectionKey="events_section_description"
-              fallbackContent="<p class='text-gray-600 max-w-3xl mx-auto text-sm sm:text-base'>Join us for these special events and activities at Rehoboth Christian Church. All are welcome!</p>"
+              fallbackContent="<p class='text-gray-600 max-w-4xl mx-auto text-lg sm:text-xl lg:text-2xl leading-relaxed'>Join us for these special events and activities at Rehoboth Christian Church. All are welcome!</p>"
             />
           </div>
           
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
-            {/* Event Card 1 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 flex flex-col">
-              <div className="bg-blue-600 text-white p-3 text-center font-bold text-sm sm:text-base">
-                SUNDAY, JUNE 23, 2025
-              </div>
-              <div className="p-4 sm:p-6 flex-grow flex flex-col">
-                <h3 className="text-lg sm:text-xl font-semibold mb-2">Sunday Worship Service</h3>
-                <div className="flex items-center mb-3 text-gray-600 text-sm sm:text-base">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  3:00 PM - 6:00 PM
-                </div>
-                <div className="flex items-center mb-4 text-gray-600 text-sm sm:text-base">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Main Sanctuary
-                </div>
-                <p className="text-gray-600 mb-4 flex-grow text-sm sm:text-base">Join us for worship, prayer, and an inspiring message from Pastor Patrick.</p>
-                <Link href="/events/sunday-worship">
-                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 sm:py-3 rounded-md font-medium transition-colors text-sm sm:text-base">
-                    Event Details
-                  </button>
-                </Link>
-              </div>
-            </div>
-            
-            {/* Event Card 2 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100">
-              <div className="bg-blue-600 text-white p-2 text-center font-bold">
-                WEDNESDAY, JUNE 26, 2025
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Prayer Service</h3>
-                <div className="flex items-center mb-3 text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  7:00 PM - 9:00 PM
-                </div>
-                <div className="flex items-center mb-4 text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Fellowship Hall
-                </div>
-                <p className="text-gray-600 mb-4">Join us for our midweek prayer service where we come together to pray and seek God&apos;s guidance.</p>
-                <Link href="/events/bible-study">
-                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 rounded-md font-medium transition-colors">
-                    Event Details
-                  </button>
-                </Link>
-              </div>
-            </div>
-            
-            {/* Event Card 3 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 flex flex-col sm:col-span-1 md:col-span-2 lg:col-span-1">
-              <div className="bg-blue-600 text-white p-3 text-center font-bold text-sm sm:text-base">
-                SATURDAY, JUNE 29, 2025
-              </div>
-              <div className="p-4 sm:p-6 flex-grow flex flex-col">
-                <h3 className="text-lg sm:text-xl font-semibold mb-2">Community Outreach</h3>
-                <div className="flex items-center mb-3 text-gray-600 text-sm sm:text-base">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  9:00 AM - 12:00 PM
-                </div>
-                <div className="flex items-center mb-4 text-gray-600 text-sm sm:text-base">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Community Center
-                </div>
-                <p className="text-gray-600 mb-4 flex-grow text-sm sm:text-base">Volunteer with us as we serve our local community through this family-friendly event.</p>
-                <Link href="/events/outreach">
-                  <button className="w-full bg-gray-100 hover:bg-green-50 text-green-600 py-2 sm:py-3 rounded-md font-medium transition-colors text-sm sm:text-base">
-                    Event Details
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
+                    
+          <DynamicEventCards
+            pageKey="home"
+            sectionKey="event_cards"
+            maxCards={3}
+          />
           
-          <div className="text-center mt-6 sm:mt-8">
+          <div className="text-center mt-10 sm:mt-12 lg:mt-16">
             <Link href="/events">
-              <button className="bg-green-600 text-white px-6 sm:px-8 py-3 rounded-md font-medium hover:bg-green-700 transition-colors text-sm sm:text-base">
+              <button className="bg-green-600 text-white px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg lg:text-xl">
                 View All Events
               </button>
             </Link>
@@ -302,17 +251,20 @@ export default function Home() {
         </div>
       </section>
       
-      <section className="mb-12 sm:mb-16 lg:mb-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-blue-900">Latest <span className="text-green-600">Sermons</span></h2>
-            <p className="text-gray-600 max-w-3xl mx-auto text-sm sm:text-base">
-              Listen to our most recent messages to grow in your faith and biblical understanding.
-            </p>
+      {/* Latest Sermons Section */}
+      <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-16 sm:py-20 lg:py-24 mb-16 sm:mb-20 lg:mb-24 rounded-2xl mx-6 sm:mx-8 lg:mx-12 shadow-lg">
+        <div className="container mx-auto px-8 sm:px-10 lg:px-16 max-w-6xl">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-blue-900 leading-tight">Latest <span className="text-green-600">Sermons</span></h2>
+            <EditableContent
+              pageKey="home"
+              sectionKey="sermons_section_description"
+              fallbackContent="<p class='text-gray-600 max-w-4xl mx-auto text-lg sm:text-xl lg:text-2xl leading-relaxed'>Listen to our most recent messages to grow in your faith and biblical understanding.</p>"
+            />
           </div>
           <div className="flex justify-center">
             <Link href="/sermons">
-              <button className="bg-green-600 text-white px-6 sm:px-8 py-3 rounded-md font-medium hover:bg-green-700 transition-colors text-sm sm:text-base">
+              <button className="bg-green-600 text-white px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg lg:text-xl">
                 Browse All Sermons
               </button>
             </Link>
@@ -321,75 +273,50 @@ export default function Home() {
       </section>
       
       {/* Contact and Location Section */}
-            {/* Location & Connect Section */}
-      <section className="bg-white py-12 sm:py-16 lg:py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-blue-900">Visit <span className="text-green-600">Us</span></h2>
+      <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24 rounded-2xl mx-6 sm:mx-8 lg:mx-12 shadow-lg">
+        <div className="container mx-auto px-8 sm:px-10 lg:px-16 max-w-6xl">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-blue-900 leading-tight">Visit <span className="text-green-600">Us</span></h2>
             <EditableContent
               pageKey="home"
               sectionKey="visit_us_description"
-              fallbackContent="<p class='text-gray-600 max-w-3xl mx-auto text-sm sm:text-base'>We'd love to meet you! Join us for worship, fellowship, and community. Everyone is welcome at Rehoboth Christian Church.</p>"
+              fallbackContent="<p class='text-gray-600 max-w-4xl mx-auto text-lg sm:text-xl lg:text-2xl leading-relaxed'>We'd love to meet you! Join us for worship, fellowship, and community. Everyone is welcome at Rehoboth Christian Church.</p>"
             />
           </div>
           
-          <div className="grid gap-8 lg:gap-12 md:grid-cols-2 lg:grid-cols-2 items-center">
-            <div className="space-y-4 sm:space-y-6">
+          <div className="grid gap-12 sm:gap-16 lg:gap-20 md:grid-cols-2 items-center">
+            <div className="space-y-8 sm:space-y-10">
               <div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-blue-900">Service Times</h3>
-                <div className="space-y-2 text-sm sm:text-base text-gray-600">
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Sunday Worship: 3:00 PM - 6:00 PM</span>
-                  </div>
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Wednesday Prayer: 7:00 PM - 9:00 PM</span>
-                  </div>
-                </div>
+                <ServiceTimes
+                  pageKey="home"
+                  sectionKey="service_times"
+                />
               </div>
               
               <div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-blue-900">Contact Information</h3>
-                <div className="space-y-2 text-sm sm:text-base text-gray-600">
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    <span>613-400-4966</span>
-                  </div>
-                  <div className="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span className="break-all">rehobothchristianchurch2022@gmail.com</span>
-                  </div>
-                  <div className="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>Your Church Address Here</span>
-                  </div>
-                </div>
+                <ContactInfo
+                  pageKey="home"
+                  sectionKey="contact_information"
+                />
               </div>
-              <div className="mt-6 sm:mt-8">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 pt-4">
+                <Link href="/about" className="inline-block">
+                  <button className="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg">
+                    Learn More
+                  </button>
+                </Link>
                 <Link href="/contact" className="inline-block">
-                  <button className="w-full sm:w-auto bg-orange-500 text-white px-6 sm:px-8 py-3 rounded-md font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+                  <button className="w-full sm:w-auto bg-orange-500 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl font-semibold hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-base sm:text-lg">
                     Contact Us
                   </button>
                 </Link>
               </div>
             </div>
-            <div className="rounded-lg overflow-hidden shadow-lg">
-              <div className="bg-gray-300 h-[250px] sm:h-[300px] w-full flex items-center justify-center">
-                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 flex items-center text-sm sm:text-base hover:text-orange-600 transition-colors">
-                  <span className="mr-2">View on Google Maps</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-gray-300 to-gray-400 h-[300px] sm:h-[350px] lg:h-[400px] w-full flex items-center justify-center">
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 flex items-center text-base sm:text-lg lg:text-xl font-semibold transition-colors group">
+                  <span className="mr-3">View on Google Maps</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 6-3v15l-6 3-6-3z" />
                   </svg>
                 </a>

@@ -35,10 +35,22 @@ export async function GET(request: NextRequest) {
 
     // If requesting specific page and section, return single item
     if (pageKey && sectionKey && data && data.length > 0) {
-      return NextResponse.json({ content: data[0] });
+      return NextResponse.json({ content: data[0] }, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
     }
 
-    return NextResponse.json({ content: data || [] });
+    return NextResponse.json({ content: data || [] }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache', 
+        'Expires': '0'
+      }
+    });
   } catch (error) {
     console.error('Error in GET /api/content:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

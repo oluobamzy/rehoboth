@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useEditableContent } from '@/hooks/useEditableContent';
 import { useAuth } from '@/services/auth';
 import ContentEditor from '@/components/admin/ContentEditor';
+import StyledContent from './StyledContent';
 
 interface EditableContentProps {
   pageKey: string;
@@ -80,10 +81,17 @@ export default function EditableContent({
       }
 
       setIsEditing(false);
-      refresh();
-      if (onContentUpdate) {
-        onContentUpdate();
-      }
+      
+      // Force cache invalidation and refresh
+      setTimeout(() => {
+        refresh();
+        // Also trigger a hard refresh of the page content if needed
+        if (onContentUpdate) {
+          onContentUpdate();
+        }
+        // Force a window reload to clear all caches
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error saving content:', error);
       throw error;
@@ -108,10 +116,9 @@ export default function EditableContent({
       <div className={`text-red-600 ${className}`}>
         <p>Error loading content: {error}</p>
         {fallbackContent && (
-          <div 
-            className="mt-2 opacity-75"
-            dangerouslySetInnerHTML={{ __html: fallbackContent }} 
-          />
+          <div className="mt-2 opacity-75">
+            <StyledContent content={fallbackContent} />
+          </div>
         )}
       </div>
     );
@@ -136,7 +143,7 @@ export default function EditableContent({
   return (
     <div className={`relative group ${className}`}>
       {/* Content Display */}
-      <div dangerouslySetInnerHTML={{ __html: displayContent }} />
+      <StyledContent content={displayContent} />
       
       {/* Admin Edit Button */}
       {isAdmin && showEditButton && (
@@ -150,13 +157,6 @@ export default function EditableContent({
           </svg>
           Edit
         </button>
-      )}
-      
-      {/* Development indicator (shows in non-production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute bottom-0 left-0 text-xs text-gray-400 bg-gray-100 px-1 rounded opacity-50">
-          {pageKey}/{sectionKey}
-        </div>
       )}
     </div>
   );

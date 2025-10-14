@@ -10,6 +10,7 @@ interface PageContent {
   title?: string;
   content: string;
   content_type?: string;
+  metadata?: any;
   is_published?: boolean;
 }
 
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
       title: body.title,
       content: body.content?.substring(0, 100) + '...',
       content_type: body.content_type,
+      metadata: body.metadata,
       is_published: body.is_published
     });
     
@@ -86,6 +88,7 @@ export async function POST(request: NextRequest) {
         title: body.title || null,
         content: body.content,
         content_type: body.content_type || 'html',
+        metadata: body.metadata || null,
         is_published: body.is_published !== false, // Default to true
         updated_at: new Date().toISOString()
       }, {

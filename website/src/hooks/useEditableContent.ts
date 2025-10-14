@@ -58,7 +58,7 @@ export function useEditableContent(
       }
 
       const response = await fetch(
-        `/api/content?page_key=${encodeURIComponent(pageKey)}&section_key=${encodeURIComponent(sectionKey)}`,
+        `/api/content?page_key=${encodeURIComponent(pageKey)}&section_key=${encodeURIComponent(sectionKey)}&_t=${Date.now()}`,
         {
           method: 'GET',
           headers: {
@@ -110,8 +110,14 @@ export function useEditableContent(
   const refresh = useCallback(() => {
     // Clear cache and refetch
     contentCache.delete(cacheKey);
+    // Clear all related cache entries
+    for (const key of contentCache.keys()) {
+      if (key.startsWith(pageKey)) {
+        contentCache.delete(key);
+      }
+    }
     fetchContent();
-  }, [cacheKey, fetchContent]);
+  }, [cacheKey, fetchContent, pageKey]);
 
   useEffect(() => {
     fetchContent();
