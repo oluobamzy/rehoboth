@@ -279,7 +279,7 @@ export default function AdminContentPage() {
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <button
-                onClick={() => router.push('/admin')}
+                onClick={() => router.push('/admin/dashboard')}
                 className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 <h3 className="font-medium text-gray-900">Back to Dashboard</h3>
