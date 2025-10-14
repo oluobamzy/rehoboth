@@ -3,6 +3,7 @@
 
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/services/supabase';
 import Button from '@/components/common/Button';
 import { posthog } from '@/services/posthog';
@@ -189,6 +190,15 @@ function LoginPageContent() {
                 >
                   {isLoading ? 'Signing in...' : 'Sign in'}
                 </Button>
+              </div>
+
+              <div className="text-center">
+                <Link 
+                  href="/auth/forgot-password"
+                  className="text-sm text-primary hover:text-primary-dark"
+                >
+                  Forgot your password?
+                </Link>
               </div>
             </form>
           </div>

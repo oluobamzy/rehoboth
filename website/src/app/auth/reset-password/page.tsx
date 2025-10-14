@@ -21,6 +21,21 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const checkSession = async () => {
+      // Check for error in URL hash first
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const error = hashParams.get('error');
+      const errorDescription = hashParams.get('error_description');
+      
+      if (error) {
+        if (error === 'access_denied' && errorDescription?.includes('expired')) {
+          setError('Password reset link has expired. Please request a new password reset.');
+        } else {
+          setError(`Reset failed: ${errorDescription || error}`);
+        }
+        return;
+      }
+
+      // Check for session
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         setError('Invalid or expired password reset link. Please request a new password reset.');
